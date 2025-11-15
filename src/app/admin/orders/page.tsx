@@ -1,7 +1,7 @@
 
 "use client";
 
-import { MoreHorizontal, File, ChevronDown, Search } from "lucide-react";
+import { MoreHorizontal, File, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orders } from "@/lib/data";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useAdminSearch } from "@/context/admin-search-context";
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
     'Pending': 'secondary',
@@ -95,7 +95,7 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery } = useAdminSearch();
 
   const filterOrders = (orders: Order[]) => {
     if (!searchQuery) return orders;
@@ -170,15 +170,6 @@ export default function AdminOrdersPage() {
           <TabsTrigger value="delivered">Delivered</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex w-full sm:w-auto items-center gap-2">
-            <div className="relative w-full sm:w-auto flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search by ID or name..."
-                    className="pl-9 h-7"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button size="sm" variant="outline" className="h-7 gap-1">

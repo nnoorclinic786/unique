@@ -1,7 +1,7 @@
 
 "use client";
 
-import { MoreHorizontal, CheckCircle2, EyeOff, Eye, Search } from "lucide-react";
+import { MoreHorizontal, CheckCircle2, EyeOff, Eye } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,18 +29,18 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useBuyerContext } from "@/context/buyers-context";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useAdminSearch } from "@/context/admin-search-context";
 
 export default function AdminBuyersPage() {
   const { buyers, pendingBuyers, disabledBuyers, approveBuyer, toggleBuyerStatus } = useBuyerContext();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery } = useAdminSearch();
 
   const filterBuyers = (buyers: any[]) => {
     if (!searchQuery) return buyers;
+    const lowerCaseQuery = searchQuery.toLowerCase();
     return buyers.filter(buyer =>
-        buyer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        buyer.email.toLowerCase().includes(searchQuery.toLowerCase())
+        buyer.name.toLowerCase().includes(lowerCaseQuery) ||
+        buyer.email.toLowerCase().includes(lowerCaseQuery)
     );
   }
 
@@ -50,16 +50,6 @@ export default function AdminBuyersPage() {
 
   return (
     <div className="space-y-8">
-       <div className="relative w-full md:w-1/3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search buyers by name or email..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
       {filteredPendingBuyers.length > 0 && (
         <Card>
           <CardHeader>
