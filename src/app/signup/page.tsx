@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from 'date-fns';
 import { Textarea } from "@/components/ui/textarea";
 import { FileUp } from "lucide-react";
+import type { Buyer } from "@/lib/types";
 
 const formSchema = z.object({
   personName: z.string().min(2, "Person name is required."),
@@ -63,10 +64,20 @@ export default function SignupPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newBuyer = {
+    const newBuyer: Buyer = {
       id: `BUYER-${Date.now()}`,
       name: values.businessName, // Main name for display
-      ...values,
+      personName: values.personName,
+      businessName: values.businessName,
+      mobileNumber1: values.mobileNumber1,
+      mobileNumber2: values.mobileNumber2,
+      email: values.email,
+      password: values.password,
+      address: values.address,
+      businessLocation: values.businessLocation,
+      type: values.type,
+      doctorRegNumber: values.doctorRegNumber,
+      gstNumber: values.gstNumber,
       registeredOn: format(new Date(), 'yyyy-MM-dd'),
       status: 'Pending' as const,
     };

@@ -38,6 +38,7 @@ export type Buyer = {
     address?: string;
     businessLocation?: string;
     doctorRegNumber?: string;
+    password?: string;
     // For file uploads, we'll just store a boolean or a path in a real app.
     // For now, we'll omit them from the type as we're not handling file uploads yet.
 };
