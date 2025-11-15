@@ -26,7 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { products } from "@/lib/data";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { placeholderImages } from "@/lib/data";
 
 export default function AdminDrugsPage() {
   return (
@@ -65,7 +65,7 @@ export default function AdminDrugsPage() {
           </TableHeader>
           <TableBody>
             {products.map((product) => {
-              const image = PlaceHolderImages.find((img) => img.id === product.imageId);
+              const image = placeholderImages.find((img) => img.id === product.imageId);
               return (
                 <TableRow key={product.id}>
                   <TableCell className="hidden sm:table-cell">
