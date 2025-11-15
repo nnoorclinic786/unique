@@ -18,23 +18,16 @@ export default function AdminLoginPage() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    try {
-      const result = await login(formData);
-      if (result?.error) {
-        setError(result.error);
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description: result.error,
-        });
-      }
-    } catch (err) {
-       setError("An unexpected error occurred.");
-       toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "An unexpected error occurred during login.",
-       });
+    // Server action will handle the redirect, but might return an error
+    const result = await login(formData);
+    
+    if (result?.error) {
+      setError(result.error);
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: result.error,
+      });
     }
   }
 
