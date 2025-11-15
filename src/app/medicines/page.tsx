@@ -1,10 +1,13 @@
+
+"use client";
 import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { medicines } from '@/lib/data';
 import { MedicineCard } from '@/components/medicine-card';
+import { useMedicineContext } from '@/context/medicines-context';
 
 export default function MedicinesPage() {
+  const { medicines } = useMedicineContext();
   return (
     <>
       <Header />

@@ -1,3 +1,4 @@
+
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,10 +28,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { medicines } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useMedicineContext } from "@/context/medicines-context";
 
 export default function AdminDrugsPage() {
+  const { medicines } = useMedicineContext();
   return (
     <Card>
       <CardHeader>

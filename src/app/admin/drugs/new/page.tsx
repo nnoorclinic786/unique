@@ -32,10 +32,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { medicines } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ChevronLeft } from "lucide-react";
 import type { Medicine } from "@/lib/types";
+import { useMedicineContext } from "@/context/medicines-context";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Medicine name must be at least 2 characters." }),
@@ -52,6 +52,7 @@ const formSchema = z.object({
 export default function AddMedicinePage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { medicines, addMedicine } = useMedicineContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,7 +75,7 @@ export default function AddMedicinePage() {
       ...values,
     };
     
-    console.log("New Medicine Added:", newMedicine);
+    addMedicine(newMedicine);
     
     toast({
       title: "Medicine Added!",
