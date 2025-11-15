@@ -24,12 +24,16 @@ const formSchema = z.object({
   mobileNumber1: z.string().min(10, "A valid mobile number is required."),
   mobileNumber2: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email address." }),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+  confirmPassword: z.string(),
   address: z.string().min(10, "A valid business address is required."),
   businessLocation: z.string().min(2, "Business location is required."),
   type: z.enum(['Medical Store', 'Doctor', 'Hospital'], { required_error: "Please select a buyer type."}),
   doctorRegNumber: z.string().optional(),
   gstNumber: z.string().optional(),
-  // For now, we won't validate file uploads, just show the fields.
+}).refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 });
 
 export default function SignupPage() {
@@ -44,6 +48,8 @@ export default function SignupPage() {
       mobileNumber1: "",
       mobileNumber2: "",
       email: "",
+      password: "",
+      confirmPassword: "",
       address: "",
       businessLocation: "",
       doctorRegNumber: "",
@@ -141,7 +147,7 @@ export default function SignupPage() {
 
               {/* Personal Details */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium font-headline border-b pb-2">Personal Details</h3>
+                <h3 className="text-lg font-medium font-headline border-b pb-2">Account Details</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="personName" render={({ field }) => (
                       <FormItem>
@@ -158,6 +164,30 @@ export default function SignupPage() {
                         <FormMessage />
                       </FormItem>
                     )}
+                  />
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl><Input placeholder="contact@example.com" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                  />
+                  <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                  />
+                  <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                   />
                 </div>
               </div>
@@ -183,14 +213,6 @@ export default function SignupPage() {
                       )}
                     />
                 </div>
-                 <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl><Input placeholder="contact@example.com" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               {/* Address Details */}
