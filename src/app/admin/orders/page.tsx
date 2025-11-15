@@ -35,7 +35,63 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } =
     'Cancelled': 'destructive',
 };
 
+const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Customer</TableHead>
+          <TableHead className="hidden sm:table-cell">Status</TableHead>
+          <TableHead className="hidden sm:table-cell">Date</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
+          <TableHead>
+            <span className="sr-only">Actions</span>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {ordersToShow.map((order) => (
+          <TableRow key={order.id}>
+            <TableCell>
+              <div className="font-medium">{order.buyerName}</div>
+              <div className="hidden text-sm text-muted-foreground md:inline">
+                {order.id}
+              </div>
+            </TableCell>
+            <TableCell className="hidden sm:table-cell">
+              <Badge className="text-xs" variant={statusColors[order.status] || 'secondary'}>
+                {order.status}
+              </Badge>
+            </TableCell>
+            <TableCell className="hidden sm:table-cell">{order.date}</TableCell>
+            <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button aria-haspopup="true" size="icon" variant="ghost">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Toggle menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuItem>View Details</DropdownMenuItem>
+                  <DropdownMenuItem>Update Status</DropdownMenuItem>
+                  <DropdownMenuItem>Contact Buyer</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+);
+
+
 export default function AdminOrdersPage() {
+  const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Processing');
+  const shippedOrders = orders.filter(o => o.status === 'Shipped');
+  const deliveredOrders = orders.filter(o => o.status === 'Delivered');
+
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">
@@ -57,60 +113,52 @@ export default function AdminOrdersPage() {
       <TabsContent value="all">
         <Card>
           <CardHeader>
-            <CardTitle>Orders</CardTitle>
+            <CardTitle>All Orders</CardTitle>
             <CardDescription>
               A list of all recent orders from your buyers.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead className="hidden sm:table-cell">Status</TableHead>
-                  <TableHead className="hidden sm:table-cell">Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <div className="font-medium">{order.buyerName}</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        {order.id}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Badge className="text-xs" variant={statusColors[order.status] || 'secondary'}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">{order.date}</TableCell>
-                    <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Update Status</DropdownMenuItem>
-                          <DropdownMenuItem>Contact Buyer</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <OrderTable ordersToShow={orders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="pending">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pending Orders</CardTitle>
+            <CardDescription>
+              These orders are awaiting processing or shipment.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OrderTable ordersToShow={pendingOrders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+       <TabsContent value="shipped">
+        <Card>
+          <CardHeader>
+            <CardTitle>Shipped Orders</CardTitle>
+            <CardDescription>
+              These orders have been shipped and are in transit.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OrderTable ordersToShow={shippedOrders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+       <TabsContent value="delivered">
+        <Card>
+          <CardHeader>
+            <CardTitle>Delivered Orders</CardTitle>
+            <CardDescription>
+              These orders have been successfully delivered.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OrderTable ordersToShow={deliveredOrders} />
           </CardContent>
         </Card>
       </TabsContent>
