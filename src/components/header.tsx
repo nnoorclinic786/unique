@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import { ShoppingCart } from 'lucide-react';
@@ -12,7 +13,14 @@ interface HeaderProps {
 }
 
 export function Header({ isAdminLoggedIn }: HeaderProps) {
-  const user = null; // Placeholder for auth state
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // This will run on the client after hydration
+    if (localStorage.getItem('userLoggedIn') === 'true') {
+      setIsUserLoggedIn(true);
+    }
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
@@ -27,7 +35,7 @@ export function Header({ isAdminLoggedIn }: HeaderProps) {
           <Link href="/medicines" className="transition-colors hover:text-primary">
             Medicines
           </Link>
-          {user && (
+          {isUserLoggedIn && (
             <Link href="/account" className="transition-colors hover:text-primary">
                 My Account
             </Link>
@@ -45,7 +53,7 @@ export function Header({ isAdminLoggedIn }: HeaderProps) {
               <span className="sr-only">Shopping Cart</span>
             </Link>
           </Button>
-          {user || isAdminLoggedIn ? (
+          {isUserLoggedIn || isAdminLoggedIn ? (
             <UserNav />
           ) : (
             <div className="hidden sm:flex items-center gap-2">

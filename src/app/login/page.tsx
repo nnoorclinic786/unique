@@ -1,11 +1,67 @@
+
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/icons";
+import { useToast } from "@/hooks/use-toast";
+import { useBuyerContext } from "@/context/buyers-context";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const { toast } = useToast();
+  const { buyers, pendingBuyers, disabledBuyers } = useBuyerContext();
+
+  const allBuyers = [...buyers, ...pendingBuyers, ...disabledBuyers];
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const buyer = allBuyers.find(
+      (b) => b.email === email && b.password === password
+    );
+
+    if (buyer) {
+        if (buyer.status === 'Pending') {
+            toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: "Your account is still pending approval.",
+            });
+        } else if (buyer.status === 'Disabled') {
+            toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: "Your account has been disabled. Please contact support.",
+            });
+        }
+        else if (buyer.status === 'Approved') {
+            // In a real app, you'd set a session cookie or token
+            toast({
+                title: "Login Successful",
+                description: "Welcome back!",
+            });
+            // For now, we simulate login by storing a value in localStorage
+            localStorage.setItem('userLoggedIn', 'true');
+            localStorage.setItem('userName', buyer.name);
+            router.push("/account");
+        }
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Invalid email or password.",
+      });
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md mx-auto">
@@ -19,7 +75,7 @@ export default function LoginPage() {
           <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4">
+          <form className="grid gap-4" onSubmit={handleLogin}>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -27,6 +83,8 @@ export default function LoginPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -36,7 +94,13 @@ export default function LoginPage() {
                   Forgot your password?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
             <Button type="submit" className="w-full">
               Login
