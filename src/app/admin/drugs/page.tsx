@@ -1,4 +1,6 @@
+"use client";
 import Image from "next/image";
+import Link from "next/link";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,11 +41,13 @@ export default function AdminDrugsPage() {
                     Manage your medicines and view their sales performance.
                 </CardDescription>
             </div>
-            <Button size="sm" className="gap-1">
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Medicine
-                </span>
+            <Button size="sm" className="gap-1" asChild>
+                <Link href="/admin/drugs/new">
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                        Add Medicine
+                    </span>
+                </Link>
             </Button>
         </div>
       </CardHeader>
