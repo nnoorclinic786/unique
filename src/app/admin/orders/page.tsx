@@ -1,7 +1,7 @@
 
 "use client";
 
-import { MoreHorizontal, File } from "lucide-react";
+import { MoreHorizontal, File, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -29,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orders } from "@/lib/data";
 import type { Order } from "@/lib/types";
+import { useState } from "react";
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
     'Pending': 'secondary',
@@ -91,9 +93,23 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
 
 
 export default function AdminOrdersPage() {
+  const [activeTab, setActiveTab] = useState("all");
+
+  const allOrders = orders;
   const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Processing');
   const shippedOrders = orders.filter(o => o.status === 'Shipped');
   const deliveredOrders = orders.filter(o => o.status === 'Delivered');
+
+  const getOrdersForTab = (tab: string) => {
+    switch (tab) {
+        case 'pending': return pendingOrders;
+        case 'shipped': return shippedOrders;
+        case 'delivered': return deliveredOrders;
+        case 'all':
+        default:
+            return allOrders;
+    }
+  }
 
   const exportToCsv = (data: Order[], filename: string) => {
     const csvRows = [
@@ -121,12 +137,20 @@ export default function AdminOrdersPage() {
     document.body.removeChild(link);
   };
 
-  const handleExport = () => {
-    exportToCsv(orders, 'orders.csv');
+  const handleExport = (format: 'csv' | 'pdf' | 'excel') => {
+    const dataToExport = getOrdersForTab(activeTab);
+    const filename = `orders-${activeTab}-${new Date().toISOString().split('T')[0]}`;
+    
+    if (format === 'csv') {
+        exportToCsv(dataToExport, `${filename}.csv`);
+    }
+    // Future implementation for other formats
+    // if (format === 'pdf') { ... }
+    // if (format === 'excel') { ... }
   };
 
   return (
-    <Tabs defaultValue="all">
+    <Tabs defaultValue="all" onValueChange={setActiveTab}>
       <div className="flex items-center">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
@@ -135,12 +159,24 @@ export default function AdminOrdersPage() {
           <TabsTrigger value="delivered">Delivered</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-7 gap-1" onClick={handleExport}>
-                <File className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Export
-                </span>
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="outline" className="h-7 gap-1">
+                        <File className="h-3.5 w-3.5" />
+                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                        Export
+                        </span>
+                         <ChevronDown className="h-3.5 w-3.5" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Export As</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleExport('csv')}>CSV (.csv)</DropdownMenuItem>
+                    <DropdownMenuItem disabled>PDF (.pdf)</DropdownMenuItem>
+                    <DropdownMenuItem disabled>Excel (.xlsx)</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
       </div>
       <TabsContent value="all">
@@ -152,7 +188,7 @@ export default function AdminOrdersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <OrderTable ordersToShow={orders} />
+            <OrderTable ordersToShow={allOrders} />
           </CardContent>
         </Card>
       </TabsContent>
