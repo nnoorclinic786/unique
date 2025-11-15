@@ -1,3 +1,4 @@
+
 import type { Medicine, Order, Buyer } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -30,6 +31,7 @@ export const buyers: Buyer[] = [
     { id: 'BUY003', name: 'Wellness Hospital', email: 'procurement@wellness.com', registeredOn: '2022-11-10', gstNumber: '27NOPQR2468T1Z4', type: 'Hospital', status: 'Approved' },
     { id: 'BUY004', name: 'QuickMed Retail', email: 'orders@quickmed.com', registeredOn: '2023-05-01', gstNumber: '36UVWXY9876P1Z9', type: 'Chemist', status: 'Pending' },
     { id: 'BUY005', name: 'Central Clinic', email: 'admin@centralclinic.org', registeredOn: '2023-06-25', gstNumber: '21GHIJK1357S1Z7', type: 'Hospital', status: 'Pending' },
+    { id: 'BUY006', name: 'HealthFirst Pharma', email: 'contact@healthfirst.com', registeredOn: '2023-03-12', gstNumber: '33AAAAA1111B1Z5', type: 'Chemist', status: 'Disabled' },
 ];
 
 export const salesData = [
