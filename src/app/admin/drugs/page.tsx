@@ -29,9 +29,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMedicineContext } from "@/context/medicines-context";
+import { useAdminSearch } from "@/context/admin-search-context";
 
 export default function AdminDrugsPage() {
   const { medicines } = useMedicineContext();
+  const { searchQuery } = useAdminSearch();
+
+  const filteredMedicines = medicines.filter(medicine => {
+    if (!searchQuery) return true;
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return medicine.name.toLowerCase().includes(lowerCaseQuery) ||
+           (medicine.description && medicine.description.toLowerCase().includes(lowerCaseQuery)) ||
+           (medicine.category && medicine.category.toLowerCase().includes(lowerCaseQuery));
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -69,7 +80,7 @@ export default function AdminDrugsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {medicines.map((medicine) => {
+            {filteredMedicines.map((medicine) => {
               return (
                 <TableRow key={medicine.id}>
                   <TableCell className="hidden sm:table-cell">
@@ -112,7 +123,7 @@ export default function AdminDrugsPage() {
       </CardContent>
       <CardFooter>
         <div className="text-xs text-muted-foreground">
-          Showing <strong>1-{medicines.length}</strong> of <strong>{medicines.length}</strong> medicines
+          Showing <strong>1-{filteredMedicines.length}</strong> of <strong>{medicines.length}</strong> medicines
         </div>
       </CardFooter>
     </Card>
