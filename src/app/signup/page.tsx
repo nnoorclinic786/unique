@@ -18,9 +18,9 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   mobileNumber: z.string().regex(/^\d{10}$/, { message: "Please enter a valid 10-digit mobile number." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
-  drugLicense: z.string().min(5, { message: "Drug license number is required." }),
-  practitionerRegistration: z.string().min(5, { message: "Practitioner registration is required." }),
-  gstNumber: z.string().regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, { message: "Please enter a valid GST number." }),
+  drugLicense: z.string().optional(),
+  practitionerRegistration: z.string().optional(),
+  gstNumber: z.string().optional(),
   deliveryAddress: z.string().min(10, { message: "Please provide a complete delivery address." }),
 });
 
@@ -124,7 +124,7 @@ export default function SignupPage() {
                   name="drugLicense"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Drugs Registration No.</FormLabel>
+                      <FormLabel>Drugs Registration No. (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter drug license" {...field} />
                       </FormControl>
@@ -137,7 +137,7 @@ export default function SignupPage() {
                   name="practitionerRegistration"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Practitioner Registration No.</FormLabel>
+                      <FormLabel>Practitioner Registration No. (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter practitioner license" {...field} />
                       </FormControl>
@@ -151,7 +151,7 @@ export default function SignupPage() {
                 name="gstNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>GST Number</FormLabel>
+                    <FormLabel>GST Number (Optional)</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter GSTIN" {...field} />
                     </FormControl>
