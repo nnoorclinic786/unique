@@ -46,7 +46,7 @@ export default function LandingPage() {
           <div className="container mx-auto px-4 md:px-6 text-center">
             <div className="max-w-3xl mx-auto">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tight text-foreground">
-                WholesaleRx: Your Partner in Pharmaceutical Supply
+                Unique Medicare: Your Partner in Pharmaceutical Supply
               </h1>
               <p className="mt-6 text-lg md:text-xl text-muted-foreground">
                 The one-stop solution for retail chemists, doctors, and hospitals to procure medicines efficiently. Simplified ordering, transparent pricing, and reliable delivery.
@@ -68,7 +68,7 @@ export default function LandingPage() {
         <section id="features" className="w-full py-16 md:py-24">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">Why Choose WholesaleRx?</h2>
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Why Choose Unique Medicare?</h2>
               <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
                 We are dedicated to providing a seamless procurement experience for healthcare professionals and businesses.
               </p>
@@ -110,7 +110,7 @@ export default function LandingPage() {
       </main>
       <footer className="w-full bg-secondary py-6">
         <div className="container mx-auto px-4 md:px-6 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} WholesaleRx. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Unique Medicare. All rights reserved.</p>
         </div>
       </footer>
     </>

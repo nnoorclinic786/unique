@@ -43,7 +43,7 @@ export default function AdminLayout({
         <SidebarHeader>
           <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
             <Logo className="h-6 w-6 text-primary" />
-            <span className="font-headline">WholesaleRx Admin</span>
+            <span className="font-headline">Unique Medicare Admin</span>
           </Link>
         </SidebarHeader>
         <SidebarContent>
@@ -91,7 +91,7 @@ export default function AdminLayout({
                   className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                 >
                   <Logo className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">WholesaleRx</span>
+                  <span className="sr-only">Unique Medicare</span>
                 </Link>
                 <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                   <Home className="h-5 w-5" />

@@ -13,7 +13,7 @@ export function Header() {
         <Link href="/" className="mr-6 flex items-center gap-2">
           <Logo className="h-6 w-6 text-primary" />
           <span className="font-headline text-lg font-semibold text-foreground">
-            WholesaleRx
+            Unique Medicare
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">

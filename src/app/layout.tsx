@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'WholesaleRx',
+  title: 'Unique Medicare',
   description: 'Wholesale medicine for retailers, doctors, and clinics.',
 };
 
