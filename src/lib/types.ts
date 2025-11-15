@@ -27,7 +27,7 @@ export type Buyer = {
     name: string;
     email: string;
     registeredOn: string;
-    gstNumber: string;
+    gstNumber?: string;
     type: 'Chemist' | 'Doctor' | 'Hospital';
-    status?: 'Pending' | 'Approved';
+    status: 'Pending' | 'Approved';
 };

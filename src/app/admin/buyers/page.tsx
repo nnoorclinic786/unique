@@ -1,3 +1,4 @@
+
 "use client";
 
 import { MoreHorizontal, CheckCircle2 } from "lucide-react";
@@ -27,12 +28,9 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useBuyerContext } from "@/context/buyers-context";
-import { Separator } from "@/components/ui/separator";
 
 export default function AdminBuyersPage() {
   const { buyers, pendingBuyers, approveBuyer } = useBuyerContext();
-
-  const approvedBuyers = buyers.filter(b => b.status !== 'Pending');
 
   return (
     <div className="space-y-8">
@@ -86,9 +84,9 @@ export default function AdminBuyersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Buyers</CardTitle>
+          <CardTitle>Approved Buyers</CardTitle>
           <CardDescription>
-            List of all registered buyers on the platform.
+            List of all approved buyers on the platform.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -105,7 +103,7 @@ export default function AdminBuyersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {approvedBuyers.map((buyer) => (
+              {buyers.map((buyer) => (
                 <TableRow key={buyer.id}>
                   <TableCell>
                     <div className="flex items-center gap-4">

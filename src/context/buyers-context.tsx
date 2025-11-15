@@ -15,7 +15,7 @@ interface BuyerContextType {
 const BuyerContext = createContext<BuyerContextType | undefined>(undefined);
 
 export function BuyerProvider({ children }: { children: ReactNode }) {
-  const [buyers, setBuyers] = useState<Buyer[]>(initialBuyers.filter(b => b.status !== 'Pending'));
+  const [buyers, setBuyers] = useState<Buyer[]>(initialBuyers.filter(b => b.status === 'Approved'));
   const [pendingBuyers, setPendingBuyers] = useState<Buyer[]>(initialBuyers.filter(b => b.status === 'Pending'));
 
   const addPendingBuyer = (buyer: Buyer) => {
