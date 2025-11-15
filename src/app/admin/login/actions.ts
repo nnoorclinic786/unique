@@ -19,7 +19,7 @@ export async function login(formData: FormData) {
       maxAge: 60 * 60 * 24, // 1 day
       path: "/",
     });
-    return { success: true };
+    redirect("/admin/dashboard");
   }
 
   return { success: false, error: "Invalid email or password." };

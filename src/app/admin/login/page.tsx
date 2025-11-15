@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { login } from "./actions";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
@@ -22,14 +20,12 @@ export default function AdminLoginPage() {
     
     try {
       const result = await login(formData);
-      if (result.success) {
-        router.push("/admin/dashboard");
-      } else {
-        setError(result.error || "Login failed. Please check your credentials.");
+      if (result?.error) {
+        setError(result.error);
         toast({
           variant: "destructive",
           title: "Login Failed",
-          description: result.error || "Please check your credentials and try again.",
+          description: result.error,
         });
       }
     } catch (err) {
@@ -62,13 +58,20 @@ export default function AdminLoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="admin@medicare.com"
                 required
+                defaultValue="admin@medicare.com"
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" required />
+              <Input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                defaultValue="password"
+              />
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <Button type="submit" className="w-full">

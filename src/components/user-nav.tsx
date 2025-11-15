@@ -12,11 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { logout } from '@/app/admin/login/actions';
 
 export function UserNav() {
-  const router = useRouter();
 
   const handleLogout = async () => {
     await logout();
