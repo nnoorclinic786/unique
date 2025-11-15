@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -149,10 +150,13 @@ export default function AddMedicinePage() {
                     name="price"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Price (₹)</FormLabel>
-                        <FormControl>
-                            <Input type="number" step="0.01" placeholder="e.g., 15.50" {...field} />
-                        </FormControl>
+                        <FormLabel>Price</FormLabel>
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                            <FormControl>
+                                <Input type="number" step="0.01" placeholder="15.50" className="pl-7" {...field} />
+                            </FormControl>
+                        </div>
                         <FormMessage />
                         </FormItem>
                     )}
