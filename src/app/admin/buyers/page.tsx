@@ -1,7 +1,7 @@
-
 "use client";
 
 import { MoreHorizontal, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,10 +69,24 @@ export default function AdminBuyersPage() {
                     <TableCell className="hidden sm:table-cell">{buyer.registeredOn}</TableCell>
                     <TableCell className="hidden md:table-cell font-mono text-xs">{buyer.gstNumber}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm" onClick={() => approveBuyer(buyer.id)}>
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Approve
-                      </Button>
+                       <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/buyers/${buyer.id}`}>View Details</Link>
+                          </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => approveBuyer(buyer.id)}>
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Approve
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -131,7 +145,9 @@ export default function AdminBuyersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/buyers/${buyer.id}`}>View Details</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem>Disable Account</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
