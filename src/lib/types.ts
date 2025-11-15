@@ -8,6 +8,9 @@ export type Medicine = {
   stock: number;
   category: string;
   imageId: (typeof placeholderImages)[number]['id'];
+  hsnCode?: string;
+  priceUnit?: 'strip' | 'piece' | 'bottle';
+  companyName?: string;
 };
 
 export type Order = {
