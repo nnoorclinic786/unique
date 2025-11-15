@@ -9,8 +9,10 @@ export type Medicine = {
   category: string;
   imageUrl: string;
   hsnCode?: string;
-  priceUnit?: 'strip' | 'piece' | 'bottle';
+  priceUnit?: 'strip' | 'piece' | 'bottle' | 'box';
+  stockUnit?: 'strip' | 'piece' | 'bottle' | 'box';
   companyName?: string;
+  imageSource?: string;
 };
 
 export type Order = {
@@ -39,3 +41,5 @@ export type Buyer = {
     // For file uploads, we'll just store a boolean or a path in a real app.
     // For now, we'll omit them from the type as we're not handling file uploads yet.
 };
+
+    
