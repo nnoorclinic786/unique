@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -12,38 +13,40 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
+import { useBuyerContext } from "@/context/buyers-context";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from 'date-fns';
 
 const formSchema = z.object({
-  businessName: z.string().min(2, { message: "Business name must be at least 2 characters." }),
-  contactPerson: z.string().min(2, { message: "Contact person name must be at least 2 characters." }),
+  name: z.string().min(2, { message: "Business name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  mobileNumber: z.string().regex(/^\d{10}$/, { message: "Please enter a valid 10-digit mobile number." }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
-  drugLicense: z.string().optional(),
-  practitionerRegistration: z.string().optional(),
   gstNumber: z.string().optional(),
-  deliveryAddress: z.string().min(10, { message: "Please provide a complete delivery address." }),
+  type: z.enum(['Chemist', 'Doctor', 'Hospital'], { required_error: "Please select a buyer type."}),
 });
 
 export default function SignupPage() {
   const { toast } = useToast();
+  const { addPendingBuyer } = useBuyerContext();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      businessName: "",
-      contactPerson: "",
+      name: "",
       email: "",
-      mobileNumber: "",
-      password: "",
-      drugLicense: "",
-      practitionerRegistration: "",
       gstNumber: "",
-      deliveryAddress: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    const newBuyer = {
+      id: `BUYER-${Date.now()}`,
+      ...values,
+      registeredOn: format(new Date(), 'yyyy-MM-dd'),
+      status: 'Pending' as const,
+    };
+    
+    addPendingBuyer(newBuyer);
+    
     toast({
       title: "Registration Submitted!",
       description: "Your registration is under review. We will notify you upon approval.",
@@ -66,109 +69,14 @@ export default function SignupPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="businessName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., City Pharmacy" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="contactPerson"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Person</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="contact@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="mobileNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="9876543210" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="drugLicense"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Drugs Registration No. (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter drug license" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="practitionerRegistration"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Practitioner Registration No. (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter practitioner license" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
               <FormField
                 control={form.control}
-                name="gstNumber"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>GST Number (Optional)</FormLabel>
+                    <FormLabel>Business/Practice Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter GSTIN" {...field} />
+                      <Input placeholder="e.g., City Pharmacy or Dr. John Doe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -176,17 +84,54 @@ export default function SignupPage() {
               />
               <FormField
                 control={form.control}
-                name="deliveryAddress"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Delivery Address</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Enter your full delivery address" className="resize-y" {...field} />
+                      <Input placeholder="contact@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <div className="grid md:grid-cols-2 gap-4">
+                 <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>I am a...</FormLabel>
+                       <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select buyer type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Chemist">Retail Chemist</SelectItem>
+                          <SelectItem value="Doctor">Doctor / Practitioner</SelectItem>
+                          <SelectItem value="Hospital">Hospital / Clinic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gstNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GST Number (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter GSTIN" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <Button type="submit" className="w-full">Create Account</Button>
             </form>

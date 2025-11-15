@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { MedicineProvider } from '@/context/medicines-context';
+import { BuyerProvider } from '@/context/buyers-context';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -24,7 +25,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
         <MedicineProvider>
-          {children}
+          <BuyerProvider>
+            {children}
+          </BuyerProvider>
         </MedicineProvider>
         <Toaster />
       </body>

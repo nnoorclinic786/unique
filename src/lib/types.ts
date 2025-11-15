@@ -29,4 +29,5 @@ export type Buyer = {
     registeredOn: string;
     gstNumber: string;
     type: 'Chemist' | 'Doctor' | 'Hospital';
+    status?: 'Pending' | 'Approved';
 };
