@@ -1,3 +1,6 @@
+
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,8 +8,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/icons";
 import { ChevronLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import React from "react";
 
 export default function ForgotPasswordPage() {
+  const { toast } = useToast();
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email");
+
+    if (email) {
+      toast({
+        title: "Reset Link Sent",
+        description: `If an account with the email ${email} exists, a password reset link has been sent.`,
+      });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Please enter your email address.",
+        });
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md mx-auto">
@@ -22,11 +48,12 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4">
+          <form className="grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="m@example.com"
                 required
