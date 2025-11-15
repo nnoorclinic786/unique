@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { ChevronLeft } from "lucide-react";
 import type { Medicine } from "@/lib/types";
 import { useMedicineContext } from "@/context/medicines-context";
@@ -46,7 +45,7 @@ const formSchema = z.object({
   stock: z.coerce.number().int().min(0, { message: "Stock must be a positive integer." }),
   category: z.string().min(2, { message: "Category is required." }),
   hsnCode: z.string().optional(),
-  imageId: z.string({ required_error: "Please select an image." }),
+  imageUrl: z.string().url({ message: "Please enter a valid image URL." }),
 });
 
 export default function AddMedicinePage() {
@@ -64,7 +63,7 @@ export default function AddMedicinePage() {
       stock: 0,
       category: "",
       hsnCode: "",
-      imageId: "",
+      imageUrl: "",
     },
   });
 
@@ -226,24 +225,13 @@ export default function AddMedicinePage() {
                 </div>
                 <FormField
                     control={form.control}
-                    name="imageId"
+                    name="imageUrl"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Image</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select an image for the medicine" />
-                            </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                            {PlaceHolderImages.map((image) => (
-                                <SelectItem key={image.id} value={image.id}>
-                                {image.description}
-                                </SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
+                        <FormLabel>Image URL</FormLabel>
+                         <FormControl>
+                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                        </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}

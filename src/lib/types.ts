@@ -1,4 +1,4 @@
-import type { placeholderImages } from './data';
+
 
 export type Medicine = {
   id: string;
@@ -7,7 +7,7 @@ export type Medicine = {
   price: number;
   stock: number;
   category: string;
-  imageId: (typeof placeholderImages)[number]['id'];
+  imageUrl: string;
   hsnCode?: string;
   priceUnit?: 'strip' | 'piece' | 'bottle';
   companyName?: string;

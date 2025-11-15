@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { medicines, placeholderImages } from '@/lib/data';
+import { medicines } from '@/lib/data';
 import { Trash2 } from 'lucide-react';
 
 const cartItems = [
@@ -40,17 +40,15 @@ export default function CartPage() {
                 </TableHeader>
                 <TableBody>
                   {cartItems.map((item) => {
-                    const image = placeholderImages.find(img => img.id === item.imageId);
                     return (
                       <TableRow key={item.id}>
                         <TableCell className="hidden md:table-cell">
-                          {image && (
+                          {item.imageUrl && (
                             <Image
-                              src={image.imageUrl}
+                              src={item.imageUrl}
                               alt={item.name}
                               width={64}
                               height={64}
-                              data-ai-hint={image.imageHint}
                               className="rounded-md object-cover"
                             />
                           )}

@@ -28,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useMedicineContext } from "@/context/medicines-context";
 
 export default function AdminDrugsPage() {
@@ -71,18 +70,16 @@ export default function AdminDrugsPage() {
           </TableHeader>
           <TableBody>
             {medicines.map((medicine) => {
-              const image = PlaceHolderImages.find((img) => img.id === medicine.imageId);
               return (
                 <TableRow key={medicine.id}>
                   <TableCell className="hidden sm:table-cell">
-                    {image && (
+                    {medicine.imageUrl && (
                       <Image
                         alt={medicine.name}
                         className="aspect-square rounded-md object-cover"
                         height="64"
-                        src={image.imageUrl}
+                        src={medicine.imageUrl}
                         width="64"
-                        data-ai-hint={image.imageHint}
                       />
                     )}
                   </TableCell>

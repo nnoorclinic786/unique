@@ -3,26 +3,22 @@ import type { Medicine } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 interface MedicineCardProps {
   medicine: Medicine;
 }
 
 export function MedicineCard({ medicine }: MedicineCardProps) {
-  const image = PlaceHolderImages.find(img => img.id === medicine.imageId);
-
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="p-0">
         <div className="aspect-[3/2] w-full overflow-hidden">
-          {image && (
+          {medicine.imageUrl && (
             <Image
-              src={image.imageUrl}
+              src={medicine.imageUrl}
               alt={medicine.name}
               width={600}
               height={400}
-              data-ai-hint={image.imageHint}
               className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
             />
           )}
