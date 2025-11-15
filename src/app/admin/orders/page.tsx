@@ -1,4 +1,6 @@
 
+"use client";
+
 import { MoreHorizontal, File } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orders } from "@/lib/data";
+import type { Order } from "@/lib/types";
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
     'Pending': 'secondary',
@@ -92,6 +95,36 @@ export default function AdminOrdersPage() {
   const shippedOrders = orders.filter(o => o.status === 'Shipped');
   const deliveredOrders = orders.filter(o => o.status === 'Delivered');
 
+  const exportToCsv = (data: Order[], filename: string) => {
+    const csvRows = [
+        // Headers
+        ['Order ID', 'Customer', 'Date', 'Amount', 'Status'].join(','),
+        // Data
+        ...data.map(order => [
+            order.id,
+            `"${order.buyerName.replace(/"/g, '""')}"`, // Handle quotes in names
+            order.date,
+            order.total.toFixed(2),
+            order.status
+        ].join(','))
+    ];
+
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExport = () => {
+    exportToCsv(orders, 'orders.csv');
+  };
+
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">
@@ -102,7 +135,7 @@ export default function AdminOrdersPage() {
           <TabsTrigger value="delivered">Delivered</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" variant="outline" className="h-7 gap-1">
+            <Button size="sm" variant="outline" className="h-7 gap-1" onClick={handleExport}>
                 <File className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Export
