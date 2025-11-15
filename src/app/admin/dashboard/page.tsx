@@ -1,6 +1,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -40,60 +41,68 @@ export default function Dashboard() {
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Revenue
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN')}</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Buyers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+{buyers.length}</div>
-            <p className="text-xs text-muted-foreground">
-              +10 since last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.filter(o => o.status === 'Pending').length}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {orders.filter(o => o.status === 'Processing').length} being processed
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Medicines in Stock
-            </CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{medicines.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Total variants available
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/orders">
+            <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                Total Revenue
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN')}</div>
+                <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+                </p>
+            </CardContent>
+            </Card>
+        </Link>
+        <Link href="/admin/buyers">
+            <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">New Buyers</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">+{buyers.length}</div>
+                <p className="text-xs text-muted-foreground">
+                +10 since last month
+                </p>
+            </CardContent>
+            </Card>
+        </Link>
+        <Link href="/admin/orders">
+            <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">
+                {orders.filter(o => o.status === 'Pending').length}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                {orders.filter(o => o.status === 'Processing').length} being processed
+                </p>
+            </CardContent>
+            </Card>
+        </Link>
+        <Link href="/admin/drugs">
+            <Card className="hover:bg-muted/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                Medicines in Stock
+                </CardTitle>
+                <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{medicines.length}</div>
+                <p className="text-xs text-muted-foreground">
+                Total variants available
+                </p>
+            </CardContent>
+            </Card>
+        </Link>
       </div>
       <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
         <Card className="xl:col-span-2">
