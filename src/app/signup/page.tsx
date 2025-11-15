@@ -14,7 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
 
 const formSchema = z.object({
-  fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
+  businessName: z.string().min(2, { message: "Business name must be at least 2 characters." }),
+  contactPerson: z.string().min(2, { message: "Contact person name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   mobileNumber: z.string().regex(/^\d{10}$/, { message: "Please enter a valid 10-digit mobile number." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
@@ -29,7 +30,8 @@ export default function SignupPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
+      businessName: "",
+      contactPerson: "",
       email: "",
       mobileNumber: "",
       password: "",
@@ -67,12 +69,25 @@ export default function SignupPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="fullName"
+                  name="businessName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name / Business Name</FormLabel>
+                      <FormLabel>Business Name</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., City Pharmacy" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contactPerson"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Person</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., John Doe" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
