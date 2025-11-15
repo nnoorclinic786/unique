@@ -1,32 +1,45 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
- 
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
 export function middleware(request: NextRequest) {
-  const cookie = request.cookies.get('admin_session')
-  const { pathname } = request.nextUrl
- 
-  // If the user is trying to access the login page, and is not logged in, let them through.
-  if (pathname.startsWith('/admin/login')) {
-    return NextResponse.next()
+  const { pathname } = request.nextUrl;
+  const hasSessionCookie = request.cookies.has('admin_session');
+  const isLoggedIn = hasSessionCookie && request.cookies.get('admin_session')?.value === 'true';
+
+  const isAdminPath = pathname.startsWith('/admin');
+  const isAdminLoginPage = pathname === '/admin/login';
+
+  if (!isAdminPath) {
+    return NextResponse.next();
   }
 
-  // If the user has a valid session cookie and is trying to access a non-login admin page, let them through.
-  if (cookie && cookie.value === 'true') {
-     // But if they are logged in and try to go to /admin/login, redirect to dashboard
-    if (pathname.startsWith('/admin/login')) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+  // If user is logged in
+  if (isLoggedIn) {
+    // If they try to access the login page, redirect to the dashboard
+    if (isAdminLoginPage) {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-    return NextResponse.next()
+    // Otherwise, they can access the requested admin page
+    return NextResponse.next();
   }
+  
+  // If user is not logged in
+  // And they are not trying to access the login page, redirect them to it
+  if (!isAdminLoginPage) {
+    return NextResponse.redirect(new URL('/admin/login', request.url));
+  }
+  
+  // If they are trying to access the login page, let them
+  return NextResponse.next();
+}
 
-  // If there's no valid cookie, redirect to login page.
-  if (!pathname.startsWith('/admin/login')) {
-    return NextResponse.redirect(new URL('/admin/login', request.url))
-  }
- 
-  return NextResponse.next()
-}
- 
 export const config = {
-  matcher: ['/admin/:path*'],
-}
+  /*
+   * Match all request paths except for the ones starting with:
+   * - api (API routes)
+   * - _next/static (static files)
+   * - _next/image (image optimization files)
+   * - favicon.ico (favicon file)
+   */
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
