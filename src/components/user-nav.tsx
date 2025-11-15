@@ -47,7 +47,7 @@ export function UserNav() {
             <Link href="/admin/dashboard">Dashboard</Link>
           </DropdownMenuItem>
            <DropdownMenuItem asChild>
-            <Link href="/admin/drugs">Products</Link>
+            <Link href="/admin/drugs">Medicines</Link>
           </DropdownMenuItem>
            <DropdownMenuItem asChild>
             <Link href="/admin/buyers">Buyers</Link>

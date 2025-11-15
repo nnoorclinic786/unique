@@ -1,6 +1,6 @@
 import type { placeholderImages } from './data';
 
-export type Product = {
+export type Medicine = {
   id: string;
   name: string;
   description: string;

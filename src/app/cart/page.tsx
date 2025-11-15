@@ -6,13 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { products, placeholderImages } from '@/lib/data';
+import { medicines, placeholderImages } from '@/lib/data';
 import { Trash2 } from 'lucide-react';
 
 const cartItems = [
-  { ...products[0], quantity: 2 },
-  { ...products[2], quantity: 1 },
-  { ...products[4], quantity: 3 },
+  { ...medicines[0], quantity: 2 },
+  { ...medicines[2], quantity: 1 },
+  { ...medicines[4], quantity: 3 },
 ];
 
 export default function CartPage() {
@@ -32,7 +32,7 @@ export default function CartPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[80px] hidden md:table-cell"></TableHead>
-                    <TableHead>Product</TableHead>
+                    <TableHead>Medicine</TableHead>
                     <TableHead>Quantity</TableHead>
                     <TableHead className="text-right">Price</TableHead>
                     <TableHead className="w-[40px]"></TableHead>

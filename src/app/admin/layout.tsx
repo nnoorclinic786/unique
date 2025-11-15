@@ -58,9 +58,9 @@ export default function AdminLayout({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <Link href="/admin/drugs" passHref>
-                <SidebarMenuButton tooltip="Products">
+                <SidebarMenuButton tooltip="Medicines">
                   <Package />
-                  <span>Products</span>
+                  <span>Medicines</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -103,7 +103,7 @@ export default function AdminLayout({
                 </Link>
                 <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground">
                   <Package className="h-5 w-5" />
-                  Products
+                  Medicines
                 </Link>
                 <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
                   <Users className="h-5 w-5" />

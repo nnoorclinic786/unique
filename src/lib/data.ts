@@ -1,9 +1,9 @@
-import type { Product, Order, Buyer } from './types';
+import type { Medicine, Order, Buyer } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const placeholderImages = PlaceHolderImages;
 
-export const products: Product[] = [
+export const medicines: Medicine[] = [
   { id: 'PROD001', name: 'Paracetamol 500mg', description: 'Standard analgesic and antipyretic.', price: 15.50, stock: 1200, category: 'Analgesics', imageId: 'pills-bottle' },
   { id: 'PROD002', name: 'Amoxicillin 250mg', description: 'Broad-spectrum antibiotic.', price: 45.00, stock: 800, category: 'Antibiotics', imageId: 'capsules' },
   { id: 'PROD003', name: 'Cough Syrup 100ml', description: 'For relief from cough and cold.', price: 75.00, stock: 650, category: 'Respiratory', imageId: 'syrup' },

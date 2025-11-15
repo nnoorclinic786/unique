@@ -58,7 +58,7 @@ export default function LandingPage() {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="font-headline">
-                  <Link href="/products">Browse Products</Link>
+                  <Link href="/medicines">Browse Medicines</Link>
                 </Button>
               </div>
             </div>

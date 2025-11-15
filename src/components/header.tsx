@@ -17,8 +17,8 @@ export function Header() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/products" className="transition-colors hover:text-primary">
-            Products
+          <Link href="/medicines" className="transition-colors hover:text-primary">
+            Medicines
           </Link>
           <Link href="/account" className="transition-colors hover:text-primary">
             My Account
