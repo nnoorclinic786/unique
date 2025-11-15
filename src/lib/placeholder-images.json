@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "pills-bottle",
+      "description": "A bottle of white pills.",
+      "imageUrl": "https://images.unsplash.com/photo-1702776102013-1530fcb73add?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwaWxscyUyMGJvdHRsZXxlbnwwfHx8fDE3NjMxNDA1NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pills bottle"
+    },
+    {
+      "id": "syrup",
+      "description": "A bottle of cough syrup.",
+      "imageUrl": "https://images.unsplash.com/photo-1700104495010-2e961cd6141f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxzeXJ1cCUyMG1lZGljaW5lfGVufDB8fHx8MTc2MzE4NjUxOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "syrup medicine"
+    },
+    {
+      "id": "ointment-tube",
+      "description": "A tube of medical ointment.",
+      "imageUrl": "https://images.unsplash.com/photo-1699885725103-2bf0a3c38cbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjcmVhbSUyMHR1YmV8ZW58MHx8fHwxNzYzMTk0NDY5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cream tube"
+    },
+    {
+      "id": "capsules",
+      "description": "A collection of colorful capsules.",
+      "imageUrl": "https://images.unsplash.com/photo-1733336911156-2672b142d037?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjYXBzdWxlcyUyMG1lZGljaW5lfGVufDB8fHx8MTc2MzE4NTU3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "capsules medicine"
+    },
+    {
+      "id": "inhaler",
+      "description": "An asthma inhaler.",
+      "imageUrl": "https://images.unsplash.com/photo-1637930030080-4ec4b95914c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhc3RobWElMjBpbmhhbGVyfGVufDB8fHx8MTc2MzE5NDQ2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "asthma inhaler"
+    },
+    {
+      "id": "vaccine-vial",
+      "description": "A vial of vaccine.",
+      "imageUrl": "https://images.unsplash.com/photo-1623682688253-c35512ff8039?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2YWNjaW5lJTIwdmlhbHxlbnwwfHx8fDE3NjMxOTQ0Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vaccine vial"
+    }
+  ]
 }

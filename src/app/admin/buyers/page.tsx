@@ -1,0 +1,92 @@
+import { MoreHorizontal } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { buyers } from "@/lib/data";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+export default function AdminBuyersPage() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Buyers</CardTitle>
+        <CardDescription>
+          List of all registered buyers on the platform.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Buyer</TableHead>
+              <TableHead className="hidden sm:table-cell">Type</TableHead>
+              <TableHead className="hidden md:table-cell">GST Number</TableHead>
+              <TableHead className="hidden sm:table-cell">Registered On</TableHead>
+              <TableHead>
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {buyers.map((buyer) => (
+              <TableRow key={buyer.id}>
+                <TableCell>
+                  <div className="flex items-center gap-4">
+                    <Avatar className="hidden h-9 w-9 sm:flex">
+                        <AvatarFallback>{buyer.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-1">
+                      <p className="text-sm font-medium leading-none">{buyer.name}</p>
+                      <p className="text-sm text-muted-foreground">{buyer.email}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                    <Badge variant="outline">{buyer.type}</Badge>
+                </TableCell>
+                <TableCell className="hidden md:table-cell font-mono text-xs">{buyer.gstNumber}</TableCell>
+                <TableCell className="hidden sm:table-cell">{buyer.registeredOn}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Toggle menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuItem>Disable Account</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
