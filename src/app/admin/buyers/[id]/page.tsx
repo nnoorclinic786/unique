@@ -14,9 +14,9 @@ export default function BuyerDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
-  const { buyers, pendingBuyers } = useBuyerContext();
+  const { buyers, pendingBuyers, disabledBuyers } = useBuyerContext();
 
-  const allBuyers = [...buyers, ...pendingBuyers];
+  const allBuyers = [...buyers, ...pendingBuyers, ...disabledBuyers];
   const buyer = allBuyers.find((b) => b.id === id);
 
   if (!buyer) {
@@ -53,7 +53,7 @@ export default function BuyerDetailsPage() {
           <div>
             <div className="flex items-center gap-4">
               <CardTitle className="font-headline text-2xl">{buyer.name}</CardTitle>
-              <Badge variant={buyer.status === 'Approved' ? "default" : "secondary"}>{buyer.status}</Badge>
+              <Badge variant={buyer.status === 'Approved' ? "default" : buyer.status === 'Pending' ? 'secondary' : 'destructive'}>{buyer.status}</Badge>
             </div>
             <CardDescription>Registered on {buyer.registeredOn}</CardDescription>
           </div>
