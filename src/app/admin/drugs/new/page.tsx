@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from "next/link";
@@ -18,6 +17,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -33,20 +33,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Image as ImageIcon } from "lucide-react";
 import type { Medicine } from "@/lib/types";
 import { useMedicineContext } from "@/context/medicines-context";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Medicine name must be at least 2 characters." }),
-  companyName: z.string().min(2, { message: "Company name must be at least 2 characters." }),
-  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
-  price: z.coerce.number().min(0, { message: "Price must be a positive number." }),
-  priceUnit: z.enum(['strip', 'piece', 'bottle'], { required_error: "Please select a price unit."}),
-  stock: z.coerce.number().int().min(0, { message: "Stock must be a positive integer." }),
-  category: z.string().min(2, { message: "Category is required." }),
   hsnCode: z.string().optional(),
+  price: z.coerce.number().min(0, { message: "Price must be a positive number." }),
+  priceUnit: z.enum(['strip', 'piece', 'bottle', 'box'], { required_error: "Please select a price unit."}),
   imageUrl: z.string().url({ message: "Please enter a valid image URL." }),
+  category: z.string().min(2, { message: "Category is required." }),
+  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
+  stock: z.coerce.number().int().min(0, { message: "Stock must be a positive integer." }),
+  companyName: z.string().min(2, { message: "Company name must be at least 2 characters." }),
 });
 
 export default function AddMedicinePage() {
@@ -58,13 +58,13 @@ export default function AddMedicinePage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      companyName: "",
-      description: "",
-      price: 0,
-      stock: 0,
-      category: "",
       hsnCode: "",
+      price: 0,
       imageUrl: "",
+      category: "",
+      description: "",
+      stock: 0,
+      companyName: "",
     },
   });
 
@@ -96,15 +96,18 @@ export default function AddMedicinePage() {
             </Button>
             <div>
                 <CardTitle className="font-headline text-2xl">Add New Medicine</CardTitle>
-                <CardDescription>Fill out the form to add a new medicine to the catalog.</CardDescription>
+                <CardDescription>Please enter the medicine details below.</CardDescription>
             </div>
         </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            
+            {/* Basic Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium font-headline border-b pb-2">Basic Details</h3>
+              <div className="grid md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -118,74 +121,107 @@ export default function AddMedicinePage() {
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   control={form.control}
-                  name="companyName"
+                  name="hsnCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company Name</FormLabel>
+                      <FormLabel>HSN Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Cipla" {...field} />
+                        <Input placeholder="e.g., 30049099" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4 items-end">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price</FormLabel>
+                      <div className="relative">
+                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
+                          <FormControl>
+                              <Input type="number" step="0.01" placeholder="15.50" className="pl-7" {...field} />
+                          </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="description"
+                  name="priceUnit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Describe the medicine" {...field} />
-                      </FormControl>
+                      <FormLabel>Price Per</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Unit (e.g., Strip)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="strip">Strip</SelectItem>
+                          <SelectItem value="piece">Piece</SelectItem>
+                          <SelectItem value="bottle">Bottle</SelectItem>
+                          <SelectItem value="box">Box</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField
+              </div>
+            </div>
+
+            {/* Image Section */}
+            <div className="space-y-4">
+                <h3 className="text-lg font-medium font-headline border-b pb-2">Image Section</h3>
+                 <FormField
                     control={form.control}
-                    name="price"
+                    name="imageUrl"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Price</FormLabel>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">₹</span>
-                            <FormControl>
-                                <Input type="number" step="0.01" placeholder="15.50" className="pl-7" {...field} />
-                            </FormControl>
-                        </div>
+                        <FormLabel>Medicine Image</FormLabel>
+                         <FormControl>
+                            <div className="flex gap-2">
+                                <Input placeholder="https://example.com/image.jpg" {...field} />
+                                <Button variant="outline" type="button">
+                                    <ImageIcon className="mr-2"/>
+                                    Upload
+                                </Button>
+                            </div>
+                        </FormControl>
+                        <FormDescription>
+                            Upload a medicine image. You can use a URL to a real medicine image.
+                        </FormDescription>
                         <FormMessage />
                         </FormItem>
                     )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="priceUnit"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Price Per</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Unit" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="strip">Strip</SelectItem>
-                                    <SelectItem value="piece">Piece</SelectItem>
-                                    <SelectItem value="bottle">Bottle</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                </div>
-              </div>
-              <div className="space-y-6">
+                />
+            </div>
+            
+            {/* Other Fields */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium font-headline border-b pb-2">Other Details</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Cipla" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                  <FormField
                   control={form.control}
                   name="category"
@@ -199,48 +235,33 @@ export default function AddMedicinePage() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                    control={form.control}
-                    name="stock"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Stock Quantity</FormLabel>
-                        <FormControl>
-                            <Input type="number" placeholder="e.g., 1200" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={form.control}
-                    name="hsnCode"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>HSN Code</FormLabel>
-                        <FormControl>
-                            <Input placeholder="e.g., 30049099" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                </div>
-                <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Image URL</FormLabel>
-                         <FormControl>
-                            <Input placeholder="https://example.com/image.jpg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
               </div>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Describe the medicine, its composition, and uses." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="stock"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Stock Quantity (in selected Price Unit)</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="e.g., 1200" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+              />
             </div>
             <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
