@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/icons";
+import { ChevronLeft } from "lucide-react";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md mx-auto">
@@ -15,8 +16,10 @@ export default function LoginPage() {
               <Logo className="h-12 w-12 text-primary" />
             </Link>
           </div>
-          <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardTitle className="font-headline text-2xl">Forgot Your Password?</CardTitle>
+          <CardDescription>
+            No problem. Enter your email and we'll send you a reset link.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4">
@@ -29,30 +32,17 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" className="ml-auto inline-block text-sm underline">
-                  Forgot your password?
-                </Link>
-              </div>
-              <Input id="password" type="password" required />
-            </div>
             <Button type="submit" className="w-full">
-              Login
+              Send Reset Link
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline">
-              Sign up
-            </Link>
-          </div>
-           <div className="mt-4 text-center text-sm">
-            Are you an admin?{" "}
-            <Link href="/admin/login" className="underline">
-              Login here
-            </Link>
+          <div className="mt-4 text-center">
+            <Button variant="link" asChild>
+                <Link href="/login">
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Back to Login
+                </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
