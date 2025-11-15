@@ -25,8 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { products } from "@/lib/data";
-import { placeholderImages } from "@/lib/data";
+import { products, placeholderImages } from "@/lib/data";
 
 export default function AdminDrugsPage() {
   return (
