@@ -21,11 +21,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { orders, buyers, salesData, medicines } from "@/lib/data";
 import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
+import { useAdminSearch } from "@/context/admin-search-context";
 
 export default function Dashboard() {
+  const { searchQuery } = useAdminSearch();
+
   const totalRevenue = orders
     .filter(o => o.status === 'Delivered')
     .reduce((acc, order) => acc + order.total, 0);
+
+  const filteredOrders = orders.filter(order => {
+      if (!searchQuery) return true;
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      return order.buyerName.toLowerCase().includes(lowerCaseQuery) ||
+             order.id.toLowerCase().includes(lowerCaseQuery);
+  }).slice(0, 5);
 
   return (
     <>
@@ -128,7 +138,7 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.slice(0, 5).map((order) => (
+                {filteredOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>
                       <div className="font-medium">{order.buyerName}</div>

@@ -1,4 +1,8 @@
+
+"use client";
+
 import Link from "next/link";
+import React, { useState } from "react";
 import {
   Home,
   Users,
@@ -16,66 +20,18 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarInset,
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
+import { AdminSearchProvider, useAdminSearch } from "@/context/admin-search-context";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <SidebarProvider>
-      <Sidebar className="border-r bg-muted/40">
-        <SidebarHeader>
-          <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-            <Logo className="h-10 w-10 text-primary" />
-            <span className="font-headline">Unique Medicare Admin</span>
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Link href="/admin/dashboard" passHref>
-                <SidebarMenuButton tooltip="Dashboard">
-                  <Home />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-               <Link href="/admin/orders" passHref>
-                <SidebarMenuButton tooltip="Orders">
-                  <ShoppingCart />
-                  <span>Orders</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/admin/drugs" passHref>
-                <SidebarMenuButton tooltip="Medicines">
-                  <Package />
-                  <span>Medicines</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/admin/buyers" passHref>
-                <SidebarMenuButton tooltip="Customers">
-                  <Users />
-                  <span>Buyers</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+
+function AdminHeader() {
+    const { searchQuery, setSearchQuery } = useAdminSearch();
+    return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
             <SheetTrigger asChild>
@@ -118,14 +74,75 @@ export default function AdminLayout({
               type="search"
               placeholder="Search..."
               className="w-full rounded-lg bg-muted pl-8 md:w-[200px] lg:w-[320px]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <UserNav />
         </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
+    )
+}
+
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AdminSearchProvider>
+        <SidebarProvider>
+        <Sidebar className="border-r bg-muted/40">
+            <SidebarHeader>
+            <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+                <Logo className="h-10 w-10 text-primary" />
+                <span className="font-headline">Unique Medicare Admin</span>
+            </Link>
+            </SidebarHeader>
+            <SidebarContent>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                <Link href="/admin/dashboard" passHref>
+                    <SidebarMenuButton tooltip="Dashboard">
+                    <Home />
+                    <span>Dashboard</span>
+                    </SidebarMenuButton>
+                </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                <Link href="/admin/orders" passHref>
+                    <SidebarMenuButton tooltip="Orders">
+                    <ShoppingCart />
+                    <span>Orders</span>
+                    </SidebarMenuButton>
+                </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                <Link href="/admin/drugs" passHref>
+                    <SidebarMenuButton tooltip="Medicines">
+                    <Package />
+                    <span>Medicines</span>
+                    </SidebarMenuButton>
+                </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                <Link href="/admin/buyers" passHref>
+                    <SidebarMenuButton tooltip="Customers">
+                    <Users />
+                    <span>Buyers</span>
+                    </SidebarMenuButton>
+                </Link>
+                </SidebarMenuItem>
+            </SidebarMenu>
+            </SidebarContent>
+        </Sidebar>
+        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+            <AdminHeader />
+            <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+            {children}
+            </main>
+        </div>
+        </SidebarProvider>
+    </AdminSearchProvider>
   );
 }
