@@ -20,9 +20,11 @@ export function Header() {
           <Link href="/medicines" className="transition-colors hover:text-primary">
             Medicines
           </Link>
-          <Link href="/account" className="transition-colors hover:text-primary">
-            My Account
-          </Link>
+          {user && (
+            <Link href="/account" className="transition-colors hover:text-primary">
+                My Account
+            </Link>
+          )}
           <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
             Admin
           </Link>
