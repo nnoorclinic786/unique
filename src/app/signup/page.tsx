@@ -15,7 +15,6 @@ import { Logo } from "@/components/icons";
 import { useBuyerContext } from "@/context/buyers-context";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from 'date-fns';
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUp } from "lucide-react";
 
@@ -52,7 +51,7 @@ export default function SignupPage() {
     },
   });
 
-  const businessType = useWatch({
+  const buyerType = useWatch({
     control: form.control,
     name: 'type'
   });
@@ -75,8 +74,8 @@ export default function SignupPage() {
     form.reset();
   }
 
-  const renderConditionalFields = () => {
-    switch (businessType) {
+  const renderBusinessVerificationFields = () => {
+    switch (buyerType) {
       case 'Doctor':
         return (
           <FormField
@@ -96,28 +95,26 @@ export default function SignupPage() {
       case 'Hospital':
         return (
           <FormItem>
-            <FormLabel>Clinic/Hospital Registration</FormLabel>
+            <FormLabel>Clinic/Hospital Registration Certificate</FormLabel>
             <FormControl>
               <Button variant="outline" className="w-full justify-start font-normal" type="button">
                 <FileUp className="mr-2 h-4 w-4" />
                 Upload Registration Document
               </Button>
             </FormControl>
-            <FormDescription>Upload a PDF or image of your registration.</FormDescription>
             <FormMessage />
           </FormItem>
         );
       case 'Medical Store':
          return (
           <FormItem>
-            <FormLabel>Drug License</FormLabel>
+            <FormLabel>Medical Store Drug License</FormLabel>
             <FormControl>
               <Button variant="outline" className="w-full justify-start font-normal" type="button">
                 <FileUp className="mr-2 h-4 w-4" />
                 Upload Drug License
               </Button>
             </FormControl>
-            <FormDescription>Upload a PDF or image of your drug license.</FormDescription>
             <FormMessage />
           </FormItem>
         );
@@ -127,7 +124,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center p-4 bg-gray-50">
       <Card className="w-full max-w-3xl mx-auto my-8">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -144,7 +141,7 @@ export default function SignupPage() {
 
               {/* Personal Details */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium font-headline">Personal Details</h3>
+                <h3 className="text-lg font-medium font-headline border-b pb-2">Personal Details</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <FormField control={form.control} name="personName" render={({ field }) => (
                       <FormItem>
@@ -167,7 +164,7 @@ export default function SignupPage() {
 
               {/* Contact Details */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium font-headline">Contact Details</h3>
+                <h3 className="text-lg font-medium font-headline border-b pb-2">Contact Details</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="mobileNumber1" render={({ field }) => (
                         <FormItem>
@@ -198,7 +195,7 @@ export default function SignupPage() {
 
               {/* Address Details */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium font-headline">Address Details</h3>
+                <h3 className="text-lg font-medium font-headline border-b pb-2">Address Details</h3>
                 <FormField control={form.control} name="address" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Buyer Business Address</FormLabel>
@@ -219,11 +216,12 @@ export default function SignupPage() {
 
               {/* Business Details */}
               <div className="space-y-4">
-                 <h3 className="text-lg font-medium font-headline">Business Details</h3>
-                <div className="grid md:grid-cols-2 gap-4">
+                 <h3 className="text-lg font-medium font-headline border-b pb-2">Business Verification</h3>
+                 <FormDescription>Please provide any one of the following, if applicable.</FormDescription>
+                <div className="grid md:grid-cols-2 gap-4 items-start">
                    <FormField control={form.control} name="type" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>I am a...</FormLabel>
+                        <FormLabel>Business Type</FormLabel>
                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger><SelectValue placeholder="Select buyer type" /></SelectTrigger>
@@ -238,9 +236,11 @@ export default function SignupPage() {
                       </FormItem>
                     )}
                   />
-                  {renderConditionalFields()}
+                  
+                  {renderBusinessVerificationFields()}
+
                   <FormField control={form.control} name="gstNumber" render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="md:col-span-2">
                         <FormLabel>GST Number (Optional)</FormLabel>
                         <FormControl><Input placeholder="Enter GSTIN" {...field} /></FormControl>
                         <FormMessage />
