@@ -11,7 +11,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
         <Link href="/" className="mr-6 flex items-center gap-2">
-          <Logo className="h-6 w-6 text-primary" />
+          <Logo className="h-10 w-10 text-primary" />
           <span className="font-headline text-lg font-semibold text-foreground">
             Unique Medicare
           </span>
