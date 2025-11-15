@@ -41,28 +41,36 @@ export default function AdminLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/dashboard" tooltip="Dashboard">
-                <Home />
-                <span>Dashboard</span>
-              </SidebarMenuButton>
+              <Link href="/admin/dashboard" passHref>
+                <SidebarMenuButton tooltip="Dashboard">
+                  <Home />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/orders" tooltip="Orders">
-                <ShoppingCart />
-                <span>Orders</span>
-              </SidebarMenuButton>
+               <Link href="/admin/orders" passHref>
+                <SidebarMenuButton tooltip="Orders">
+                  <ShoppingCart />
+                  <span>Orders</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/drugs" tooltip="Products">
-                <Package />
-                <span>Products</span>
-              </SidebarMenuButton>
+              <Link href="/admin/drugs" passHref>
+                <SidebarMenuButton tooltip="Products">
+                  <Package />
+                  <span>Products</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/admin/buyers" tooltip="Customers">
-                <Users />
-                <span>Buyers</span>
-              </SidebarMenuButton>
+              <Link href="/admin/buyers" passHref>
+                <SidebarMenuButton tooltip="Customers">
+                  <Users />
+                  <span>Buyers</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
