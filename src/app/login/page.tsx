@@ -41,6 +41,12 @@ export default function LoginPage() {
             <Button type="submit" className="w-full">
               Login
             </Button>
+             <div className="mt-4 text-center text-sm">
+              Admin?{" "}
+              <Link href="/admin/login" className="underline">
+                Login here
+              </Link>
+            </div>
           </form>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
