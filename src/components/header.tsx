@@ -1,10 +1,17 @@
+
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { UserNav } from './user-nav';
 
-export function Header() {
+interface HeaderProps {
+  isAdminLoggedIn: boolean;
+}
+
+export function Header({ isAdminLoggedIn }: HeaderProps) {
   const user = null; // Placeholder for auth state
 
   return (
@@ -25,9 +32,11 @@ export function Header() {
                 My Account
             </Link>
           )}
-          <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
-            Admin
-          </Link>
+          {isAdminLoggedIn && (
+            <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
+              Admin
+            </Link>
+          )}
         </nav>
         <div className="ml-auto flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
@@ -36,7 +45,7 @@ export function Header() {
               <span className="sr-only">Shopping Cart</span>
             </Link>
           </Button>
-          {user ? (
+          {user || isAdminLoggedIn ? (
             <UserNav />
           ) : (
             <div className="hidden sm:flex items-center gap-2">

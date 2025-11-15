@@ -8,9 +8,12 @@ import { useMedicineContext } from '@/context/medicines-context';
 
 export default function MedicinesPage() {
   const { medicines } = useMedicineContext();
+  // This is a client component, so we can't use `cookies()` directly.
+  // We'll assume the admin status is not needed here or passed differently if required.
+  // For now, we pass false as a default.
   return (
     <>
-      <Header />
+      <Header isAdminLoggedIn={false} />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
