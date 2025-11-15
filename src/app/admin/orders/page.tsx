@@ -1,7 +1,7 @@
 
 "use client";
 
-import { MoreHorizontal, File, ChevronDown } from "lucide-react";
+import { MoreHorizontal, File, ChevronDown, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orders } from "@/lib/data";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
     'Pending': 'secondary',
@@ -94,11 +95,21 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const allOrders = orders;
-  const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Processing');
-  const shippedOrders = orders.filter(o => o.status === 'Shipped');
-  const deliveredOrders = orders.filter(o => o.status === 'Delivered');
+  const filterOrders = (orders: Order[]) => {
+    if (!searchQuery) return orders;
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return orders.filter(order =>
+        order.buyerName.toLowerCase().includes(lowercasedQuery) ||
+        order.id.toLowerCase().includes(lowercasedQuery)
+    );
+  }
+
+  const allOrders = filterOrders(orders);
+  const pendingOrders = filterOrders(orders.filter(o => o.status === 'Pending' || o.status === 'Processing'));
+  const shippedOrders = filterOrders(orders.filter(o => o.status === 'Shipped'));
+  const deliveredOrders = filterOrders(orders.filter(o => o.status === 'Delivered'));
 
   const getOrdersForTab = (tab: string) => {
     switch (tab) {
@@ -151,14 +162,23 @@ export default function AdminOrdersPage() {
 
   return (
     <Tabs defaultValue="all" onValueChange={setActiveTab}>
-      <div className="flex items-center">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="shipped">Shipped</TabsTrigger>
           <TabsTrigger value="delivered">Delivered</TabsTrigger>
         </TabsList>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex w-full sm:w-auto items-center gap-2">
+            <div className="relative w-full sm:w-auto flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search by ID or name..."
+                    className="pl-9 h-7"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button size="sm" variant="outline" className="h-7 gap-1">
