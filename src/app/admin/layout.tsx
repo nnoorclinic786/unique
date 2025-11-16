@@ -36,7 +36,7 @@ interface AdminSession {
   permissions: string[];
 }
 
-// Function to get session from cookie
+// Function to get session from cookie, safe for server and client
 const getSession = (): AdminSession | null => {
   if (typeof window === 'undefined') {
     return null;
