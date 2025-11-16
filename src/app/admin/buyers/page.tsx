@@ -1,4 +1,3 @@
-
 "use client";
 
 import { MoreHorizontal, CheckCircle2, EyeOff, Eye } from "lucide-react";
@@ -33,11 +32,11 @@ import { useAdminSearch } from "@/context/admin-search-context";
 
 export default function AdminBuyersPage() {
   const { buyers, pendingBuyers, disabledBuyers, approveBuyer, toggleBuyerStatus } = useBuyerContext();
-  const { searchQuery } = useAdminSearch();
+  const { query } = useAdminSearch();
 
   const filterBuyers = (buyers: any[]) => {
-    if (!searchQuery) return buyers;
-    const lowerCaseQuery = searchQuery.toLowerCase();
+    if (!query) return buyers;
+    const lowerCaseQuery = query.toLowerCase();
     return buyers.filter(buyer =>
         buyer.name.toLowerCase().includes(lowerCaseQuery) ||
         buyer.email.toLowerCase().includes(lowerCaseQuery)

@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import React from "react";
 import { cookies } from 'next/headers';
@@ -36,7 +35,7 @@ interface AdminSession {
 // This new component contains the client-side logic for the header.
 function AdminHeader() {
     'use client';
-    const { searchQuery, setSearchQuery } = useAdminSearch();
+    const { query, setQuery } = useAdminSearch();
 
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -70,8 +69,8 @@ function AdminHeader() {
               type="search"
               placeholder="Search..."
               className="w-full rounded-lg bg-muted pl-8 md:w-[200px] lg:w-[320px]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
           <UserNav />
@@ -84,33 +83,31 @@ function AdminClientLayout({ children, permissions }: { children: React.ReactNod
   'use client';
   const hasPermission = (p: string) => permissions.includes(p);
   return (
-    <AdminSearchProvider>
-      <SidebarProvider>
-        <Sidebar className="border-r bg-muted/40">
-            <SidebarHeader>
-            <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-                <Logo className="h-10 w-10 text-primary" />
-                <span className="font-headline">Unique Medicare Admin</span>
-            </Link>
-            </SidebarHeader>
-            <SidebarContent>
-            <SidebarMenu>
-                {hasPermission('dashboard') && <SidebarMenuItem><Link href="/admin/dashboard" passHref><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></Link></SidebarMenuItem>}
-                {hasPermission('orders') && <SidebarMenuItem><Link href="/admin/orders" passHref><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></Link></SidebarMenuItem>}
-                {hasPermission('drugs') && <SidebarMenuItem><Link href="/admin/drugs" passHref><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></Link></SidebarMenuItem>}
-                {hasPermission('buyers') && <SidebarMenuItem><Link href="/admin/buyers" passHref><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></Link></SidebarMenuItem>}
-                {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
-            </SidebarMenu>
-            </SidebarContent>
-        </Sidebar>
-        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-            <AdminHeader />
-            <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            {children}
-            </main>
-        </div>
-      </SidebarProvider>
-    </AdminSearchProvider>
+    <SidebarProvider>
+      <Sidebar className="border-r bg-muted/40">
+          <SidebarHeader>
+          <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+              <Logo className="h-10 w-10 text-primary" />
+              <span className="font-headline">Unique Medicare Admin</span>
+          </Link>
+          </SidebarHeader>
+          <SidebarContent>
+          <SidebarMenu>
+              {hasPermission('dashboard') && <SidebarMenuItem><Link href="/admin/dashboard" passHref><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></Link></SidebarMenuItem>}
+              {hasPermission('orders') && <SidebarMenuItem><Link href="/admin/orders" passHref><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></Link></SidebarMenuItem>}
+              {hasPermission('drugs') && <SidebarMenuItem><Link href="/admin/drugs" passHref><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></Link></SidebarMenuItem>}
+              {hasPermission('buyers') && <SidebarMenuItem><Link href="/admin/buyers" passHref><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></Link></SidebarMenuItem>}
+              {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
+          </SidebarMenu>
+          </SidebarContent>
+      </Sidebar>
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+          <AdminHeader />
+          <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+          {children}
+          </main>
+      </div>
+    </SidebarProvider>
   )
 }
 
@@ -131,18 +128,20 @@ export default function AdminLayout({
     }
   }
 
-  // The middleware redirects unauthenticated users, so for most admin pages, a session will exist.
-  // However, for /admin/login and /admin/signup, the session will be null.
-  // We return children directly for these pages, which will use the root layout.
+  // The middleware redirects unauthenticated users for most admin pages.
+  // We check for the session here. If it doesn't exist, it means we are on the login/signup page.
   if (!session?.isLoggedIn) {
-    return <>{children}</>;
+    // For login/signup, we just need the search provider, not the full admin UI.
+    return <AdminSearchProvider>{children}</AdminSearchProvider>;
   }
 
   const permissions = session.permissions || [];
 
   return (
-    <AdminClientLayout permissions={permissions}>
-      {children}
-    </AdminClientLayout>
+    <AdminSearchProvider>
+      <AdminClientLayout permissions={permissions}>
+        {children}
+      </AdminClientLayout>
+    </AdminSearchProvider>
   );
 }

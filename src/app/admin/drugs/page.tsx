@@ -1,4 +1,3 @@
-
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,11 +32,11 @@ import { useAdminSearch } from "@/context/admin-search-context";
 
 export default function AdminDrugsPage() {
   const { medicines } = useMedicineContext();
-  const { searchQuery } = useAdminSearch();
+  const { query } = useAdminSearch();
 
   const filteredMedicines = medicines.filter(medicine => {
-    if (!searchQuery) return true;
-    const lowerCaseQuery = searchQuery.toLowerCase();
+    if (!query) return true;
+    const lowerCaseQuery = query.toLowerCase();
     return medicine.name.toLowerCase().includes(lowerCaseQuery) ||
            (medicine.description && medicine.description.toLowerCase().includes(lowerCaseQuery)) ||
            (medicine.category && medicine.category.toLowerCase().includes(lowerCaseQuery));

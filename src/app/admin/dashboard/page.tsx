@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -25,15 +24,15 @@ import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
 import { useAdminSearch } from "@/context/admin-search-context";
 
 export default function Dashboard() {
-  const { searchQuery } = useAdminSearch();
+  const { query } = useAdminSearch();
 
   const totalRevenue = orders
     .filter(o => o.status === 'Delivered')
     .reduce((acc, order) => acc + order.total, 0);
 
   const filteredOrders = orders.filter(order => {
-      if (!searchQuery) return true;
-      const lowerCaseQuery = searchQuery.toLowerCase();
+      if (!query) return true;
+      const lowerCaseQuery = query.toLowerCase();
       return order.buyerName.toLowerCase().includes(lowerCaseQuery) ||
              order.id.toLowerCase().includes(lowerCaseQuery);
   }).slice(0, 5);

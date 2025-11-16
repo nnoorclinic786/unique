@@ -1,20 +1,19 @@
-
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface AdminSearchContextType {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
+  query: string;
+  setQuery: (q: string) => void;
 }
 
 const AdminSearchContext = createContext<AdminSearchContextType | undefined>(undefined);
 
 export function AdminSearchProvider({ children }: { children: ReactNode }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [query, setQuery] = useState("");
 
   return (
-    <AdminSearchContext.Provider value={{ searchQuery, setSearchQuery }}>
+    <AdminSearchContext.Provider value={{ query, setQuery }}>
       {children}
     </AdminSearchContext.Provider>
   );

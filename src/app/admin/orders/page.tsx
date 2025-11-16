@@ -1,4 +1,3 @@
-
 "use client";
 
 import { MoreHorizontal, File, ChevronDown } from "lucide-react";
@@ -95,11 +94,11 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
-  const { searchQuery } = useAdminSearch();
+  const { query } = useAdminSearch();
 
   const filterOrders = (orders: Order[]) => {
-    if (!searchQuery) return orders;
-    const lowercasedQuery = searchQuery.toLowerCase();
+    if (!query) return orders;
+    const lowercasedQuery = query.toLowerCase();
     return orders.filter(order =>
         order.buyerName.toLowerCase().includes(lowercasedQuery) ||
         order.id.toLowerCase().includes(lowercasedQuery)
