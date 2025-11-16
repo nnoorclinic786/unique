@@ -11,7 +11,7 @@ const ADMIN_USERS = [
 ];
 
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData): Promise<{ success: boolean, error?: string }> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -38,8 +38,7 @@ export async function login(formData: FormData) {
       path: "/",
     });
     
-    // The redirect needs to happen here, after the cookie is set.
-    redirect("/admin/dashboard");
+    return { success: true };
   }
 
   return { success: false, error: "Invalid email or password." };

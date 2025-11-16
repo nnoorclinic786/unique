@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,16 +15,16 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
     const formData = new FormData(event.currentTarget);
     
-    // The login action will handle the redirect on success.
-    // We only need to handle the error case here.
     const result = await login(formData);
     
     if (result?.error) {
@@ -33,13 +34,13 @@ export default function AdminLoginPage() {
         title: "Login Failed",
         description: result.error,
       });
-    } else {
-        // On success, the server action will redirect, so this part might not even be reached.
-        // But as a fallback, we can show a success toast.
+    } else if (result?.success) {
         toast({
             title: "Login Successful",
             description: "Redirecting to your dashboard...",
         });
+        router.push("/admin/dashboard");
+        router.refresh();
     }
   }
 
