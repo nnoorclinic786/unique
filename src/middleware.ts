@@ -64,11 +64,11 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAdminPath) {
-    // If logged in, they shouldn't be on the login or signup page
+    // If logged in, they shouldn't be on the login or signup page. Redirect to dashboard.
     if (isLoggedIn && (isAdminLoginPage || isAdminSignupPage)) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-    // If not logged in, they can only be on the login or signup page
+    // If not logged in, they can only be on the login or signup page. Redirect unauthenticated users from other admin pages.
     if (!isLoggedIn && !isAdminLoginPage && !isAdminSignupPage) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
