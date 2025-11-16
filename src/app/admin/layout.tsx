@@ -33,7 +33,7 @@ interface AdminSession {
   permissions: string[];
 }
 
-// This new component contains all the client-side logic
+// This new component contains the client-side logic for the header.
 function AdminHeader({ permissions }: { permissions: string[] }) {
     'use client';
     const { searchQuery, setSearchQuery } = useAdminSearch();
@@ -80,33 +80,9 @@ function AdminHeader({ permissions }: { permissions: string[] }) {
     )
 }
 
-
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const cookieStore = cookies();
-  const sessionCookie = cookieStore.get('admin_session');
-  let session: AdminSession | null = null;
-  
-  if (sessionCookie) {
-    try {
-      session = JSON.parse(sessionCookie.value);
-    } catch {
-      session = null;
-    }
-  }
-  
-  const permissions = session?.permissions || [];
-  const hasPermission = (permission: string) => permissions.includes(permission);
-
-  // Login and Signup pages have a different layout
-  const pathname = cookieStore.get('next-url')?.value || '';
-  if (pathname.includes("/admin/login") || pathname.includes("/admin/signup")) {
-     return <AdminSearchProvider>{children}</AdminSearchProvider>;
-  }
-
+// This new component contains all the client-side providers and layout structure.
+function AdminClientLayout({ children, permissions, hasPermission }: { children: React.ReactNode, permissions: string[], hasPermission: (p: string) => boolean }) {
+  'use client';
   return (
     <AdminSearchProvider>
       <SidebarProvider>
@@ -135,5 +111,38 @@ export default function AdminLayout({
         </div>
       </SidebarProvider>
     </AdminSearchProvider>
+  )
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('admin_session');
+  let session: AdminSession | null = null;
+  
+  if (sessionCookie) {
+    try {
+      session = JSON.parse(sessionCookie.value);
+    } catch {
+      session = null;
+    }
+  }
+  
+  const permissions = session?.permissions || [];
+  const hasPermission = (permission: string) => permissions.includes(permission);
+
+  // Login and Signup pages have a different layout
+  const pathname = cookieStore.get('next-url')?.value || '';
+  if (pathname.includes("/admin/login") || pathname.includes("/admin/signup")) {
+     return <AdminSearchProvider>{children}</AdminSearchProvider>;
+  }
+
+  return (
+    <AdminClientLayout permissions={permissions} hasPermission={hasPermission}>
+      {children}
+    </AdminClientLayout>
   );
 }
