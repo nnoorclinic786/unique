@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   Home,
@@ -11,7 +11,9 @@ import {
   ShoppingCart,
   PanelLeft,
   Search,
+  ShieldCheck
 } from "lucide-react";
+import Cookies from 'js-cookie';
 
 import {
   SidebarProvider,
@@ -29,9 +31,29 @@ import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
 import { AdminSearchProvider, useAdminSearch } from "@/context/admin-search-context";
 
+interface AdminSession {
+  isLoggedIn: boolean;
+  permissions: string[];
+}
 
 function AdminHeader() {
     const { searchQuery, setSearchQuery } = useAdminSearch();
+    const [session, setSession] = useState<AdminSession | null>(null);
+
+    useEffect(() => {
+        const sessionCookie = Cookies.get('admin_session');
+        if (sessionCookie) {
+            try {
+                setSession(JSON.parse(sessionCookie));
+            } catch (error) {
+                console.error("Failed to parse admin session cookie:", error);
+            }
+        }
+    }, []);
+
+    const hasPermission = (permission: string) => session?.permissions?.includes(permission);
+
+
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
@@ -50,22 +72,11 @@ function AdminHeader() {
                   <Logo className="h-6 w-6 transition-all group-hover:scale-110" />
                   <span className="sr-only">Unique Medicare</span>
                 </Link>
-                <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <Home className="h-5 w-5" />
-                  Dashboard
-                </Link>
-                <Link href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <ShoppingCart className="h-5 w-5" />
-                  Orders
-                </Link>
-                <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground">
-                  <Package className="h-5 w-5" />
-                  Medicines
-                </Link>
-                <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <Users className="h-5 w-5" />
-                  Customers
-                </Link>
+                {hasPermission('dashboard') && <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</Link>}
+                {hasPermission('orders') && <Link href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</Link>}
+                {hasPermission('drugs') && <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>}
+                {hasPermission('buyers') && <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>}
+                {hasPermission('manage_admins') && <Link href="/admin/manage-admins" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>}
               </nav>
             </SheetContent>
           </Sheet>
@@ -91,6 +102,20 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [session, setSession] = useState<AdminSession | null>(null);
+
+  useEffect(() => {
+    const sessionCookie = Cookies.get('admin_session');
+    if (sessionCookie) {
+        try {
+            setSession(JSON.parse(sessionCookie));
+        } catch (error) {
+            console.error("Failed to parse admin session cookie:", error);
+        }
+    }
+  }, [pathname]); // Rerun on path change to ensure session is fresh
+
+  const hasPermission = (permission: string) => session?.permissions?.includes(permission);
 
   if (pathname === "/admin/login") {
     return <AdminSearchProvider>{children}</AdminSearchProvider>;
@@ -108,38 +133,11 @@ export default function AdminLayout({
             </SidebarHeader>
             <SidebarContent>
             <SidebarMenu>
-                <SidebarMenuItem>
-                <Link href="/admin/dashboard" passHref>
-                    <SidebarMenuButton tooltip="Dashboard">
-                    <Home />
-                    <span>Dashboard</span>
-                    </SidebarMenuButton>
-                </Link>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                <Link href="/admin/orders" passHref>
-                    <SidebarMenuButton tooltip="Orders">
-                    <ShoppingCart />
-                    <span>Orders</span>
-                    </SidebarMenuButton>
-                </Link>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                <Link href="/admin/drugs" passHref>
-                    <SidebarMenuButton tooltip="Medicines">
-                    <Package />
-                    <span>Medicines</span>
-                    </SidebarMenuButton>
-                </Link>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                <Link href="/admin/buyers" passHref>
-                    <SidebarMenuButton tooltip="Customers">
-                    <Users />
-                    <span>Buyers</span>
-                    </SidebarMenuButton>
-                </Link>
-                </SidebarMenuItem>
+                {hasPermission('dashboard') && <SidebarMenuItem><Link href="/admin/dashboard" passHref><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('orders') && <SidebarMenuItem><Link href="/admin/orders" passHref><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('drugs') && <SidebarMenuItem><Link href="/admin/drugs" passHref><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('buyers') && <SidebarMenuItem><Link href="/admin/buyers" passHref><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
             </SidebarMenu>
             </SidebarContent>
         </Sidebar>
