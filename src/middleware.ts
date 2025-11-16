@@ -59,6 +59,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Redirect to dashboard if trying to access /admin root
   if (pathname === '/admin') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
@@ -68,10 +69,12 @@ export function middleware(request: NextRequest) {
     if (isLoggedIn && (isAdminLoginPage || isAdminSignupPage)) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
+    
     // If not logged in, they can only be on the login or signup page. Redirect unauthenticated users from other admin pages.
     if (!isLoggedIn && !isAdminLoginPage && !isAdminSignupPage) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
+
      // If logged in, check permissions for non-login/signup pages
     if (isLoggedIn && !isAdminLoginPage && !isAdminSignupPage && session) {
       if (!hasPermissionForPath(pathname, session.permissions)) {
