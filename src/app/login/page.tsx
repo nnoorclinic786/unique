@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Logo } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import { useBuyerContext } from "@/context/buyers-context";
 import { Eye, EyeOff } from "lucide-react";
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,21 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { buyers, pendingBuyers, disabledBuyers } = useBuyerContext();
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const adminCookie = Cookies.get('admin_session');
+    if (adminCookie) {
+      try {
+        const session = JSON.parse(adminCookie);
+        if (session.isLoggedIn) {
+          setIsAdminLoggedIn(true);
+        }
+      } catch (e) {
+        setIsAdminLoggedIn(false);
+      }
+    }
+  }, []);
 
   const allBuyers = [...buyers, ...pendingBuyers, ...disabledBuyers];
 
@@ -126,12 +142,14 @@ export default function LoginPage() {
               Sign up
             </Link>
           </div>
-           <div className="mt-4 text-center text-sm">
-            Are you an admin?{" "}
-            <Link href="/admin/login" className="underline">
-              Login here
-            </Link>
-          </div>
+           {!isAdminLoggedIn && (
+            <div className="mt-4 text-center text-sm">
+                Are you an admin?{" "}
+                <Link href="/admin/login" className="underline">
+                Login here
+                </Link>
+            </div>
+           )}
         </CardContent>
       </Card>
     </div>
