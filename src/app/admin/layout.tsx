@@ -34,10 +34,9 @@ interface AdminSession {
 }
 
 // This new component contains the client-side logic for the header.
-function AdminHeader({ permissions }: { permissions: string[] }) {
+function AdminHeader() {
     'use client';
     const { searchQuery, setSearchQuery } = useAdminSearch();
-    const hasPermission = (permission: string) => permissions.includes(permission);
 
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -57,11 +56,11 @@ function AdminHeader({ permissions }: { permissions: string[] }) {
                   <Logo className="h-6 w-6 transition-all group-hover:scale-110" />
                   <span className="sr-only">Unique Medicare</span>
                 </Link>
-                {hasPermission('dashboard') && <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</Link>}
-                {hasPermission('orders') && <Link href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</Link>}
-                {hasPermission('drugs') && <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>}
-                {hasPermission('buyers') && <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>}
-                {hasPermission('manage_admins') && <Link href="/admin/manage-admins" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>}
+                <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</Link>
+                <Link href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</Link>
+                <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>
+                <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>
+                <Link href="/admin/manage-admins" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -105,7 +104,7 @@ function AdminClientLayout({ children, permissions }: { children: React.ReactNod
             </SidebarContent>
         </Sidebar>
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-            <AdminHeader permissions={permissions} />
+            <AdminHeader />
             <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             {children}
             </main>
