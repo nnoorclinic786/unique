@@ -131,11 +131,10 @@ export default function AdminLayout({
     }
   }
 
-  // The middleware redirects unauthenticated users, so we can assume a session exists here for this layout.
-  // The login/signup pages have their own simple layout and won't use this one.
+  // The middleware redirects unauthenticated users, so for most admin pages, a session will exist.
+  // However, for /admin/login and /admin/signup, the session will be null.
+  // We return children directly for these pages, which will use the root layout.
   if (!session?.isLoggedIn) {
-     // This case handles /admin/login and /admin/signup, which don't need the full admin layout.
-     // They will fall back to the root layout which is sufficient.
     return <>{children}</>;
   }
 
