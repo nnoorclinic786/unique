@@ -303,7 +303,7 @@ export default function AdminOrdersPage() {
           <CardContent>
             <OrderTable ordersToShow={deliveredOrders} />
           </CardContent>
-        </Card>
+        </card>
       </TabsContent>
        <TabsContent value="cancelled">
         <Card>
@@ -321,3 +321,5 @@ export default function AdminOrdersPage() {
     </Tabs>
   );
 }
+
+    
