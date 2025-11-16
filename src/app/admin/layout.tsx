@@ -132,17 +132,9 @@ export default function AdminLayout({
     }
   }
 
-  // The middleware ensures unauthenticated users are redirected away from these pages,
-  // and authenticated users are redirected away from login/signup.
-  // This means if we are here, we can assume a valid session exists.
-  // The login/signup pages have their own root layout implicitly and won't use this one.
-  if (!session?.isLoggedIn) {
-     // This case should ideally not be hit for pages using this layout due to middleware.
-     // However, to prevent crashes on login/signup pages if they were to render this layout,
-     // we provide a minimal provider wrapper.
-    return <AdminSearchProvider>{children}</AdminSearchProvider>;
-  }
-  
+  // The middleware ensures unauthenticated users are redirected away from this layout's pages.
+  // We can assume if we are here, a valid session exists for an authenticated admin.
+  // The login and signup pages will use the root layout by default, not this one.
   const permissions = session?.permissions || [];
 
   return (
