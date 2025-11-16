@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,7 +26,16 @@ export default function AdminLoginPage() {
     
     const result = await login(formData);
     
-    if (result?.error) {
+    if (result?.success) {
+        toast({
+            title: "Login Successful",
+            description: "Redirecting to your dashboard...",
+        });
+        router.push('/admin/dashboard');
+        // We trigger a refresh to ensure all server-side data is re-fetched.
+        router.refresh(); 
+    }
+    else if (result?.error) {
       setError(result.error);
       toast({
         variant: "destructive",
