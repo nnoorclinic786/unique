@@ -131,9 +131,8 @@ export default function AdminLayout({
     }
   }
 
-  // The middleware ensures unauthenticated users are redirected away from this layout's pages.
-  // We can assume if we are here, a valid session exists for an authenticated admin.
-  // The login and signup pages will use the root layout by default, not this one.
+  // The middleware ensures unauthenticated users are redirected away from this layout's pages,
+  // so we can assume this layout is for authenticated users.
   const permissions = session?.permissions || [];
 
   return (
