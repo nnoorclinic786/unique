@@ -1,9 +1,7 @@
 
-"use client";
-
 import Link from "next/link";
 import React from "react";
-import { usePathname } from "next/navigation";
+import { cookies } from 'next/headers';
 import {
   Home,
   Users,
@@ -13,7 +11,6 @@ import {
   Search,
   ShieldCheck
 } from "lucide-react";
-import Cookies from 'js-cookie';
 
 import {
   SidebarProvider,
@@ -36,27 +33,11 @@ interface AdminSession {
   permissions: string[];
 }
 
-// Function to get session from cookie, safe for server and client
-const getSession = (): AdminSession | null => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-  const sessionCookie = Cookies.get('admin_session');
-  if (sessionCookie) {
-    try {
-      return JSON.parse(sessionCookie);
-    } catch (error) {
-      console.error("Failed to parse admin session cookie:", error);
-      return null;
-    }
-  }
-  return null;
-};
-
-function AdminHeader() {
+// This new component contains all the client-side logic
+function AdminHeader({ permissions }: { permissions: string[] }) {
+    'use client';
     const { searchQuery, setSearchQuery } = useAdminSearch();
-    const session = getSession();
-    const hasPermission = (permission: string) => session?.permissions?.includes(permission);
+    const hasPermission = (permission: string) => permissions.includes(permission);
 
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -105,13 +86,25 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const session = getSession();
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('admin_session');
+  let session: AdminSession | null = null;
+  
+  if (sessionCookie) {
+    try {
+      session = JSON.parse(sessionCookie.value);
+    } catch {
+      session = null;
+    }
+  }
+  
+  const permissions = session?.permissions || [];
+  const hasPermission = (permission: string) => permissions.includes(permission);
 
-  const hasPermission = (permission: string) => session?.permissions?.includes(permission);
-
-  if (pathname === "/admin/login" || pathname === "/admin/signup") {
-    return <AdminSearchProvider>{children}</AdminSearchProvider>;
+  // Login and Signup pages have a different layout
+  const pathname = cookieStore.get('next-url')?.value || '';
+  if (pathname.includes("/admin/login") || pathname.includes("/admin/signup")) {
+     return <AdminSearchProvider>{children}</AdminSearchProvider>;
   }
 
   return (
@@ -135,7 +128,7 @@ export default function AdminLayout({
             </SidebarContent>
         </Sidebar>
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-            <AdminHeader />
+            <AdminHeader permissions={permissions} />
             <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             {children}
             </main>
