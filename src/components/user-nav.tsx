@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { logout } from '@/app/admin/login/actions';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 interface AdminSession {
   name: string;
@@ -27,29 +28,45 @@ interface AdminSession {
 
 export function UserNav() {
   const [session, setSession] = useState<AdminSession | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
-    const sessionCookie = Cookies.get('admin_session');
-    if (sessionCookie) {
+    const adminCookie = Cookies.get('admin_session');
+    if (adminCookie) {
       try {
-        const sessionData = JSON.parse(sessionCookie);
-        setSession(sessionData);
+        const sessionData = JSON.parse(adminCookie);
+        if (sessionData.isLoggedIn) {
+          setSession(sessionData);
+          return; // Admin session found, no need to check for user
+        }
       } catch (e) {
         setSession(null);
       }
     }
+
+    // Check for regular user login only if no admin session
+    if (localStorage.getItem('userLoggedIn') === 'true') {
+        setUserName(localStorage.getItem('userName'));
+    }
+
   }, []);
 
   const handleLogout = async () => {
-    // Clear the userLoggedIn state for regular users if it exists
-    if(typeof window !== 'undefined'){
-      localStorage.removeItem('userLoggedIn');
-      localStorage.removeItem('userName');
-    }
+    // Clear local storage for regular user
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userName');
+
+    // Clear admin cookie via server action
     await logout();
-    // Redirect handled by the server action
+    
+    // For admin, the redirect is handled in the action. For user, redirect here.
+    if(!session?.isLoggedIn){
+        router.push('/');
+        router.refresh();
+    }
   };
 
   const getInitials = (name: string = "") => {
@@ -60,38 +77,6 @@ export function UserNav() {
       return null;
   }
   
-  const userLoggedIn = isClient && localStorage.getItem('userLoggedIn') === 'true';
-  const userName = isClient ? localStorage.getItem('userName') : null;
-
-
-  if (userLoggedIn && userName) {
-     return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                    <AvatarFallback>{getInitials(userName)}</AvatarFallback>
-                </Avatar>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{userName}</p>
-                    </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                    <DropdownMenuItem asChild><Link href="/account">My Account</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link href="/cart">My Orders</Link></DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-     )
-  }
-
   if (session?.isLoggedIn) {
      return (
         <DropdownMenu>
@@ -99,7 +84,7 @@ export function UserNav() {
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
                 <AvatarImage src="/avatars/01.png" alt="@user" />
-                <AvatarFallback>{session ? getInitials(session.name) : 'A'}</AvatarFallback>
+                <AvatarFallback>{getInitials(session.name)}</AvatarFallback>
             </Avatar>
             </Button>
         </DropdownMenuTrigger>
@@ -129,6 +114,34 @@ export function UserNav() {
         </DropdownMenuContent>
         </DropdownMenu>
     );
+  }
+
+  if (userName) {
+     return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                    <AvatarFallback>{getInitials(userName)}</AvatarFallback>
+                </Avatar>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userName}</p>
+                    </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                    <DropdownMenuItem asChild><Link href="/account">My Account</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/cart">My Orders</Link></DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+     )
   }
 
   return null;
