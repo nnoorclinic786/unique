@@ -32,7 +32,7 @@ import { useBuyerContext } from "@/context/buyers-context";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
-export default function AdminBuyersPageContents() {
+export default function AdminBuyersPage() {
   const { buyers, pendingBuyers, disabledBuyers, approveBuyer, toggleBuyerStatus } = useBuyerContext();
   const { query } = useAdminSearch();
 

@@ -32,7 +32,7 @@ import { useMedicineContext } from "@/context/medicines-context";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
-export default function AdminDrugsPageContents() {
+export default function AdminDrugsPage() {
   const { medicines } = useMedicineContext();
   const { query } = useAdminSearch();
 

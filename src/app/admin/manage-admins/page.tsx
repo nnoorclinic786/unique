@@ -42,7 +42,7 @@ const allPermissions = [
   { id: 'buyers', label: 'Buyers' },
 ];
 
-export default function ManageAdminsPageContents() {
+export default function ManageAdminsPage() {
   const [allAdmins, setAllAdmins] = useState<AdminUser[]>([]);
   const [initialAdmins, setInitialAdmins] = useState<AdminUser[]>([]);
   const { toast } = useToast();

@@ -25,7 +25,7 @@ import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
-export default function DashboardContents() {
+export default function DashboardPage() {
   const { query } = useAdminSearch();
 
   const totalRevenue = orders

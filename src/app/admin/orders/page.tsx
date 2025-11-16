@@ -94,7 +94,7 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
 );
 
 
-export default function AdminOrdersPageContents() {
+export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const { query } = useAdminSearch();
 
