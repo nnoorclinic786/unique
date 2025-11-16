@@ -31,6 +31,8 @@ export default function AdminLoginPage() {
             title: "Login Successful",
             description: "Redirecting to your dashboard...",
         });
+        // The server action will handle the redirect, but we can also push here
+        // as a fallback and to ensure client-side state is updated.
         router.push('/admin/dashboard');
     }
     else if (result?.error) {

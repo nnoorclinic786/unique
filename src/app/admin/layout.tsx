@@ -84,6 +84,7 @@ function AdminClientLayout({ children, permissions }: { children: React.ReactNod
   'use client';
   const hasPermission = (p: string) => permissions.includes(p);
   return (
+    <AdminSearchProvider>
       <SidebarProvider>
         <Sidebar className="border-r bg-muted/40">
             <SidebarHeader>
@@ -109,6 +110,7 @@ function AdminClientLayout({ children, permissions }: { children: React.ReactNod
             </main>
         </div>
       </SidebarProvider>
+    </AdminSearchProvider>
   )
 }
 

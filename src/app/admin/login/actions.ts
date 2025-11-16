@@ -38,8 +38,8 @@ export async function login(formData: FormData) {
       path: "/",
     });
     
-    // Instead of redirecting, we return a success status to the client.
-    return { success: true };
+    // The redirect needs to happen here, after the cookie is set.
+    redirect("/admin/dashboard");
   }
 
   return { success: false, error: "Invalid email or password." };
