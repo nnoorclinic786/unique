@@ -23,15 +23,29 @@ export default function AdminLoginPage() {
     setError(null);
     const formData = new FormData(event.currentTarget);
     
-    const result = await login(formData);
-    
-    if (result?.error) {
-      setError(result.error);
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: result.error,
-      });
+    try {
+      // The login action will automatically redirect on success.
+      // If it returns, it means there was an error.
+      const result = await login(formData);
+      if (result?.error) {
+        setError(result.error);
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: result.error,
+        });
+      }
+    } catch (e: any) {
+      // This will catch the NEXT_REDIRECT error and allow the redirect to happen.
+      // We can also handle other unexpected errors here.
+      if (e.message !== 'NEXT_REDIRECT') {
+        setError("An unexpected error occurred.");
+         toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "An unexpected error occurred.",
+        });
+      }
     }
   }
 
