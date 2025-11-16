@@ -1,3 +1,4 @@
+
 "use client";
 
 import { MoreHorizontal, File, ChevronDown } from "lucide-react";
@@ -126,7 +127,7 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: Order[] }) => {
             ))}
           </TableBody>
         </Table>
-    )
+    );
 };
 
 
@@ -272,7 +273,7 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders are awaiting processing or shipment.
             </CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
             <OrderTable ordersToShow={pendingOrders} />
           </CardContent>
@@ -285,7 +286,7 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders have been shipped and are in transit.
             </CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
             <OrderTable ordersToShow={shippedOrders} />
           </CardContent>
@@ -298,7 +299,7 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders have been successfully delivered.
             </CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
             <OrderTable ordersToShow={deliveredOrders} />
           </CardContent>
@@ -311,7 +312,7 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders have been cancelled.
             </CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
             <OrderTable ordersToShow={cancelledOrders} />
           </CardContent>
