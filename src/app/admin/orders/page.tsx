@@ -33,6 +33,9 @@ import type { Order } from "@/lib/types";
 import { useState } from "react";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
     'Pending': 'secondary',
@@ -138,7 +141,7 @@ export default function AdminOrdersPage() {
     ];
 
     const csvString = csvRows.join('\n');
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-t-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -148,6 +151,22 @@ export default function AdminOrdersPage() {
     link.click();
     document.body.removeChild(link);
   };
+  
+  const exportToPdf = (data: Order[], filename: string) => {
+      const doc = new jsPDF();
+      (doc as any).autoTable({
+          head: [['Order ID', 'Customer', 'Date', 'Amount', 'Status']],
+          body: data.map(order => [
+              order.id,
+              order.buyerName,
+              order.date,
+              `₹${order.total.toFixed(2)}`,
+              order.status,
+          ]),
+      });
+      doc.save(`${filename}.pdf`);
+  };
+
 
   const handleExport = (format: 'csv' | 'pdf' | 'excel') => {
     const dataToExport = getOrdersForTab(activeTab);
@@ -156,9 +175,13 @@ export default function AdminOrdersPage() {
     if (format === 'csv') {
         exportToCsv(dataToExport, `${filename}.csv`);
     }
-    // Future implementation for other formats
-    // if (format === 'pdf') { ... }
-    // if (format === 'excel') { ... }
+    if (format === 'pdf') {
+        exportToPdf(dataToExport, filename);
+    }
+    if (format === 'excel') {
+        // Excel opens CSV files, so we can reuse the CSV export logic.
+        exportToCsv(dataToExport, `${filename}.csv`);
+    }
   };
 
   return (
@@ -185,8 +208,8 @@ export default function AdminOrdersPage() {
                     <DropdownMenuLabel>Export As</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => handleExport('csv')}>CSV (.csv)</DropdownMenuItem>
-                    <DropdownMenuItem disabled>PDF (.pdf)</DropdownMenuItem>
-                    <DropdownMenuItem disabled>Excel (.xlsx)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('pdf')}>PDF (.pdf)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('excel')}>Excel (via .csv)</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
