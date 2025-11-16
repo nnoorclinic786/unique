@@ -10,8 +10,10 @@ import {
   ShoppingCart,
   PanelLeft,
   Search,
-  ShieldCheck
+  ShieldCheck,
+  LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
   SidebarProvider,
@@ -21,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -28,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
 import { useAdminSearch } from "@/context/admin-search-context";
+import { logout } from "@/app/admin/logout/actions";
 
 function AdminHeader() {
     const { query, setQuery } = useAdminSearch();
@@ -75,6 +79,13 @@ function AdminHeader() {
 
 export default function AdminClientLayout({ children, permissions }: { children: React.ReactNode, permissions: string[] }) {
   const hasPermission = (p: string) => permissions.includes(p);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/admin/login');
+    router.refresh();
+  };
   
   return (
     <SidebarProvider>
@@ -95,6 +106,16 @@ export default function AdminClientLayout({ children, permissions }: { children:
                 {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
             </SidebarMenu>
             </SidebarContent>
+             <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
+                            <LogOut />
+                            <span>Log Out</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
         </Sidebar>
         <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 flex-1">
             <AdminHeader />
