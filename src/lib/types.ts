@@ -30,7 +30,7 @@ export type Buyer = {
     email: string;
     registeredOn: string;
     gstNumber?: string;
-    type: 'Medical Store' | 'Doctor' | 'Hospital' | 'Chemist';
+    type: 'Medical Store' | 'Doctor' | 'Hospital';
     status: 'Pending' | 'Approved' | 'Disabled';
     personName?: string;
     mobileNumber1?: string;

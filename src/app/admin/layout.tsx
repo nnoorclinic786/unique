@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 import {
   Home,
@@ -38,6 +38,9 @@ interface AdminSession {
 
 // Function to get session from cookie
 const getSession = (): AdminSession | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
   const sessionCookie = Cookies.get('admin_session');
   if (sessionCookie) {
     try {
@@ -103,28 +106,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [session, setSession] = useState<AdminSession | null>(null);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-    setSession(getSession());
-  }, []);
+  const session = getSession();
 
   const hasPermission = (permission: string) => session?.permissions?.includes(permission);
 
   if (pathname === "/admin/login" || pathname === "/admin/signup") {
     return <AdminSearchProvider>{children}</AdminSearchProvider>;
-  }
-
-  if (!isClient) {
-      return (
-         <AdminSearchProvider>
-            <div className="flex min-h-screen w-full flex-col bg-muted/40">
-                {/* You can add a loader here if you want */}
-            </div>
-        </AdminSearchProvider>
-      )
   }
 
   return (
