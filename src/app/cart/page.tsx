@@ -1,6 +1,9 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,14 +12,37 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Header } from '@/components/header';
 import { medicines } from '@/lib/data';
 import { Trash2 } from 'lucide-react';
+import type { Medicine } from '@/lib/types';
 
-const cartItems = [
+interface CartItem extends Medicine {
+  quantity: number;
+}
+
+const initialCartItems: CartItem[] = [
   { ...medicines[0], quantity: 2 },
   { ...medicines[2], quantity: 1 },
   { ...medicines[4], quantity: 3 },
 ];
 
 export default function CartPage() {
+  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+
+  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+    // Ensure quantity is not negative
+    if (newQuantity < 0) return;
+
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+  
+  const handleRemoveItem = (itemId: string) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
+  };
+
+
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
@@ -56,11 +82,16 @@ export default function CartPage() {
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell>
-                          <Input type="number" value={item.quantity} className="w-20" />
+                          <Input 
+                            type="number" 
+                            value={item.quantity} 
+                            className="w-20"
+                            onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value, 10) || 0)}
+                          />
                         </TableCell>
                         <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
                             <Trash2 className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </TableCell>
