@@ -62,19 +62,18 @@ export function Header() {
           )}
         </nav>
         <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/cart">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="sr-only">Shopping Cart</span>
-            </Link>
-          </Button>
+          {isUserLoggedIn && (
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/cart">
+                <ShoppingCart className="h-5 w-5" />
+                <span className="sr-only">Shopping Cart</span>
+              </Link>
+            </Button>
+          )}
           {isUserLoggedIn || isAdminLoggedIn ? (
             <UserNav />
           ) : (
             <div className="hidden sm:flex items-center gap-2">
-                 <Link href="/medicines" className="transition-colors hover:text-primary text-sm font-medium">
-                    Browse Medicines
-                 </Link>
               <Button variant="ghost" asChild>
                 <Link href="/login">Login</Link>
               </Button>
