@@ -134,7 +134,6 @@ export default function AdminLayout({
   
   const permissions = session?.permissions || [];
   
-  // Login and Signup pages have a different layout
   // We check the URL from the cookie set by the middleware
   const urlCookie = cookieStore.get('next-url');
   const pathname = urlCookie ? urlCookie.value : '';
