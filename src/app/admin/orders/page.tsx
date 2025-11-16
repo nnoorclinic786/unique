@@ -273,7 +273,7 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders are awaiting processing or shipment.
             </CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent>
             <OrderTable ordersToShow={pendingOrders} />
           </CardContent>
