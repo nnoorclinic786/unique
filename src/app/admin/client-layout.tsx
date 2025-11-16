@@ -30,6 +30,8 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
 import { useAdminSearch } from "@/context/admin-search-context";
+import { logout } from "./(public)/login/actions";
+import { useToast } from "@/hooks/use-toast";
 
 function AdminHeader() {
     const { query, setQuery } = useAdminSearch();
@@ -77,6 +79,15 @@ function AdminHeader() {
 
 export default function AdminClientLayout({ children, permissions }: { children: React.ReactNode, permissions: string[] }) {
   const hasPermission = (p: string) => permissions.includes(p);
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    await logout();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+  };
   
   return (
     <SidebarProvider>
@@ -100,7 +111,9 @@ export default function AdminClientLayout({ children, permissions }: { children:
              <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <UserNav />
+                        <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
+                            <LogOut /><span>Log Out</span>
+                        </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
