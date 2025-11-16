@@ -32,8 +32,6 @@ export default function AdminLoginPage() {
             description: "Redirecting to your dashboard...",
         });
         router.push('/admin/dashboard');
-        // We trigger a refresh to ensure all server-side data is re-fetched.
-        router.refresh(); 
     }
     else if (result?.error) {
       setError(result.error);
