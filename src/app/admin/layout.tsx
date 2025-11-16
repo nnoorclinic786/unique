@@ -36,23 +36,24 @@ interface AdminSession {
   permissions: string[];
 }
 
+// Function to get session from cookie
+const getSession = (): AdminSession | null => {
+  const sessionCookie = Cookies.get('admin_session');
+  if (sessionCookie) {
+    try {
+      return JSON.parse(sessionCookie);
+    } catch (error) {
+      console.error("Failed to parse admin session cookie:", error);
+      return null;
+    }
+  }
+  return null;
+};
+
 function AdminHeader() {
     const { searchQuery, setSearchQuery } = useAdminSearch();
-    const [session, setSession] = useState<AdminSession | null>(null);
-
-    useEffect(() => {
-        const sessionCookie = Cookies.get('admin_session');
-        if (sessionCookie) {
-            try {
-                setSession(JSON.parse(sessionCookie));
-            } catch (error) {
-                console.error("Failed to parse admin session cookie:", error);
-            }
-        }
-    }, []);
-
+    const session = getSession();
     const hasPermission = (permission: string) => session?.permissions?.includes(permission);
-
 
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -103,24 +104,29 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [session, setSession] = useState<AdminSession | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const sessionCookie = Cookies.get('admin_session');
-    if (sessionCookie) {
-        try {
-            setSession(JSON.parse(sessionCookie));
-        } catch (error) {
-            console.error("Failed to parse admin session cookie:", error);
-        }
-    }
-  }, [pathname]); // Rerun on path change to ensure session is fresh
+    setIsClient(true);
+    setSession(getSession());
+  }, []);
 
   const hasPermission = (permission: string) => session?.permissions?.includes(permission);
 
-  if (pathname === "/admin/login") {
+  if (pathname === "/admin/login" || pathname === "/admin/signup") {
     return <AdminSearchProvider>{children}</AdminSearchProvider>;
   }
-  
+
+  if (!isClient) {
+      return (
+         <AdminSearchProvider>
+            <div className="flex min-h-screen w-full flex-col bg-muted/40">
+                {/* You can add a loader here if you want */}
+            </div>
+        </AdminSearchProvider>
+      )
+  }
+
   return (
     <AdminSearchProvider>
         <SidebarProvider>
