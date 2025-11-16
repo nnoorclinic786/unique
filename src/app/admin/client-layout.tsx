@@ -9,7 +9,6 @@ import {
   Package,
   ShoppingCart,
   PanelLeft,
-  Search,
   ShieldCheck,
   LogOut,
 } from "lucide-react";
@@ -26,16 +25,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
-import { useAdminSearch } from "@/context/admin-search-context";
 import { logout } from "./(public)/login/actions";
 import { useToast } from "@/hooks/use-toast";
 
 function AdminHeader() {
-    const { query, setQuery } = useAdminSearch();
-
     return (
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
@@ -49,16 +44,17 @@ function AdminHeader() {
               <nav className="grid gap-6 text-lg font-medium">
                 <Link
                   href="/admin/dashboard"
+                  passHref
                   className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                 >
                   <Logo className="h-6 w-6 transition-all group-hover:scale-110" />
                   <span className="sr-only">Unique Medicare</span>
                 </Link>
-                <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</Link>
-                <Link href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</Link>
-                <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>
-                <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>
-                <Link href="/admin/manage-admins" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>
+                <Link href="/admin/dashboard" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</Link>
+                <Link href="/admin/orders" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</Link>
+                <Link href="/admin/drugs" passHref className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>
+                <Link href="/admin/buyers" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>
+                <Link href="/admin/manage-admins" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -86,7 +82,7 @@ export default function AdminClientLayout({ children, permissions }: { children:
       <div className="relative flex min-h-screen w-full bg-muted/40">
         <Sidebar className="border-r bg-background">
             <SidebarHeader>
-            <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+            <Link href="/admin/dashboard" passHref className="flex items-center gap-2 font-semibold">
                 <Logo className="h-10 w-10 text-primary" />
                 <span className="font-headline">Unique Medicare Admin</span>
             </Link>
