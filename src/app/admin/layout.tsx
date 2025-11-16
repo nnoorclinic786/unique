@@ -29,7 +29,11 @@ export default function AdminLayout({
   // If there's no valid session, it means we are on a public-facing admin page
   // like login or signup. These pages don't need the full admin UI.
   if (!session?.isLoggedIn) {
-    return <>{children}</>;
+    return (
+        <AdminSearchProvider>
+            {children}
+        </AdminSearchProvider>
+    );
   }
 
   // If we have a valid session, render the full admin client layout
@@ -37,6 +41,8 @@ export default function AdminLayout({
   const permissions = session.permissions || [];
 
   return (
-    <AdminClientLayout permissions={permissions}>{children}</AdminClientLayout>
+    <AdminSearchProvider>
+        <AdminClientLayout permissions={permissions}>{children}</AdminClientLayout>
+    </AdminSearchProvider>
   );
 }
