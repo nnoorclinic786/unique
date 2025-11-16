@@ -22,6 +22,7 @@ interface AdminSession {
   email: string;
   role: string;
   permissions: string[];
+  isLoggedIn: boolean;
 }
 
 export function UserNav() {
@@ -82,7 +83,7 @@ export function UserNav() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem asChild><Link href="/account">My Account</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link href="/orders">My Orders</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/cart">My Orders</Link></DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
