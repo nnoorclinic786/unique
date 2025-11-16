@@ -81,8 +81,9 @@ function AdminHeader({ permissions }: { permissions: string[] }) {
 }
 
 // This new component contains all the client-side providers and layout structure.
-function AdminClientLayout({ children, permissions, hasPermission }: { children: React.ReactNode, permissions: string[], hasPermission: (p: string) => boolean }) {
+function AdminClientLayout({ children, permissions }: { children: React.ReactNode, permissions: string[] }) {
   'use client';
+  const hasPermission = (p: string) => permissions.includes(p);
   return (
     <AdminSearchProvider>
       <SidebarProvider>
@@ -132,16 +133,18 @@ export default function AdminLayout({
   }
   
   const permissions = session?.permissions || [];
-  const hasPermission = (permission: string) => permissions.includes(permission);
-
+  
   // Login and Signup pages have a different layout
-  const pathname = cookieStore.get('next-url')?.value || '';
+  // We check the URL from the cookie set by the middleware
+  const urlCookie = cookieStore.get('next-url');
+  const pathname = urlCookie ? urlCookie.value : '';
+
   if (pathname.includes("/admin/login") || pathname.includes("/admin/signup")) {
      return <AdminSearchProvider>{children}</AdminSearchProvider>;
   }
 
   return (
-    <AdminClientLayout permissions={permissions} hasPermission={hasPermission}>
+    <AdminClientLayout permissions={permissions}>
       {children}
     </AdminClientLayout>
   );
