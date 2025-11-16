@@ -1,3 +1,4 @@
+
 "use client";
 
 import { MoreHorizontal, CheckCircle2, EyeOff, Eye } from "lucide-react";
@@ -29,8 +30,9 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useBuyerContext } from "@/context/buyers-context";
 import { useAdminSearch } from "@/context/admin-search-context";
+import React from 'react';
 
-export default function AdminBuyersPage() {
+export default function AdminBuyersPageContents() {
   const { buyers, pendingBuyers, disabledBuyers, approveBuyer, toggleBuyerStatus } = useBuyerContext();
   const { query } = useAdminSearch();
 
@@ -46,7 +48,7 @@ export default function AdminBuyersPage() {
   const filteredPendingBuyers = filterBuyers(pendingBuyers);
   const filteredBuyers = filterBuyers(buyers);
   const filteredDisabledBuyers = filterBuyers(disabledBuyers);
-
+  
   return (
     <div className="space-y-8">
       {filteredPendingBuyers.length > 0 && (
@@ -245,5 +247,5 @@ export default function AdminBuyersPage() {
         </Card>
       )}
     </div>
-  );
+  )
 }

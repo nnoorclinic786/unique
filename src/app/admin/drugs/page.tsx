@@ -1,3 +1,4 @@
+
 "use client";
 import Image from "next/image";
 import Link from "next/link";
@@ -29,8 +30,9 @@ import {
 } from "@/components/ui/table";
 import { useMedicineContext } from "@/context/medicines-context";
 import { useAdminSearch } from "@/context/admin-search-context";
+import React from 'react';
 
-export default function AdminDrugsPage() {
+export default function AdminDrugsPageContents() {
   const { medicines } = useMedicineContext();
   const { query } = useAdminSearch();
 
@@ -41,7 +43,7 @@ export default function AdminDrugsPage() {
            (medicine.description && medicine.description.toLowerCase().includes(lowerCaseQuery)) ||
            (medicine.category && medicine.category.toLowerCase().includes(lowerCaseQuery));
   });
-
+  
   return (
     <Card>
       <CardHeader>

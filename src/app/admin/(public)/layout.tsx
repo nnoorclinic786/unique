@@ -1,5 +1,4 @@
 
-import { AdminSearchProvider } from '@/context/admin-search-context';
 import React from 'react';
 
 // This layout is for public-facing admin pages like login and signup.
@@ -9,9 +8,5 @@ export default function PublicAdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-      <AdminSearchProvider>
-        {children}
-      </AdminSearchProvider>
-  );
+  return <>{children}</>;
 }

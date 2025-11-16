@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -22,8 +23,9 @@ import { Badge } from "@/components/ui/badge";
 import { orders, buyers, salesData, medicines } from "@/lib/data";
 import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
 import { useAdminSearch } from "@/context/admin-search-context";
+import React from 'react';
 
-export default function Dashboard() {
+export default function DashboardContents() {
   const { query } = useAdminSearch();
 
   const totalRevenue = orders
@@ -36,7 +38,7 @@ export default function Dashboard() {
       return order.buyerName.toLowerCase().includes(lowerCaseQuery) ||
              order.id.toLowerCase().includes(lowerCaseQuery);
   }).slice(0, 5);
-
+  
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">

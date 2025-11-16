@@ -1,3 +1,4 @@
+
 "use client";
 
 import { MoreHorizontal, File, ChevronDown } from "lucide-react";
@@ -31,6 +32,7 @@ import { orders } from "@/lib/data";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
 import { useAdminSearch } from "@/context/admin-search-context";
+import React from 'react';
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
     'Pending': 'secondary',
@@ -92,7 +94,7 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
 );
 
 
-export default function AdminOrdersPage() {
+export default function AdminOrdersPageContents() {
   const [activeTab, setActiveTab] = useState("all");
   const { query } = useAdminSearch();
 

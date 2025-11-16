@@ -25,6 +25,7 @@ import { getAdmins, updateAdminPermissions, approveAdmin, toggleAdminStatus } fr
 import { MoreHorizontal, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import React from 'react';
 
 type AdminUser = {
   email: string;
@@ -41,7 +42,7 @@ const allPermissions = [
   { id: 'buyers', label: 'Buyers' },
 ];
 
-export default function ManageAdminsPage() {
+export default function ManageAdminsPageContents() {
   const [allAdmins, setAllAdmins] = useState<AdminUser[]>([]);
   const [initialAdmins, setInitialAdmins] = useState<AdminUser[]>([]);
   const { toast } = useToast();
