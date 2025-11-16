@@ -137,7 +137,7 @@ export default function AdminLayout({
   // Login and Signup pages have a different layout
   // We check the URL from the cookie set by the middleware
   const urlCookie = cookieStore.get('next-url');
-  const pathname = urlCookie ? new URL(urlCookie.value).pathname : '';
+  const pathname = urlCookie ? urlCookie.value : '';
 
   if (pathname.includes("/admin/login") || pathname.includes("/admin/signup")) {
      return <AdminSearchProvider>{children}</AdminSearchProvider>;
