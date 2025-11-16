@@ -12,8 +12,8 @@ const ADMIN_USERS = [
 
 
 export async function login(formData: FormData) {
-  const email = formData.get("email");
-  const password = formData.get("password");
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
   const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
 
