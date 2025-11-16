@@ -24,8 +24,8 @@ export default function AdminLoginPage() {
     const formData = new FormData(event.currentTarget);
     
     try {
-      // The login action will automatically redirect on success.
-      // If it returns, it means there was an error.
+      // The login action will automatically redirect on success by throwing an error.
+      // If it returns a value, it means there was an error.
       const result = await login(formData);
       if (result?.error) {
         setError(result.error);

@@ -88,5 +88,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  // Ensure we are not matching paths for public assets
+  // and only matching page routes.
+  matcher: ['/((?!api|_next/static|_next/image|.*\\..*).*)'],
 };

@@ -27,6 +27,8 @@ export default function AdminLayout({
     }
   }
 
+  // If the user is not logged in, the middleware should have already redirected them.
+  // This is a failsafe.
   if (!session?.isLoggedIn) {
     return redirect('/admin/login');
   }
