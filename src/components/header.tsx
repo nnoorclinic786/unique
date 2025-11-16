@@ -45,9 +45,11 @@ export function Header() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/medicines" className="transition-colors hover:text-primary">
-            Medicines
-          </Link>
+          {isUserLoggedIn && (
+            <Link href="/medicines" className="transition-colors hover:text-primary">
+                Medicines
+            </Link>
+          )}
           {isUserLoggedIn && (
             <Link href="/account" className="transition-colors hover:text-primary">
                 My Account
@@ -70,6 +72,9 @@ export function Header() {
             <UserNav />
           ) : (
             <div className="hidden sm:flex items-center gap-2">
+                 <Link href="/medicines" className="transition-colors hover:text-primary text-sm font-medium">
+                    Browse Medicines
+                 </Link>
               <Button variant="ghost" asChild>
                 <Link href="/login">Login</Link>
               </Button>
