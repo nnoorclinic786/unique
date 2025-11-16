@@ -46,7 +46,7 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
 
 export async function logout() {
   cookies().delete("admin_session");
-  redirect("/");
+  redirect("/admin/login");
 }
 
 export async function addPendingAdmin(data: {name: string, email: string, password: string}) {

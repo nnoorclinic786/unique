@@ -13,10 +13,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { logout } from '@/app/admin/logout/actions';
+import { logout } from '@/app/admin/(public)/login/actions';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 
 interface AdminSession {
   name: string;
@@ -112,7 +113,8 @@ export function UserNav() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
-            Log out
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
         </DropdownMenuContent>
         </DropdownMenu>
@@ -141,7 +143,10 @@ export function UserNav() {
                     <DropdownMenuItem asChild><Link href="/cart">My Orders</Link></DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
      )

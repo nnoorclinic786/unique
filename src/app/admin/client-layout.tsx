@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   LogOut,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 import {
   SidebarProvider,
@@ -31,7 +30,6 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
 import { useAdminSearch } from "@/context/admin-search-context";
-import { logout } from "@/app/admin/logout/actions";
 
 function AdminHeader() {
     const { query, setQuery } = useAdminSearch();
@@ -79,11 +77,6 @@ function AdminHeader() {
 
 export default function AdminClientLayout({ children, permissions }: { children: React.ReactNode, permissions: string[] }) {
   const hasPermission = (p: string) => permissions.includes(p);
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await logout();
-  };
   
   return (
     <SidebarProvider>
@@ -107,10 +100,7 @@ export default function AdminClientLayout({ children, permissions }: { children:
              <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
-                            <LogOut />
-                            <span>Log Out</span>
-                        </SidebarMenuButton>
+                        <UserNav />
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
