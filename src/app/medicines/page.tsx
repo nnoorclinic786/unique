@@ -13,13 +13,13 @@ export default function MedicinesPage() {
 
   const filteredMedicines = medicines.filter(medicine =>
     medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    medicine.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    medicine.category.toLowerCase().includes(searchQuery.toLowerCase())
+    (medicine.description && medicine.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (medicine.category && medicine.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
     <>
-      <Header isAdminLoggedIn={false} />
+      <Header />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">

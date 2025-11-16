@@ -7,19 +7,32 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import { ShoppingCart } from 'lucide-react';
 import { UserNav } from './user-nav';
+import Cookies from 'js-cookie';
 
-interface HeaderProps {
-  isAdminLoggedIn: boolean;
-}
 
-export function Header({ isAdminLoggedIn }: HeaderProps) {
+export function Header() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   useEffect(() => {
-    // This will run on the client after hydration
+    // Check for regular user login
     if (localStorage.getItem('userLoggedIn') === 'true') {
       setIsUserLoggedIn(true);
     }
+    
+    // Check for admin login
+    const adminCookie = Cookies.get('admin_session');
+    if (adminCookie) {
+        try {
+            const session = JSON.parse(adminCookie);
+            if(session.isLoggedIn) {
+                setIsAdminLoggedIn(true);
+            }
+        } catch (e) {
+            setIsAdminLoggedIn(false);
+        }
+    }
+
   }, []);
 
   return (

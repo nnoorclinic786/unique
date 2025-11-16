@@ -1,11 +1,24 @@
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSessionCookie = request.cookies.has('admin_session');
-  const isLoggedIn = hasSessionCookie && request.cookies.get('admin_session')?.value === 'true';
+  const sessionCookie = request.cookies.get('admin_session');
+  let isLoggedIn = false;
 
+  if (sessionCookie) {
+    try {
+      const session = JSON.parse(sessionCookie.value);
+      if (session.isLoggedIn) {
+        isLoggedIn = true;
+      }
+    } catch (e) {
+      // Malformed cookie, treat as logged out
+      isLoggedIn = false;
+    }
+  }
+  
   const isAdminPath = pathname.startsWith('/admin');
   const isApiAuthPath = pathname.startsWith('/api/auth');
   const isAdminLoginPage = pathname === '/admin/login';
@@ -32,7 +45,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   /*
    * Match all request paths except for the ones starting with:
-   * - api (API routes, but we need to allow /api/auth)
    * - _next/static (static files)
    * - _next/image (image optimization files)
    * - favicon.ico (favicon file)

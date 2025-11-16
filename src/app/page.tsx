@@ -1,5 +1,5 @@
+
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowRight, Truck, UserPlus, Pill, Building, Stethoscope, Hospital } from 'lucide-react';
@@ -39,13 +39,9 @@ const targetAudience = [
 ];
 
 export default function LandingPage() {
-  const cookieStore = cookies();
-  const adminSession = cookieStore.get('admin_session');
-  const isAdminLoggedIn = adminSession?.value === 'true';
-
   return (
     <>
-      <Header isAdminLoggedIn={isAdminLoggedIn} />
+      <Header />
       <main className="flex-1">
         <section className="w-full py-20 md:py-32 lg:py-40 bg-card">
           <div className="container mx-auto px-4 md:px-6 text-center">

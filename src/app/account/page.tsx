@@ -1,5 +1,4 @@
 
-import { cookies } from 'next/headers';
 import { Header } from '@/components/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -23,13 +22,10 @@ const user = {
 const userOrders = allOrders.filter(order => order.buyerName === 'City Pharmacy');
 
 export default function AccountPage() {
-  const cookieStore = cookies();
-  const adminSession = cookieStore.get('admin_session');
-  const isAdminLoggedIn = adminSession?.value === 'true';
 
   return (
     <>
-      <Header isAdminLoggedIn={isAdminLoggedIn}/>
+      <Header />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <h1 className="text-3xl font-headline font-bold mb-8">My Account</h1>
         <div className="grid md:grid-cols-3 gap-8">
