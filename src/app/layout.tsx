@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { MedicineProvider } from '@/context/medicines-context';
 import { BuyerProvider } from '@/context/buyers-context';
+import { OrderProvider } from '@/context/orders-context';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 import { Footer } from '@/components/footer';
 
@@ -27,6 +28,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
         <AdminSearchProvider>
+          <OrderProvider>
             <MedicineProvider>
             <BuyerProvider>
                 <div className="flex-grow">
@@ -34,6 +36,7 @@ export default function RootLayout({
                 </div>
             </BuyerProvider>
             </MedicineProvider>
+          </OrderProvider>
         </AdminSearchProvider>
         <Toaster />
       </body>

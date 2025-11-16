@@ -2,6 +2,7 @@
 "use client";
 
 import { MoreHorizontal, File, ChevronDown } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +18,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -28,78 +33,108 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { orders } from "@/lib/data";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
 import { useAdminSearch } from "@/context/admin-search-context";
+import { useOrderContext } from "@/context/orders-context";
+import { useBuyerContext } from "@/context/buyers-context";
 import React from 'react';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
 
-const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
+const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     'Pending': 'secondary',
-    'Processing': 'secondary',
-    'Shipped': 'secondary',
+    'Processing': 'outline',
+    'Shipped': 'default',
     'Delivered': 'default',
     'Cancelled': 'destructive',
 };
 
-const OrderTable = ({ ordersToShow }: { ordersToShow: typeof orders }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Customer</TableHead>
-          <TableHead className="hidden sm:table-cell">Status</TableHead>
-          <TableHead className="hidden sm:table-cell">Date</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
-          <TableHead>
-            <span className="sr-only">Actions</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {ordersToShow.map((order) => (
-          <TableRow key={order.id}>
-            <TableCell>
-              <div className="font-medium">{order.buyerName}</div>
-              <div className="hidden text-sm text-muted-foreground md:inline">
-                {order.id}
-              </div>
-            </TableCell>
-            <TableCell className="hidden sm:table-cell">
-              <Badge className="text-xs" variant={statusColors[order.status] || 'secondary'}>
-                {order.status}
-              </Badge>
-            </TableCell>
-            <TableCell className="hidden sm:table-cell">{order.date}</TableCell>
-            <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button aria-haspopup="true" size="icon" variant="ghost">
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">Toggle menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                  <DropdownMenuItem>Update Status</DropdownMenuItem>
-                  <DropdownMenuItem>Contact Buyer</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-);
+const OrderTable = ({ ordersToShow }: { ordersToShow: Order[] }) => {
+    const { updateOrderStatus } = useOrderContext();
+    const { buyers } = useBuyerContext();
+
+    const getBuyerEmail = (buyerName: string) => {
+        const buyer = buyers.find(b => b.name === buyerName);
+        return buyer?.email;
+    }
+
+    return (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Customer</TableHead>
+              <TableHead className="hidden sm:table-cell">Status</TableHead>
+              <TableHead className="hidden sm:table-cell">Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ordersToShow.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>
+                  <div className="font-medium">{order.buyerName}</div>
+                  <div className="hidden text-sm text-muted-foreground md:inline">
+                    {order.id}
+                  </div>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">
+                  <Badge className="text-xs" variant={statusColors[order.status] || 'secondary'}>
+                    {order.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="hidden sm:table-cell">{order.date}</TableCell>
+                <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button aria-haspopup="true" size="icon" variant="ghost">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Toggle menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/orders/${order.id}`}>View Details</Link>
+                      </DropdownMenuItem>
+                       <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>Update Status</DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent>
+                            <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'Pending')}>Pending</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'Processing')}>Processing</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'Shipped')}>Shipped</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'Delivered')}>Delivered</DropdownMenuItem>
+                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => updateOrderStatus(order.id, 'Cancelled')}>Cancel Order</DropdownMenuItem>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                      {getBuyerEmail(order.buyerName) && (
+                        <DropdownMenuItem asChild>
+                            <a href={`mailto:${getBuyerEmail(order.buyerName)}`}>Contact Buyer</a>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+    )
+};
 
 
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const { query } = useAdminSearch();
+  const { orders } = useOrderContext();
 
   const filterOrders = (orders: Order[]) => {
     if (!query) return orders;
@@ -114,12 +149,15 @@ export default function AdminOrdersPage() {
   const pendingOrders = filterOrders(orders.filter(o => o.status === 'Pending' || o.status === 'Processing'));
   const shippedOrders = filterOrders(orders.filter(o => o.status === 'Shipped'));
   const deliveredOrders = filterOrders(orders.filter(o => o.status === 'Delivered'));
+  const cancelledOrders = filterOrders(orders.filter(o => o.status === 'Cancelled'));
+
 
   const getOrdersForTab = (tab: string) => {
     switch (tab) {
         case 'pending': return pendingOrders;
         case 'shipped': return shippedOrders;
         case 'delivered': return deliveredOrders;
+        case 'cancelled': return cancelledOrders;
         case 'all':
         default:
             return allOrders;
@@ -192,6 +230,7 @@ export default function AdminOrdersPage() {
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="shipped">Shipped</TabsTrigger>
           <TabsTrigger value="delivered">Delivered</TabsTrigger>
+          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex w-full sm:w-auto items-center gap-2">
             <DropdownMenu>
@@ -247,7 +286,7 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders have been shipped and are in transit.
             </CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent>
             <OrderTable ordersToShow={shippedOrders} />
           </CardContent>
@@ -260,9 +299,22 @@ export default function AdminOrdersPage() {
             <CardDescription>
               These orders have been successfully delivered.
             </CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent>
             <OrderTable ordersToShow={deliveredOrders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+       <TabsContent value="cancelled">
+        <Card>
+          <CardHeader>
+            <CardTitle>Cancelled Orders</CardTitle>
+            <CardDescription>
+              These orders have been cancelled.
+            </CardDescription>
+          </Header>
+          <CardContent>
+            <OrderTable ordersToShow={cancelledOrders} />
           </CardContent>
         </Card>
       </TabsContent>
