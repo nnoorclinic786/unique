@@ -1,6 +1,7 @@
 
 import Link from 'next/link';
 import { Logo } from './icons';
+import { Mail, Phone, MapPin } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -38,9 +39,18 @@ export function Footer() {
             <div>
               <h3 className="font-headline font-semibold mb-4">Contact</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>uniquemedicare786@gmail.com</li>
-                <li>8299400552</li>
-                <li>4/79, Diwan Mubarak, Farrukhabad</li>
+                <li className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span>uniquemedicare786@gmail.com</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span>8299400552</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                  <span>4/79, Diwan Mubarak, Farrukhabad</span>
+                </li>
               </ul>
             </div>
           </div>
