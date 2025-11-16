@@ -24,7 +24,7 @@ const permissionMap: Record<string, AdminPermission> = {
 
 // Function to check permission for a given path
 const hasPermissionForPath = (pathname: string, session: AdminSession): boolean => {
-    // Super Admins have access to everything, always. This must be the first check.
+    // Super Admins have access to everything. This must be the very first check.
     if (session.role === 'Super Admin') {
         return true;
     }
