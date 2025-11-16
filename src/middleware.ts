@@ -24,12 +24,12 @@ const permissionMap: Record<string, AdminPermission> = {
 
 // Function to check permission for a given path
 const hasPermissionForPath = (pathname: string, session: AdminSession): boolean => {
-    // Super Admins have access to everything, always.
+    // Super Admins have access to everything, always. This must be the first check.
     if (session.role === 'Super Admin') {
         return true;
     }
 
-    const userPermissions = session.permissions;
+    const userPermissions = session.permissions || [];
 
     // Allow access to buyer detail pages if they have 'buyers' permission
     if (/^\/admin\/buyers\/[^/]+$/.test(pathname)) {
