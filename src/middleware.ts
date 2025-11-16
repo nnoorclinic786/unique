@@ -7,6 +7,9 @@ type AdminPermission = 'dashboard' | 'orders' | 'drugs' | 'buyers' | 'manage_adm
 interface AdminSession {
   isLoggedIn: boolean;
   permissions: AdminPermission[];
+  name: string;
+  email: string;
+  role: string;
 }
 
 // Map pathnames to required permissions
@@ -37,6 +40,8 @@ const hasPermissionForPath = (pathname: string, userPermissions: AdminPermission
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const publicAdminPaths = ['/admin/login', '/admin/signup'];
+  const isAdminRoot = pathname === '/admin';
 
   const sessionCookie = request.cookies.get('admin_session');
   let session: AdminSession | null = null;
@@ -49,43 +54,33 @@ export function middleware(request: NextRequest) {
     }
   }
   
-  const isLoggedIn = session?.isLoggedIn || false;
-  const isAdminPath = pathname.startsWith('/admin');
-  const isApiAuthPath = pathname.startsWith('/api/auth');
-  const isAdminLoginPage = pathname === '/admin/login';
-  const isAdminSignupPage = pathname === '/admin/signup';
-  
-  if (isApiAuthPath) {
-    return NextResponse.next();
-  }
+  const isLoggedIn = !!session?.isLoggedIn;
 
-  // Redirect to dashboard if trying to access /admin root and logged in
-  if (pathname === '/admin' && isLoggedIn) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-  }
-  
-  // Redirect to login if trying to access /admin root and not logged in
-  if (pathname === '/admin' && !isLoggedIn) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
-  }
-
-
-  if (isAdminPath) {
-    // If logged in, they shouldn't be on the login or signup page. Redirect to dashboard.
-    if (isLoggedIn && (isAdminLoginPage || isAdminSignupPage)) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-    
-    // If not logged in, they can only be on the login or signup page. Redirect unauthenticated users from other admin pages.
-    if (!isLoggedIn && !isAdminLoginPage && !isAdminSignupPage) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
-
-     // If logged in, check permissions for non-login/signup pages
-    if (isLoggedIn && !isAdminLoginPage && !isAdminSignupPage && session) {
-      if (!hasPermissionForPath(pathname, session.permissions)) {
-        // Redirect to a default page if they don't have access
+  // Handle all /admin routing logic here
+  if (pathname.startsWith('/admin')) {
+    // If logged in...
+    if (isLoggedIn) {
+      // and trying to access a public admin page (login/signup), redirect to dashboard.
+      if (publicAdminPaths.includes(pathname)) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
+      
+      // or trying to access the admin root, redirect to dashboard.
+      if (isAdminRoot) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
+
+      // and trying to access a protected page, check for permissions.
+      if (!hasPermissionForPath(pathname, session.permissions)) {
+        // If they don't have permission, redirect them to the dashboard.
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
+    } 
+    // If NOT logged in...
+    else {
+      // and trying to access any admin page that is NOT public, redirect to login.
+      if (!publicAdminPaths.includes(pathname)) {
+        return NextResponse.redirect(new URL('/admin/login', request.url));
       }
     }
   }
