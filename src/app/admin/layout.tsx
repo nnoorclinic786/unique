@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import React from "react";
 import { cookies } from 'next/headers';
@@ -128,10 +129,9 @@ export default function AdminLayout({
     }
   }
 
-  // The middleware redirects unauthenticated users for most admin pages.
-  // We check for the session here. If it doesn't exist, it means we are on the login/signup page.
+  // If there's no session, it means we are on the login/signup page.
+  // These pages don't need the full admin UI.
   if (!session?.isLoggedIn) {
-    // For login/signup, we just need the search provider, not the full admin UI.
     return <AdminSearchProvider>{children}</AdminSearchProvider>;
   }
 

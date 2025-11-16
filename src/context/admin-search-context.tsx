@@ -1,17 +1,17 @@
+
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState } from "react";
 
-interface AdminSearchContextType {
+type AdminSearchContextType = {
   query: string;
   setQuery: (q: string) => void;
-}
+};
 
 const AdminSearchContext = createContext<AdminSearchContextType | undefined>(undefined);
 
-export function AdminSearchProvider({ children }: { children: ReactNode }) {
+export function AdminSearchProvider({ children }: { children: React.ReactNode }) {
   const [query, setQuery] = useState("");
-
   return (
     <AdminSearchContext.Provider value={{ query, setQuery }}>
       {children}
@@ -20,9 +20,7 @@ export function AdminSearchProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAdminSearch() {
-  const context = useContext(AdminSearchContext);
-  if (context === undefined) {
-    throw new Error("useAdminSearch must be used within an AdminSearchProvider");
-  }
-  return context;
+  const ctx = useContext(AdminSearchContext);
+  if (!ctx) throw new Error("useAdminSearch must be used within AdminSearchProvider");
+  return ctx;
 }
