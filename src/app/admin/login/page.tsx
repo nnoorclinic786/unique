@@ -19,7 +19,6 @@ export default function AdminLoginPage() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    // Server action will handle the redirect, but might return an error
     const result = await login(formData);
     
     if (result?.error) {

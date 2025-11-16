@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   Home,
   Users,
@@ -89,6 +90,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  if (pathname === "/admin/login") {
+    return <AdminSearchProvider>{children}</AdminSearchProvider>;
+  }
+  
   return (
     <AdminSearchProvider>
         <SidebarProvider>

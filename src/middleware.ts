@@ -14,7 +14,6 @@ export function middleware(request: NextRequest) {
         isLoggedIn = true;
       }
     } catch (e) {
-      // Malformed cookie, treat as logged out
       isLoggedIn = false;
     }
   }
@@ -27,13 +26,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If accessing an admin path
+  if (pathname === '/admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+  }
+
   if (isAdminPath) {
-    // If logged in and trying to access login page, redirect to dashboard
     if (isLoggedIn && isAdminLoginPage) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-    // If not logged in and trying to access a protected admin page, redirect to login
     if (!isLoggedIn && !isAdminLoginPage) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
@@ -43,11 +43,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  /*
-   * Match all request paths except for the ones starting with:
-   * - _next/static (static files)
-   * - _next/image (image optimization files)
-   * - favicon.ico (favicon file)
-   */
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
