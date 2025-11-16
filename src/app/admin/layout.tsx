@@ -84,7 +84,6 @@ function AdminClientLayout({ children, permissions }: { children: React.ReactNod
   'use client';
   const hasPermission = (p: string) => permissions.includes(p);
   return (
-    <AdminSearchProvider>
       <SidebarProvider>
         <Sidebar className="border-r bg-muted/40">
             <SidebarHeader>
@@ -110,7 +109,6 @@ function AdminClientLayout({ children, permissions }: { children: React.ReactNod
             </main>
         </div>
       </SidebarProvider>
-    </AdminSearchProvider>
   )
 }
 
@@ -131,9 +129,15 @@ export default function AdminLayout({
     }
   }
 
-  // The middleware ensures unauthenticated users are redirected away from this layout's pages,
-  // so we can assume this layout is for authenticated users.
-  const permissions = session?.permissions || [];
+  // The middleware redirects unauthenticated users, so we can assume a session exists here for this layout.
+  // The login/signup pages have their own simple layout and won't use this one.
+  if (!session?.isLoggedIn) {
+     // This case handles /admin/login and /admin/signup, which don't need the full admin layout.
+     // They will fall back to the root layout which is sufficient.
+    return <>{children}</>;
+  }
+
+  const permissions = session.permissions || [];
 
   return (
     <AdminClientLayout permissions={permissions}>
