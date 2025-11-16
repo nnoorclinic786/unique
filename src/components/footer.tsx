@@ -39,12 +39,12 @@ export function Footer() {
             <div>
               <h3 className="font-headline font-semibold mb-4">Contact</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
+                <li className="flex items-start gap-2">
+                  <Mail className="h-4 w-4 mt-1 flex-shrink-0" />
                   <span>uniquemedicare786@gmail.com</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
+                <li className="flex items-start gap-2">
+                  <Phone className="h-4 w-4 mt-1 flex-shrink-0" />
                   <span>8299400552</span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -64,3 +64,4 @@ export function Footer() {
     </footer>
   );
 }
+
