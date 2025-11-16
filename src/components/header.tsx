@@ -13,8 +13,10 @@ import Cookies from 'js-cookie';
 export function Header() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     // Check for regular user login
     if (localStorage.getItem('userLoggedIn') === 'true') {
       setIsUserLoggedIn(true);
@@ -34,6 +36,32 @@ export function Header() {
     }
 
   }, []);
+
+  if (!isClient) {
+    // Render a placeholder or null during SSR to avoid hydration mismatch
+    return (
+        <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
+            <div className="container mx-auto flex h-16 items-center px-4 md:px-6">
+                 <Link href="/" className="mr-6 flex items-center gap-2">
+                    <Logo className="h-10 w-10 text-primary" />
+                    <span className="font-headline text-lg font-semibold text-foreground">
+                        Unique Medicare
+                    </span>
+                </Link>
+                <div className="ml-auto flex items-center gap-2">
+                     <div className="hidden sm:flex items-center gap-2">
+                        <Button variant="ghost" asChild>
+                            <Link href="/login">Login</Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/signup">Sign Up</Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">

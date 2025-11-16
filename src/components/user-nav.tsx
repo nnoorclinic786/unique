@@ -25,8 +25,10 @@ interface AdminSession {
 
 export function UserNav() {
   const [session, setSession] = useState<AdminSession | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const sessionCookie = Cookies.get('admin_session');
     if (sessionCookie) {
       try {
@@ -40,10 +42,15 @@ export function UserNav() {
 
   const handleLogout = async () => {
     await logout();
+    window.location.href = '/'; // Force a hard reload to clear state
   };
 
   const getInitials = (name: string = "") => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'A';
+  }
+
+  if (!isClient) {
+      return null;
   }
 
   return (
