@@ -40,7 +40,6 @@ export default function AdminLoginPage() {
             description: "Redirecting to your dashboard...",
         });
         router.push("/admin/dashboard");
-        router.refresh();
     }
   }
 
