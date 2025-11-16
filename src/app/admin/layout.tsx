@@ -28,9 +28,9 @@ export default function AdminLayout({
     }
   }
 
-  // Because of the middleware, we can assume that if we are in this layout,
+  // Because of the middleware and the (public) route group, we can assume that if we are in this layout,
   // the user is logged in. The middleware has already redirected unauthenticated
-  // users to the login page (which uses a different layout).
+  // users, and public pages have their own layout.
   const permissions = session?.permissions || [];
 
   return (
