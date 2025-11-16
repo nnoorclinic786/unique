@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { logout } from '@/app/admin/(public)/login/actions';
+import { logout } from '@/app/admin/logout/actions';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
@@ -55,6 +55,8 @@ export function UserNav() {
   }, []);
 
   const handleLogout = async () => {
+    const isAdmin = !!session?.isLoggedIn;
+    
     // Clear local storage for regular user
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userName');
@@ -62,8 +64,9 @@ export function UserNav() {
     // Clear admin cookie via server action
     await logout();
     
-    // For admin, the redirect is handled in the action. For user, redirect here.
-    if(!session?.isLoggedIn){
+    // The server action will handle the redirect for admins.
+    // For regular users, we redirect client-side.
+    if(!isAdmin){
         router.push('/');
         router.refresh();
     }

@@ -83,8 +83,6 @@ export default function AdminClientLayout({ children, permissions }: { children:
 
   const handleLogout = async () => {
     await logout();
-    router.push('/admin/login');
-    router.refresh();
   };
   
   return (
