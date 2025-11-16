@@ -23,10 +23,22 @@ const permissionMap: Record<string, AdminPermission> = {
 };
 
 // Function to check permission for a given path
-const hasPermissionForPath = (pathname: string, userPermissions: AdminPermission[]): boolean => {
+const hasPermissionForPath = (pathname: string, session: AdminSession): boolean => {
+    // Super Admins have access to everything, always.
+    if (session.role === 'Super Admin') {
+        return true;
+    }
+
+    const userPermissions = session.permissions;
+
     // Allow access to buyer detail pages if they have 'buyers' permission
     if (/^\/admin\/buyers\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('buyers');
+    }
+    
+    // Allow access to order detail pages if they have 'orders' permission
+    if (/^\/admin\/orders\/[^/]+$/.test(pathname)) {
+        return userPermissions.includes('orders');
     }
 
     const requiredPermission = Object.entries(permissionMap).find(([path]) => pathname.startsWith(path));
@@ -59,7 +71,7 @@ export function middleware(request: NextRequest) {
   // Handle all /admin routing logic here
   if (pathname.startsWith('/admin')) {
     // If logged in...
-    if (isLoggedIn) {
+    if (isLoggedIn && session) {
       // and trying to access a public admin page (login/signup), redirect to dashboard.
       if (publicAdminPaths.includes(pathname)) {
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
@@ -71,7 +83,7 @@ export function middleware(request: NextRequest) {
       }
 
       // and trying to access a protected page, check for permissions.
-      if (!hasPermissionForPath(pathname, session.permissions)) {
+      if (!hasPermissionForPath(pathname, session)) {
         // If they don't have permission, redirect them to the dashboard.
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));
       }
