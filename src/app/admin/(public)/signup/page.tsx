@@ -13,7 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
-import { addPendingAdmin } from "@/app/admin/login/actions";
+import { addPendingAdmin } from "@/app/admin/(public)/login/actions";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required."),

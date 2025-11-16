@@ -9,6 +9,8 @@ interface AdminSession {
   permissions: string[];
 }
 
+// This is the layout for all AUTHENTICATED admin pages.
+// Public pages like login/signup are in the (public) group and have their own layout.
 export default function AdminLayout({
   children,
 }: {
@@ -26,11 +28,10 @@ export default function AdminLayout({
     }
   }
 
-  if (!session?.isLoggedIn) {
-    return <AdminSearchProvider>{children}</AdminSearchProvider>;
-  }
-  
-  const permissions = session.permissions || [];
+  // Because of the middleware, we can assume that if we are in this layout,
+  // the user is logged in. The middleware has already redirected unauthenticated
+  // users to the login page (which uses a different layout).
+  const permissions = session?.permissions || [];
 
   return (
     <AdminSearchProvider>
