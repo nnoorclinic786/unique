@@ -38,10 +38,6 @@ const hasPermissionForPath = (pathname: string, userPermissions: AdminPermission
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Store the original URL in a cookie for the layout to read
-  const response = NextResponse.next();
-  response.cookies.set('next-url', pathname);
-
   const sessionCookie = request.cookies.get('admin_session');
   let session: AdminSession | null = null;
 
@@ -60,7 +56,7 @@ export function middleware(request: NextRequest) {
   const isAdminSignupPage = pathname === '/admin/signup';
   
   if (isApiAuthPath) {
-    return response;
+    return NextResponse.next();
   }
 
   if (pathname === '/admin') {
@@ -85,9 +81,9 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
