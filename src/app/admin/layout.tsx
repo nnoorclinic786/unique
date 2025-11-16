@@ -33,7 +33,6 @@ export default function AdminLayout({
   const permissions = session?.permissions || [];
   
   // If the user is logged in, render the full dashboard layout.
-  // Otherwise, just render the children (which will be the public login/signup page).
   if (isLoggedIn) {
     return (
       <AdminSearchProvider>
@@ -42,7 +41,11 @@ export default function AdminLayout({
     );
   }
 
-  // For public pages, render children directly without the dashboard UI.
+  // Otherwise, for public pages, just render the children without the dashboard UI.
   // The (public) group has its own layout that will wrap this.
-  return <>{children}</>;
+  return (
+      <AdminSearchProvider>
+        {children}
+      </AdminSearchProvider>
+  );
 }
