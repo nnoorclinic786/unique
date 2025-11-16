@@ -31,7 +31,7 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
       email: user.email,
       role: user.role,
       name: user.name,
-      permissions: user.permissions
+      permissions: user.role === 'Super Admin' ? ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins'] : user.permissions
   };
 
   cookieStore.set("admin_session", JSON.stringify(sessionData), {
