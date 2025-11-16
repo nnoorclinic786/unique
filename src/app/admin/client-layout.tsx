@@ -78,28 +78,30 @@ export default function AdminClientLayout({ children, permissions }: { children:
   
   return (
     <SidebarProvider>
-      <Sidebar className="border-r bg-muted/40">
-          <SidebarHeader>
-          <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-              <Logo className="h-10 w-10 text-primary" />
-              <span className="font-headline">Unique Medicare Admin</span>
-          </Link>
-          </SidebarHeader>
-          <SidebarContent>
-          <SidebarMenu>
-              {hasPermission('dashboard') && <SidebarMenuItem><Link href="/admin/dashboard" passHref><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></Link></SidebarMenuItem>}
-              {hasPermission('orders') && <SidebarMenuItem><Link href="/admin/orders" passHref><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></Link></SidebarMenuItem>}
-              {hasPermission('drugs') && <SidebarMenuItem><Link href="/admin/drugs" passHref><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></Link></SidebarMenuItem>}
-              {hasPermission('buyers') && <SidebarMenuItem><Link href="/admin/buyers" passHref><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></Link></SidebarMenuItem>}
-              {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
-          </SidebarMenu>
-          </SidebarContent>
-      </Sidebar>
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-          <AdminHeader />
-          <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            {children}
-          </main>
+      <div className="relative flex min-h-screen w-full bg-muted/40">
+        <Sidebar className="border-r bg-background">
+            <SidebarHeader>
+            <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+                <Logo className="h-10 w-10 text-primary" />
+                <span className="font-headline">Unique Medicare Admin</span>
+            </Link>
+            </SidebarHeader>
+            <SidebarContent>
+            <SidebarMenu>
+                {hasPermission('dashboard') && <SidebarMenuItem><Link href="/admin/dashboard" passHref><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('orders') && <SidebarMenuItem><Link href="/admin/orders" passHref><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('drugs') && <SidebarMenuItem><Link href="/admin/drugs" passHref><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('buyers') && <SidebarMenuItem><Link href="/admin/buyers" passHref><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
+            </SidebarMenu>
+            </SidebarContent>
+        </Sidebar>
+        <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 flex-1">
+            <AdminHeader />
+            <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+              {children}
+            </main>
+        </div>
       </div>
     </SidebarProvider>
   )

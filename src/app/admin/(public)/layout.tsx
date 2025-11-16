@@ -9,5 +9,5 @@ export default function PublicAdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminSearchProvider>{children}</AdminSearchProvider>;
+  return <>{children}</>;
 }

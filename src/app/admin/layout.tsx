@@ -28,14 +28,16 @@ export default function AdminLayout({
     }
   }
 
-  // Because of the middleware and the (public) route group, we can assume that if we are in this layout,
-  // the user is logged in. The middleware has already redirected unauthenticated
-  // users, and public pages have their own layout.
+  const isLoggedIn = session?.isLoggedIn || false;
   const permissions = session?.permissions || [];
-
+  
   return (
     <AdminSearchProvider>
+      {isLoggedIn ? (
         <AdminClientLayout permissions={permissions}>{children}</AdminClientLayout>
+      ) : (
+        children // For public pages, render children directly without dashboard UI
+      )}
     </AdminSearchProvider>
   );
 }
