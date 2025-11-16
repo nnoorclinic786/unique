@@ -5,5 +5,5 @@ import { redirect } from 'next/navigation';
 
 export async function logout() {
   cookies().delete("admin_session");
-  redirect('/');
+  redirect('/admin/login');
 }
