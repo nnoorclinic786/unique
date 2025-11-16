@@ -41,8 +41,6 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
     path: "/",
   });
   
-  // This will throw a REDIRECT exception, which is handled by Next.js to perform the redirect.
-  // No code after this will be executed.
   redirect("/admin/dashboard");
 }
 

@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,8 +23,6 @@ export default function AdminLoginPage() {
     setError(null);
     const formData = new FormData(event.currentTarget);
     
-    // The server action will handle the redirect on success.
-    // We only need to handle the error case here.
     const result = await login(formData);
     
     if (result?.error) {
@@ -35,13 +32,6 @@ export default function AdminLoginPage() {
         title: "Login Failed",
         description: result.error,
       });
-    } else {
-        // On success, the server action will redirect, so this part might not even be reached.
-        // But it's good practice to show feedback.
-         toast({
-            title: "Login Successful",
-            description: "Redirecting to your dashboard...",
-        });
     }
   }
 
