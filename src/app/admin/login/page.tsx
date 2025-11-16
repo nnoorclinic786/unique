@@ -54,7 +54,6 @@ export default function AdminLoginPage() {
                 type="email"
                 placeholder="admin@medicare.com"
                 required
-                defaultValue="uniquemedicare786@gmail.com"
               />
             </div>
             <div className="grid gap-2">
@@ -64,7 +63,6 @@ export default function AdminLoginPage() {
                 name="password" 
                 type="password" 
                 required 
-                defaultValue="uniquemedicare@6686#"
               />
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
