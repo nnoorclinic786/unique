@@ -143,7 +143,7 @@ export default function AdminOrdersPage() {
         order.buyerName.toLowerCase().includes(lowercasedQuery) ||
         order.id.toLowerCase().includes(lowercasedQuery)
     );
-  }
+  };
 
   const allOrders = filterOrders(orders);
   const pendingOrders = filterOrders(orders.filter(o => o.status === 'Pending' || o.status === 'Processing'));
@@ -162,7 +162,7 @@ export default function AdminOrdersPage() {
         default:
             return allOrders;
     }
-  }
+  };
 
   const exportToCsv = (data: Order[], filename: string) => {
     const csvRows = [
@@ -321,5 +321,3 @@ export default function AdminOrdersPage() {
     </Tabs>
   );
 }
-
-    
