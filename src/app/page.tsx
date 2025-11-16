@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowRight, Truck, UserPlus, Pill, Building, Stethoscope, Hospital } from 'lucide-react';
 import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
 
 const features = [
   {
@@ -109,11 +110,7 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
-      <footer className="w-full bg-secondary py-6">
-        <div className="container mx-auto px-4 md:px-6 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Unique Medicare. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

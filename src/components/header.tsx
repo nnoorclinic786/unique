@@ -18,7 +18,7 @@ export function Header() {
   useEffect(() => {
     setIsClient(true);
     // Check for regular user login
-    if (localStorage.getItem('userLoggedIn') === 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
       setIsUserLoggedIn(true);
     }
     
@@ -48,6 +48,11 @@ export function Header() {
                         Unique Medicare
                     </span>
                 </Link>
+                <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <Link href="/about" className="transition-colors hover:text-primary">
+                        About Us
+                    </Link>
+                </nav>
                 <div className="ml-auto flex items-center gap-2">
                      <div className="hidden sm:flex items-center gap-2">
                         <Button variant="ghost" asChild>
@@ -83,6 +88,9 @@ export function Header() {
                 My Account
             </Link>
           )}
+           <Link href="/about" className="transition-colors hover:text-primary">
+              About Us
+            </Link>
           {isAdminLoggedIn && (
             <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
               Admin

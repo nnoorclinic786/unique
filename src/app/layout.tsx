@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { MedicineProvider } from '@/context/medicines-context';
 import { BuyerProvider } from '@/context/buyers-context';
 import { AdminSearchProvider } from '@/context/admin-search-context';
+import { Footer } from '@/components/footer';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -28,7 +29,9 @@ export default function RootLayout({
         <AdminSearchProvider>
             <MedicineProvider>
             <BuyerProvider>
-                {children}
+                <div className="flex-grow">
+                    {children}
+                </div>
             </BuyerProvider>
             </MedicineProvider>
         </AdminSearchProvider>
