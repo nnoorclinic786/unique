@@ -21,7 +21,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { getAdmins, updateAdminPermissions, approveAdmin, toggleAdminStatus } from "@/app/admin/login/actions";
+import { getAdmins, updateAdminPermissions, approveAdmin, toggleAdminStatus } from "@/app/admin/(public)/login/actions";
 import { MoreHorizontal, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
