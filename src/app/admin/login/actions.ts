@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 // In a real application, these should be stored securely in a database and passwords should be hashed.
 const ADMIN_USERS = [
-    { email: "uniquemedicare786@gmail.com", password: "u#niquemedicare@6686#", role: "Super Admin", name: "Super Admin" },
+    { email: "uniquemedicare786@gmail.com", password: "uniquemedicare@6686#", role: "Super Admin", name: "Super Admin" },
     { email: "admin@medicare.com", password: "password", role: "Admin", name: "Admin User" }
 ];
 
