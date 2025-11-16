@@ -287,4 +287,36 @@ export default function AdminOrdersPage() {
             </CardDescription>
           </Header>
           <CardContent>
-            <OrderT
+            <OrderTable ordersToShow={shippedOrders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="delivered">
+        <Card>
+          <CardHeader>
+            <CardTitle>Delivered Orders</CardTitle>
+            <CardDescription>
+              These orders have been successfully delivered.
+            </CardDescription>
+          </Header>
+          <CardContent>
+            <OrderTable ordersToShow={deliveredOrders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+      <TabsContent value="cancelled">
+        <Card>
+          <CardHeader>
+            <CardTitle>Cancelled Orders</CardTitle>
+            <CardDescription>
+              These orders have been cancelled.
+            </CardDescription>
+          </Header>
+          <CardContent>
+            <OrderTable ordersToShow={cancelledOrders} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+}
