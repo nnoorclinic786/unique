@@ -129,7 +129,7 @@ export default function AdminLayout({
 
   return (
     <AdminSearchProvider>
-        <SidebarProvider>
+      <SidebarProvider>
         <Sidebar className="border-r bg-muted/40">
             <SidebarHeader>
             <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
@@ -153,7 +153,7 @@ export default function AdminLayout({
             {children}
             </main>
         </div>
-        </SidebarProvider>
+      </SidebarProvider>
     </AdminSearchProvider>
   );
 }
