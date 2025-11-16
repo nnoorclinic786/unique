@@ -52,6 +52,7 @@ export function middleware(request: NextRequest) {
   const isAdminPath = pathname.startsWith('/admin');
   const isApiAuthPath = pathname.startsWith('/api/auth');
   const isAdminLoginPage = pathname === '/admin/login';
+  const isAdminSignupPage = pathname === '/admin/signup';
   
   if (isApiAuthPath) {
     return NextResponse.next();
@@ -62,14 +63,16 @@ export function middleware(request: NextRequest) {
   }
 
   if (isAdminPath) {
-    if (isLoggedIn && isAdminLoginPage) {
+    // If logged in, they shouldn't be on the login or signup page
+    if (isLoggedIn && (isAdminLoginPage || isAdminSignupPage)) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-    if (!isLoggedIn && !isAdminLoginPage) {
+    // If not logged in, they can only be on the login or signup page
+    if (!isLoggedIn && !isAdminLoginPage && !isAdminSignupPage) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-     // If logged in, check permissions for non-login pages
-    if (isLoggedIn && !isAdminLoginPage && session) {
+     // If logged in, check permissions for non-login/signup pages
+    if (isLoggedIn && !isAdminLoginPage && !isAdminSignupPage && session) {
       if (!hasPermissionForPath(pathname, session.permissions)) {
         // Redirect to a default page if they don't have access
         return NextResponse.redirect(new URL('/admin/dashboard', request.url));

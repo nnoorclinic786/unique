@@ -84,6 +84,12 @@ export default function AdminLoginPage() {
               Login
             </Button>
           </form>
+           <div className="mt-4 text-center text-sm">
+            Want to become an admin?{" "}
+            <Link href="/admin/signup" className="underline">
+              Sign up here
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
