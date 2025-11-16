@@ -59,10 +59,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Redirect to dashboard if trying to access /admin root
-  if (pathname === '/admin') {
+  // Redirect to dashboard if trying to access /admin root and logged in
+  if (pathname === '/admin' && isLoggedIn) {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
+  
+  // Redirect to login if trying to access /admin root and not logged in
+  if (pathname === '/admin' && !isLoggedIn) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+  }
+
 
   if (isAdminPath) {
     // If logged in, they shouldn't be on the login or signup page. Redirect to dashboard.
