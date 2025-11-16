@@ -9,8 +9,9 @@ interface AdminSession {
   permissions: string[];
 }
 
-// This is the layout for all AUTHENTICATED admin pages.
-// Public pages like login/signup are in the (public) group and have their own layout.
+// This is the layout for all ADMIN pages.
+// It checks for authentication and decides whether to show the public view 
+// (from the (public) group) or the full authenticated dashboard UI.
 export default function AdminLayout({
   children,
 }: {
@@ -31,13 +32,17 @@ export default function AdminLayout({
   const isLoggedIn = session?.isLoggedIn || false;
   const permissions = session?.permissions || [];
   
-  return (
-    <AdminSearchProvider>
-      {isLoggedIn ? (
+  // If the user is logged in, render the full dashboard layout.
+  // Otherwise, just render the children (which will be the public login/signup page).
+  if (isLoggedIn) {
+    return (
+      <AdminSearchProvider>
         <AdminClientLayout permissions={permissions}>{children}</AdminClientLayout>
-      ) : (
-        children // For public pages, render children directly without dashboard UI
-      )}
-    </AdminSearchProvider>
-  );
+      </AdminSearchProvider>
+    );
+  }
+
+  // For public pages, render children directly without the dashboard UI.
+  // The (public) group has its own layout that will wrap this.
+  return <>{children}</>;
 }
