@@ -41,12 +41,18 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
         return userPermissions.includes('orders');
     }
 
-    const requiredPermission = Object.entries(permissionMap).find(([path]) => pathname.startsWith(path));
+    // Check against the permission map for exact matches
+    const requiredPermission = permissionMap[pathname];
 
-    if (!requiredPermission) {
-        return true; // No specific permission required for this path, e.g., /admin itself
+    // If a specific permission is required for this path
+    if (requiredPermission) {
+        // Check if the user has that permission
+        return userPermissions.includes(requiredPermission);
     }
-    return userPermissions.includes(requiredPermission[1]);
+
+    // If the path is not in the map, allow access by default (e.g., /admin root)
+    // More specific deny rules can be added here if needed.
+    return true; 
 };
 
 
