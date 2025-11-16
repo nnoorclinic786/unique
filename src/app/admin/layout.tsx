@@ -131,16 +131,19 @@ export default function AdminLayout({
       session = null;
     }
   }
+
+  // The middleware ensures unauthenticated users are redirected to /admin/login.
+  // So, if we are here, we are either on a login/signup page or we are authenticated.
+  // The login and signup pages don't use this main layout structure, 
+  // so we can assume this layout is for authenticated users.
+
+  // A simple check to differentiate auth pages from the main app layout.
+  // Login/Signup pages have a different root structure.
+  if (!session?.isLoggedIn) {
+    return <AdminSearchProvider>{children}</AdminSearchProvider>;
+  }
   
   const permissions = session?.permissions || [];
-  
-  // We check the URL from the cookie set by the middleware
-  const urlCookie = cookieStore.get('next-url');
-  const pathname = urlCookie ? urlCookie.value : '';
-
-  if (pathname.includes("/admin/login") || pathname.includes("/admin/signup")) {
-     return <AdminSearchProvider>{children}</AdminSearchProvider>;
-  }
 
   return (
     <AdminClientLayout permissions={permissions}>
