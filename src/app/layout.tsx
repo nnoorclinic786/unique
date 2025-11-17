@@ -8,6 +8,7 @@ import { OrderProvider } from '@/context/orders-context';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 import { Footer } from '@/components/footer';
 import { CartProvider } from '@/context/cart-context';
+import { SettingsProvider } from '@/context/settings-context';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -28,19 +29,21 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
-        <AdminSearchProvider>
-          <OrderProvider>
-            <MedicineProvider>
-            <BuyerProvider>
-                <CartProvider>
-                    <div className="flex-grow">
-                        {children}
-                    </div>
-                </CartProvider>
-            </BuyerProvider>
-            </MedicineProvider>
-          </OrderProvider>
-        </AdminSearchProvider>
+        <SettingsProvider>
+          <AdminSearchProvider>
+            <OrderProvider>
+              <MedicineProvider>
+              <BuyerProvider>
+                  <CartProvider>
+                      <div className="flex-grow">
+                          {children}
+                      </div>
+                  </CartProvider>
+              </BuyerProvider>
+              </MedicineProvider>
+            </OrderProvider>
+          </AdminSearchProvider>
+        </SettingsProvider>
         <Toaster />
       </body>
     </html>

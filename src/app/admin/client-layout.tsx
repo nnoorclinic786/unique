@@ -11,7 +11,8 @@ import {
   PanelLeft,
   ShieldCheck,
   LogOut,
-  Search
+  Search,
+  Settings
 } from "lucide-react";
 
 import {
@@ -59,6 +60,7 @@ function AdminHeader() {
                 <Link href="/admin/drugs" passHref className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>
                 <Link href="/admin/buyers" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>
                 <Link href="/admin/manage-admins" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>
+                <Link href="/admin/settings" passHref className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Settings className="h-5 w-5" />Settings</Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -111,6 +113,9 @@ export default function AdminClientLayout({ children, permissions }: { children:
             </SidebarContent>
              <SidebarFooter>
                 <SidebarMenu>
+                    <SidebarMenuItem>
+                        <Link href="/admin/settings" passHref><SidebarMenuButton tooltip="Settings"><Settings /><span>Settings</span></SidebarMenuButton></Link>
+                    </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
                             <LogOut /><span>Log Out</span>

@@ -20,6 +20,7 @@ const permissionMap: Record<string, AdminPermission> = {
   '/admin/drugs/new': 'drugs',
   '/admin/buyers': 'buyers',
   '/admin/manage-admins': 'manage_admins',
+  '/admin/settings': 'manage_admins', // Only super admins can change settings
 };
 
 // Function to check permission for a given path

@@ -9,13 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck } from 'lucide-react';
+import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck, Copy } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useOrderContext } from '@/context/orders-context';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { useSettings } from '@/context/settings-context';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock user data, in a real app this would come from a user context or API
 const user = {
@@ -26,7 +28,9 @@ const user = {
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart } = useCart();
   const { addOrder } = useOrderContext();
+  const { settings } = useSettings();
   const router = useRouter();
+  const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [checkoutStep, setCheckoutStep] = useState(1);
 
@@ -49,6 +53,14 @@ export default function CartPage() {
     addOrder(newOrder);
     clearCart();
     router.push('/account'); // Redirect to account page to see new order
+  }
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+        title: "Copied to clipboard!",
+        description: "UPI ID has been copied."
+    });
   }
 
   if (cartItems.length === 0) {
@@ -130,23 +142,54 @@ export default function CartPage() {
              {checkoutStep === 2 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-headline">Confirm Shipping Address</CardTitle>
+                  <CardTitle className="font-headline">Confirm Your Order</CardTitle>
                   <CardDescription>
-                    Please verify your address before placing the order.
+                    Please verify your address and payment method before placing the order.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-4 rounded-md border bg-muted/20 p-4">
-                    <Truck className="h-6 w-6 text-primary mt-1" />
+                <CardContent className="space-y-6">
                     <div>
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="text-muted-foreground">{user.address}</p>
+                        <h3 className="font-semibold mb-2">Shipping Address</h3>
+                        <div className="flex items-start gap-4 rounded-md border bg-muted/20 p-4">
+                            <Truck className="h-6 w-6 text-primary mt-1" />
+                            <div>
+                            <p className="font-semibold">{user.name}</p>
+                            <p className="text-muted-foreground">{user.address}</p>
+                            </div>
+                        </div>
+                        <Button variant="link" size="sm" className="p-0 h-auto mt-2">Change Address</Button>
                     </div>
-                  </div>
-                  <Button variant="link" size="sm" className="p-0 h-auto">Change Address</Button>
+
+                    <Separator />
+                    
+                    <div>
+                        <h3 className="font-semibold mb-2">Payment Details</h3>
+                        {paymentMethod === 'upi' && settings.upiId ? (
+                            <div className="space-y-3">
+                                <p className="text-sm text-muted-foreground">Please complete the payment using the following UPI ID. After payment, click "Place Order".</p>
+                                <div className="flex items-center gap-4 rounded-md border bg-muted/20 p-4">
+                                    <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
+                                    <span className="font-mono text-lg">{settings.upiId}</span>
+                                    <Button size="icon" variant="ghost" className="ml-auto" onClick={() => copyToClipboard(settings.upiId)}>
+                                        <Copy className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                {paymentMethod === 'cod' && <Banknote className="h-5 w-5" />}
+                                {paymentMethod === 'card' && <CreditCard className="h-5 w-5" />}
+                                {paymentMethod === 'netbanking' && <Landmark className="h-5 w-5" />}
+                                <span className="font-semibold capitalize">{paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment (Not Configured)'}</span>
+                            </div>
+                        )}
+                    </div>
                 </CardContent>
-                 <CardFooter>
-                    <Button onClick={() => setCheckoutStep(1)}>Back to Cart</Button>
+                 <CardFooter className="flex justify-between">
+                    <Button variant="outline" onClick={() => setCheckoutStep(1)}>Back to Cart</Button>
+                    <Button size="lg" onClick={handlePlaceOrder}>
+                        Place Order
+                    </Button>
                 </CardFooter>
               </Card>
             )}
@@ -177,7 +220,7 @@ export default function CartPage() {
                     <div>
                         <h3 className="text-md font-medium mb-4">Payment Method</h3>
                         <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
-                            <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer has-[input:checked]:border-primary">
                                 <RadioGroupItem value="card" id="pay-card" />
                                 <CreditCard />
                                 <div className="grid gap-1.5">
@@ -185,7 +228,7 @@ export default function CartPage() {
                                     <span className="text-sm text-muted-foreground">Visa, Mastercard, RuPay</span>
                                 </div>
                             </Label>
-                            <Label htmlFor="pay-upi" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                             <Label htmlFor="pay-upi" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer has-[input:checked]:border-primary">
                                 <RadioGroupItem value="upi" id="pay-upi" />
                                 <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
                                 <div className="grid gap-1.5">
@@ -193,7 +236,7 @@ export default function CartPage() {
                                     <span className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm</span>
                                 </div>
                             </Label>
-                            <Label htmlFor="pay-netbanking" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <Label htmlFor="pay-netbanking" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer has-[input:checked]:border-primary">
                                 <RadioGroupItem value="netbanking" id="pay-netbanking" />
                                 <Landmark />
                                 <div className="grid gap-1.5">
@@ -201,7 +244,7 @@ export default function CartPage() {
                                     <span className="text-sm text-muted-foreground">All major banks supported</span>
                                 </div>
                             </Label>
-                            <Label htmlFor="pay-cod" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <Label htmlFor="pay-cod" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer has-[input:checked]:border-primary">
                                 <RadioGroupItem value="cod" id="pay-cod" />
                                 <Banknote />
                                 <div className="grid gap-1.5">
@@ -213,28 +256,11 @@ export default function CartPage() {
                     </div>
                   </>
                 )}
-                 {checkoutStep === 2 && (
-                    <div className="space-y-2">
-                        <Separator />
-                        <h3 className="text-md font-medium">Selected Payment Method</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            {paymentMethod === 'cod' && <Banknote className="h-5 w-5" />}
-                            {paymentMethod === 'card' && <CreditCard className="h-5 w-5" />}
-                            {paymentMethod === 'upi' && <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-5 w-5"/>}
-                             {paymentMethod === 'netbanking' && <Landmark className="h-5 w-5" />}
-                            <span className="font-semibold capitalize">{paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod.replace('-', ' ')}</span>
-                        </div>
-                    </div>
-                )}
               </CardContent>
               <CardFooter>
-                 {checkoutStep === 1 ? (
+                 {checkoutStep === 1 && (
                   <Button className="w-full" size="lg" onClick={() => setCheckoutStep(2)}>
                     Proceed to Checkout
-                  </Button>
-                ) : (
-                  <Button className="w-full" size="lg" onClick={handlePlaceOrder}>
-                    Place Order
                   </Button>
                 )}
               </CardFooter>
