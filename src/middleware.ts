@@ -39,6 +39,9 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
     if (/^\/admin\/orders\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('orders');
     }
+    if (/^\/admin\/drugs\/[^/]+$/.test(pathname)) {
+        return userPermissions.includes('drugs');
+    }
 
     // Check against the permission map for exact matches
     const requiredPermission = permissionMap[pathname];

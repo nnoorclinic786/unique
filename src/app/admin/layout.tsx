@@ -22,7 +22,7 @@ export default function AdminLayout({
         if (session.isLoggedIn) {
             return (
                 <AdminSearchProvider>
-                <AdminClientLayout permissions={session.permissions}>
+                <AdminClientLayout permissions={session.permissions || []}>
                     {children}
                 </AdminClientLayout>
                 </AdminSearchProvider>
@@ -36,5 +36,9 @@ export default function AdminLayout({
   // If no session cookie, or cookie is invalid, we're on a public page (like /admin/login).
   // Just render the page content without the admin layout.
   // The route group layout `(public)/layout.tsx` will handle this.
-  return <>{children}</>;
+  return (
+    <AdminSearchProvider>
+        {children}
+    </AdminSearchProvider>
+  );
 }
