@@ -16,6 +16,7 @@ export type Medicine = {
   imageSource?: string;
   batchNumber?: string;
   expiryDate?: string;
+  manufacturingDate?: string;
 };
 
 export type Order = {

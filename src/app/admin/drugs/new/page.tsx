@@ -41,6 +41,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Medicine name must be at least 2 characters." }),
   hsnCode: z.string().optional(),
   batchNumber: z.string().optional(),
+  manufacturingDate: z.string().optional(),
   expiryDate: z.string().optional(),
   price: z.coerce.number().min(0, { message: "Price must be a positive number." }),
   priceUnit: z.enum(['strip', 'piece', 'bottle', 'box'], { required_error: "Please select a price unit."}),
@@ -65,6 +66,7 @@ export default function AddMedicinePage() {
       name: "",
       hsnCode: "",
       batchNumber: "",
+      manufacturingDate: "",
       expiryDate: "",
       price: 0,
       imageUrl: "",
@@ -153,6 +155,19 @@ export default function AddMedicinePage() {
                       <FormLabel>Batch Number</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., B-12345" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="manufacturingDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Manufacturing Date</FormLabel>
+                      <FormControl>
+                        <Input type="month" placeholder="MM/YYYY" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
