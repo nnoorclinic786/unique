@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -10,12 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 
 export function Footer() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
-    setIsClient(true);
     const checkLoginStatus = () => {
       if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
         setIsUserLoggedIn(true);
@@ -83,6 +80,7 @@ export function Footer() {
               <ul className="space-y-2 text-sm">
                 <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
                 <li><Link href="/privacy-policy" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Refund & Cancellation Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Return & Replacement Policy</Link></li>
