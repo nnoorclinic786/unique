@@ -54,7 +54,7 @@ export default function CartPage() {
 
   const handlePlaceOrder = () => {
     const newOrder = {
-        id: `ORD-${Date.now()}`,
+        id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
         buyerName: localStorage.getItem('userName') || user.name, // In a real app, get from user session
         date: new Date().toISOString().split('T')[0],
         total: total,
@@ -298,3 +298,5 @@ export default function CartPage() {
     </>
   );
 }
+
+    
