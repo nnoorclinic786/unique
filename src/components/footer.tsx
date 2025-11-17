@@ -91,8 +91,13 @@ export function Footer() {
               <h3 className="font-headline font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Refund & Cancellation Policy</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Return & Replacement Policy</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Payment Policy</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Data Protection & Security Policy</Link></li>
+                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Disclaimer</Link></li>
               </ul>
             </div>
             <div>
