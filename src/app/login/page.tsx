@@ -69,7 +69,7 @@ export default function LoginPage() {
             // For now, we simulate login by storing a value in localStorage
             localStorage.setItem('userLoggedIn', 'true');
             localStorage.setItem('userName', buyer.name);
-            router.push("/account");
+            router.push("/medicines");
         }
     } else {
       toast({
