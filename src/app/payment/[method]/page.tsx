@@ -1,6 +1,7 @@
 
 "use client";
 
+import ClientLayout from '../../client-layout';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export default function PaymentPage() {
 
     if (!details) {
         return (
-             <>
+             <ClientLayout>
                 <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
                     <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                         <h1 className="text-2xl font-bold mb-4">Invalid Payment Method</h1>
@@ -47,12 +48,12 @@ export default function PaymentPage() {
                         </Button>
                     </div>
                 </main>
-            </>
+            </ClientLayout>
         )
     }
 
     return (
-        <>
+        <ClientLayout>
             <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
                 <div className="max-w-md mx-auto">
                      <div className="mb-6">
@@ -80,6 +81,6 @@ export default function PaymentPage() {
                     </Card>
                 </div>
             </main>
-        </>
+        </ClientLayout>
     )
 }

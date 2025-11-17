@@ -1,6 +1,7 @@
 
 'use client';
 
+import ClientLayout from '../../client-layout';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAppContext } from '@/context/app-context';
@@ -22,7 +23,7 @@ export default function MedicineDetailPage() {
 
   if (!medicine) {
     return (
-      <>
+      <ClientLayout>
         <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">Medicine not found</h1>
@@ -31,7 +32,7 @@ export default function MedicineDetailPage() {
             </Button>
           </div>
         </main>
-      </>
+      </ClientLayout>
     );
   }
 
@@ -69,7 +70,7 @@ export default function MedicineDetailPage() {
   }
 
   return (
-    <>
+    <ClientLayout>
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <div className="mb-6">
           <Button variant="outline" size="sm" onClick={() => router.back()}>
@@ -131,6 +132,6 @@ export default function MedicineDetailPage() {
           </div>
         </div>
       </main>
-    </>
+    </ClientLayout>
   );
 }

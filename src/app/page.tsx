@@ -1,4 +1,5 @@
 
+import ClientLayout from './client-layout';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,7 +41,7 @@ const targetAudience = [
 
 export default function LandingPage() {
   return (
-    <>
+    <ClientLayout>
       <main className="flex-1">
         <section className="w-full py-20 md:py-32 lg:py-40 bg-card">
           <div className="container mx-auto px-4 md:px-6 text-center">
@@ -109,6 +110,6 @@ export default function LandingPage() {
         </section>
       </main>
       <Footer />
-    </>
+    </ClientLayout>
   );
 }

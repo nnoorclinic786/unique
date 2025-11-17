@@ -1,5 +1,7 @@
 
 "use client";
+
+import ClientLayout from '../client-layout';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -17,7 +19,7 @@ export default function MedicinesPage() {
   );
 
   return (
-    <>
+    <ClientLayout>
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -39,6 +41,6 @@ export default function MedicinesPage() {
           </div>
         </div>
       </main>
-    </>
+    </ClientLayout>
   );
 }
