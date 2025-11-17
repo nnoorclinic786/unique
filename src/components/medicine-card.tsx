@@ -1,14 +1,18 @@
+
 import Image from 'next/image';
 import type { Medicine } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useCart } from '@/context/cart-context';
 
 interface MedicineCardProps {
   medicine: Medicine;
 }
 
 export function MedicineCard({ medicine }: MedicineCardProps) {
+  const { addToCart } = useCart();
+  
   return (
     <Card className="flex flex-col overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="p-0">
@@ -30,7 +34,7 @@ export function MedicineCard({ medicine }: MedicineCardProps) {
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between items-center">
         <p className="text-xl font-bold text-foreground">₹{medicine.price.toFixed(2)}</p>
-        <Button size="sm">
+        <Button size="sm" onClick={() => addToCart(medicine)}>
           <Plus className="mr-2 h-4 w-4" /> Add to Cart
         </Button>
       </CardFooter>

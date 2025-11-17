@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 interface OrderContextType {
   orders: Order[];
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
+  addOrder: (order: Order) => void;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -28,9 +29,17 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       description: `Order ${orderId} has been marked as ${status}.`,
     });
   }, [toast]);
+  
+  const addOrder = useCallback((order: Order) => {
+    setOrders(prevOrders => [order, ...prevOrders]);
+     toast({
+      title: "Order Placed!",
+      description: `Your order ${order.id} has been successfully placed.`,
+    });
+  }, [toast]);
 
   return (
-    <OrderContext.Provider value={{ orders, updateOrderStatus }}>
+    <OrderContext.Provider value={{ orders, updateOrderStatus, addOrder }}>
       {children}
     </OrderContext.Provider>
   );

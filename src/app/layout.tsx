@@ -7,6 +7,7 @@ import { BuyerProvider } from '@/context/buyers-context';
 import { OrderProvider } from '@/context/orders-context';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 import { Footer } from '@/components/footer';
+import { CartProvider } from '@/context/cart-context';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -31,9 +32,11 @@ export default function RootLayout({
           <OrderProvider>
             <MedicineProvider>
             <BuyerProvider>
-                <div className="flex-grow">
-                    {children}
-                </div>
+                <CartProvider>
+                    <div className="flex-grow">
+                        {children}
+                    </div>
+                </CartProvider>
             </BuyerProvider>
             </MedicineProvider>
           </OrderProvider>
