@@ -19,18 +19,22 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    // This effect runs once on the client to safely initialize state from localStorage.
     try {
       const storedOrders = localStorage.getItem('orders');
       if (storedOrders) {
+        // If orders exist in storage, use them.
         setOrders(JSON.parse(storedOrders));
       } else {
-        // If no orders in storage, initialize with default data
+        // If no orders are in storage, initialize storage with the default data.
         localStorage.setItem('orders', JSON.stringify(initialOrders));
+        setOrders(initialOrders);
       }
     } catch (error) {
-      console.error("Failed to parse orders from localStorage", error);
-      setOrders(initialOrders); // Fallback to initial data
-      localStorage.removeItem('orders');
+      console.error("Failed to read or initialize orders from localStorage", error);
+      // If there's an error (e.g., corrupted data), reset to default and clean up.
+      setOrders(initialOrders);
+      localStorage.setItem('orders', JSON.stringify(initialOrders));
     }
   }, []);
 
