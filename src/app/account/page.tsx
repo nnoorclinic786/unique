@@ -3,7 +3,7 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
@@ -15,11 +15,12 @@ import { useAppContext } from '@/context/app-context';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AddressForm } from '@/components/address-form';
-import type { Address } from '@/lib/types';
+import type { Address, Buyer } from '@/lib/types';
 import { Home, Trash2, Edit, PlusCircle, Star } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { BuyerProfileForm } from '@/components/buyer-profile-form';
 
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
@@ -33,17 +34,24 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
 export default function AccountPage() {
   const { 
     orders, updateOrderStatus, buyers, 
-    addBuyerAddress, updateBuyerAddress, deleteBuyerAddress, setBuyerDefaultAddress
+    addBuyerAddress, updateBuyerAddress, deleteBuyerAddress, setBuyerDefaultAddress,
+    updateBuyerDetails
   } = useAppContext();
   const { toast } = useToast();
   const [userName, setUserName] = useState<string | null>(null);
   const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [isProfileDialogOpen, setProfileDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | undefined>(undefined);
+  
+  const [buyer, setBuyer] = useState<Buyer | null>(null);
 
   useEffect(() => {
     const storedUserName = localStorage.getItem('userName');
     setUserName(storedUserName);
-  }, []);
+    if (storedUserName) {
+      setBuyer(buyers.find(b => b.name === storedUserName) || null);
+    }
+  }, [buyers]);
 
   const handleCancelOrder = (orderId: string) => {
     updateOrderStatus(orderId, 'Cancelled');
@@ -53,7 +61,6 @@ export default function AccountPage() {
     });
   };
   
-  const buyer = buyers.find(b => b.name === userName);
   const userOrders = userName ? orders.filter(order => order.buyerName === userName) : [];
 
   const handleAddressSave = (addressData: Omit<Address, 'id'>) => {
@@ -75,6 +82,18 @@ export default function AccountPage() {
           title: "Error",
           description: "Could not find user to update address.",
       });
+    }
+  };
+
+  const handleProfileSave = (profileData: any) => {
+    if (buyer) {
+        updateBuyerDetails(buyer.id, profileData);
+        if (buyer.name !== profileData.name) {
+            localStorage.setItem('userName', profileData.name);
+            setUserName(profileData.name);
+        }
+        toast({ title: "Profile Updated", description: "Your account details have been updated."});
+        setProfileDialogOpen(false);
     }
   };
 
@@ -111,11 +130,22 @@ export default function AccountPage() {
         <div className="grid md:grid-cols-3 gap-8">
           <div className="md:col-span-1 space-y-8">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="font-headline">{buyer?.name || 'User'}</CardTitle>
-                <CardDescription>{buyer?.email}</CardDescription>
+                 <Button variant="outline" size="sm" onClick={() => setProfileDialogOpen(true)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                </Button>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
+                <div>
+                  <h3 className="font-semibold">Contact Person</h3>
+                  <p className="text-muted-foreground">{buyer?.personName}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold">Email</h3>
+                  <p className="text-muted-foreground">{buyer?.email}</p>
+                </div>
                 <div>
                   <h3 className="font-semibold">Mobile</h3>
                   <p className="text-muted-foreground">{buyer?.mobileNumber1}</p>
@@ -222,6 +252,8 @@ export default function AccountPage() {
           </div>
         </div>
       </main>
+
+       {/* Address Dialog */}
       <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -234,6 +266,21 @@ export default function AccountPage() {
                     setAddressDialogOpen(false);
                     setEditingAddress(undefined);
                   }}
+                />
+            </DialogContent>
+        </Dialog>
+        
+        {/* Profile Dialog */}
+        <Dialog open={isProfileDialogOpen} onOpenChange={setProfileDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Edit Profile</DialogTitle>
+                    <CardDescription>Make changes to your account details here.</CardDescription>
+                </DialogHeader>
+                <BuyerProfileForm
+                    buyer={buyer}
+                    onSave={handleProfileSave}
+                    onCancel={() => setProfileDialogOpen(false)}
                 />
             </DialogContent>
         </Dialog>

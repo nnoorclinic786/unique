@@ -39,6 +39,7 @@ interface AppContextType {
   addPendingBuyer: (buyer: Buyer) => void;
   approveBuyer: (buyerId: string) => void;
   toggleBuyerStatus: (buyerId: string, status: 'Approved' | 'Disabled') => void;
+  updateBuyerDetails: (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber'>>) => void;
   
   // Buyer Addresses
   addBuyerAddress: (buyerId: string, address: Omit<Address, 'id'>) => void;
@@ -169,6 +170,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       prev.map((b) => (b.id === buyerId ? { ...b, status: newStatus } : b))
     );
   }, []);
+  
+  const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber'>>) => {
+    setBuyers(prev => prev.map(buyer => {
+        if (buyer.id === buyerId) {
+            return { ...buyer, ...details };
+        }
+        return buyer;
+    }));
+  }, []);
+
 
   const addBuyerAddress = useCallback((buyerId: string, address: Omit<Address, 'id'>) => {
     setBuyers(prev => prev.map(buyer => {
@@ -264,6 +275,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addPendingBuyer,
     approveBuyer,
     toggleBuyerStatus,
+    updateBuyerDetails,
     addBuyerAddress,
     updateBuyerAddress,
     deleteBuyerAddress,
