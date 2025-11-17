@@ -90,7 +90,7 @@ export default function CartPage() {
     if (paymentMethod === 'cod') {
         setCheckoutStep(2);
     } else {
-        router.push(`/payment/${method}`);
+        router.push(`/payment/${paymentMethod}`);
     }
   }
 
