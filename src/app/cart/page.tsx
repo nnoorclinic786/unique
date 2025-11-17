@@ -50,7 +50,7 @@ export default function CartPage() {
 
   const handlePlaceOrder = () => {
     const newOrder = {
-        id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         buyerName: localStorage.getItem('userName') || user.name, // In a real app, get from user session
         date: new Date().toISOString().split('T')[0],
         total: total,
@@ -181,7 +181,9 @@ export default function CartPage() {
                             <p className="text-muted-foreground">{user.address}</p>
                             </div>
                         </div>
-                        <Button variant="link" size="sm" className="p-0 h-auto mt-2">Change Address</Button>
+                        <Button variant="link" size="sm" className="p-0 h-auto mt-2" asChild>
+                           <Link href="/account">Change Address</Link>
+                        </Button>
                     </div>
 
                     <Separator />
