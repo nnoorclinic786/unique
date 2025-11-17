@@ -118,13 +118,11 @@ export function Footer() {
                 <PolicyLink href="/return-and-replacement-policy">Return & Replacement</PolicyLink>
                 <PolicyLink href="/payment-policy">Payment Policy</PolicyLink>
                 <PolicyLink href="/data-protection-and-security-policy">Data Protection & Security</PolicyLink>
+                <PolicyLink href="/disclaimer">Disclaimer</PolicyLink>
             </div>
          </div>
 
-        <div className="border-t border-muted-foreground/10 mt-6 py-6 text-xs text-muted-foreground space-y-4">
-            <p>
-                <span className="font-bold">Disclaimer:</span> All information provided on this platform, including product descriptions, is for informational purposes only. It is not intended to be a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
-            </p>
+        <div className="border-t border-muted-foreground/10 mt-6 py-6 text-center text-xs text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Unique Medicare. All rights reserved.</p>
         </div>
       </div>
