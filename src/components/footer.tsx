@@ -72,26 +72,17 @@ export function Footer() {
           <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8">
             <div>
               <h3 className="font-headline font-semibold mb-4">Quick Links</h3>
-              {isClient ? (
-                  <ul className="space-y-2 text-sm">
-                    <QuickLink href="/medicines">Products</QuickLink>
-                    <QuickLink href="/account">Orders</QuickLink>
-                    <QuickLink href="/cart">Cart</QuickLink>
-                  </ul>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="h-4 bg-muted-foreground/20 rounded w-20"></div>
-                    <div className="h-4 bg-muted-foreground/20 rounded w-16"></div>
-                    <div className="h-4 bg-muted-foreground/20 rounded w-12"></div>
-                  </div>
-                )
-              }
+              <ul className="space-y-2 text-sm">
+                <QuickLink href="/medicines">Products</QuickLink>
+                <QuickLink href="/account">Orders</QuickLink>
+                <QuickLink href="/cart">Cart</QuickLink>
+              </ul>
             </div>
             <div>
               <h3 className="font-headline font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+                <li><Link href="/privacy-policy" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Refund & Cancellation Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Return & Replacement Policy</Link></li>
