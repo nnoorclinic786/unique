@@ -91,9 +91,11 @@ export function Header() {
               </Link>
             </>
           )}
+          {!(isUserLoggedIn || isAdminLoggedIn) && (
             <Link href="/about" className="transition-colors hover:text-primary">
               About Us
             </Link>
+          )}
           {isAdminLoggedIn && (
             <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
               Admin
