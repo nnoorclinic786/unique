@@ -14,8 +14,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
-import { addPendingAdmin } from "@/app/admin/(public)/login/actions";
 import { Eye, EyeOff } from "lucide-react";
+import { useAppContext } from "@/context/app-context";
+import { AppProvider } from "@/context/app-context";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -27,9 +28,10 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
-export default function AdminSignupPage() {
+function AdminSignupPageContent() {
   const { toast } = useToast();
   const router = useRouter();
+  const { addPendingAdmin } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -43,8 +45,8 @@ export default function AdminSignupPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const result = await addPendingAdmin(values);
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const result = addPendingAdmin(values);
 
     if (result.success) {
       toast({
@@ -149,4 +151,12 @@ export default function AdminSignupPage() {
       </Card>
     </div>
   );
+}
+
+export default function AdminSignupPage() {
+    return (
+        <AppProvider>
+            <AdminSignupPageContent />
+        </AppProvider>
+    )
 }

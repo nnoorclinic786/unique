@@ -3,21 +3,24 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { admins } from "@/lib/data"; // Note: this is now just the initial seed data.
 
-// In a real application, these should be stored securely in a database and passwords should be hashed.
-const ADMIN_USERS = [
-    { email: "superadmin@medicare.com", password: "superadminpassword", role: "Super Admin", name: "Super Admin", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'], status: 'Approved' },
-    { email: "admin@medicare.com", password: "adminpassword", role: "Admin", name: "Admin User", permissions: ['dashboard', 'orders'], status: 'Approved' },
-    { email: "testadmin@medicare.com", password: "testpassword", role: "Admin", name: "Test Admin", permissions: ['dashboard', 'drugs'], status: 'Approved' },
-    { email: "pending@medicare.com", password: "pendingpassword", role: "Admin", name: "Pending User", permissions: [], status: 'Pending' }
-];
+// This is a stand-in for a database call. In a real app, this would be more complex.
+// For this mock environment, we assume the client-side context is the source of truth
+// and server actions just facilitate communication.
+const getAdminsFromStorage = () => {
+    // In a real server action, we might fetch this from a DB.
+    // For this mock setup, we'll have to rely on the fact that this array is
+    // mutated by other "server actions" in the same process. This is NOT a good
+    // real-world practice but necessary for this mocked environment.
+    return admins;
+}
 
-
-export async function login(formData: FormData): Promise<{ error?: string }> {
+export async function login(formData: FormData, allAdmins: any[]): Promise<{ error?: string }> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const user = ADMIN_USERS.find(u => u.email === email && u.password === password);
+  const user = allAdmins.find(u => u.email === email && u.password === password);
 
   if (!user) {
     return { error: "Invalid email or password." };
@@ -49,60 +52,4 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
 export async function logout() {
   cookies().delete("admin_session");
   redirect("/admin/login");
-}
-
-export async function addPendingAdmin(data: {name: string, email: string, password: string}) {
-    // In a real app, this would check for existing users and save to a database.
-    const existingUser = ADMIN_USERS.find(u => u.email === data.email);
-    if (existingUser) {
-        return { success: false, error: "An admin with this email already exists." };
-    }
-
-    const newAdmin = {
-        email: data.email,
-        password: data.password,
-        role: "Admin",
-        name: data.name,
-        permissions: [], // No permissions by default
-        status: 'Pending' as const,
-    };
-    ADMIN_USERS.push(newAdmin);
-    return { success: true };
-}
-
-
-export async function getAdmins() {
-    // In a real app, this would fetch from a database.
-    // Return a copy to avoid direct mutation of the constant
-    return JSON.parse(JSON.stringify(ADMIN_USERS));
-}
-
-export async function updateAdminPermissions(email: string, permissions: string[]) {
-    // This is a mock function. In a real app, you would update the database.
-    console.log(`Updating permissions for ${email}:`, permissions);
-    const user = ADMIN_USERS.find(u => u.email === email);
-    if (user && user.role !== 'Super Admin') {
-        user.permissions = permissions;
-    }
-    return { success: true, message: `Permissions for ${email} updated.` };
-}
-
-export async function approveAdmin(email: string) {
-    const user = ADMIN_USERS.find(u => u.email === email);
-    if (user && user.status === 'Pending') {
-        user.status = 'Approved';
-        // Assign default permissions upon approval
-        user.permissions = ['dashboard']; 
-        return { success: true, message: `${user.name} has been approved.` };
-    }
-    return { success: false, error: 'User not found or not pending.' };
-}
-
-export async function toggleAdminStatus(email: string, currentStatus: 'Approved' | 'Disabled') {
-    const user = ADMIN_USERS.find(u => u.email === email);
-    if (user && user.role !== 'Super Admin') {
-        user.status = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
-        return { success: true, message: `${user.name}'s account has been ${user.status.toLowerCase()}.` };
-    }
-    return { success: false, error: 'User not found or is a Super Admin.' };
 }

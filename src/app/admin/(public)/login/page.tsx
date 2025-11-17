@@ -11,12 +11,14 @@ import { Logo } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import { login } from "./actions";
 import { Eye, EyeOff } from "lucide-react";
+import { useAppContext } from "@/context/app-context";
+import { AppProvider } from "@/context/app-context";
 
-export default function AdminLoginPage() {
+function LoginPageContent() {
   const { toast } = useToast();
+  const { admins } = useAppContext();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -26,7 +28,7 @@ export default function AdminLoginPage() {
     try {
       // The login action will automatically redirect on success by throwing an error.
       // If it returns a value, it means there was an error.
-      const result = await login(formData);
+      const result = await login(formData, admins);
       if (result?.error) {
         setError(result.error);
         toast({
@@ -109,4 +111,12 @@ export default function AdminLoginPage() {
       </Card>
     </div>
   );
+}
+
+export default function AdminLoginPage() {
+    return (
+        <AppProvider>
+            <LoginPageContent />
+        </AppProvider>
+    )
 }

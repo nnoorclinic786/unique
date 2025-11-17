@@ -1,5 +1,6 @@
 
 
+
 export type Address = {
   id: string;
   name: string; // e.g. "Main Clinic", "Warehouse"
@@ -54,6 +55,14 @@ export type Buyer = {
     // For now, we'll omit them from the type as we're not handling file uploads yet.
 };
 
+export type AdminUser = {
+  email: string;
+  name: string;
+  role: string;
+  permissions: string[];
+  status: 'Approved' | 'Pending' | 'Disabled';
+  password?: string; // Password should be optional as we won't always have it
+};
     
 
     

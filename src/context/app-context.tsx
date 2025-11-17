@@ -10,11 +10,12 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import type { Order, Buyer, Medicine, Address } from '@/lib/types';
+import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
 import {
   orders as initialOrders,
   buyers as initialBuyers,
   medicines as initialMedicines,
+  admins as initialAdmins,
 } from '@/lib/data';
 
 // == TYPES ==
@@ -62,6 +63,14 @@ interface AppContextType {
   updateQuantity: (itemId: string, quantity: number) => void;
   cartCount: number;
   clearCart: () => void;
+
+  // Admins
+  admins: AdminUser[];
+  getAdmins: () => AdminUser[];
+  addPendingAdmin: (admin: AdminUser) => { success: boolean, error?: string };
+  updateAdminPermissions: (email: string, permissions: string[]) => Promise<{ success: boolean; message: string; }>;
+  approveAdmin: (email: string) => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
+  toggleAdminStatus: (email: string, currentStatus: 'Approved' | 'Disabled') => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
 }
 
 // == CONTEXT CREATION ==
@@ -95,6 +104,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [medicines, setMedicines] = useState<Medicine[]>(() => getInitialState('medicines', initialMedicines));
   const [settings, setSettings] = useState<Settings>(() => getInitialState('appSettings', { upiId: '' }));
   const [cartItems, setCartItems] = useState<CartItem[]>(() => getInitialState('cartItems', []));
+  const [admins, setAdmins] = useState<AdminUser[]>(() => getInitialState('admins', initialAdmins));
   
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders));
@@ -115,6 +125,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem('admins', JSON.stringify(admins));
+  }, [admins]);
 
 
   // === ORDERS LOGIC ===
@@ -238,6 +252,75 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  
+  // === ADMINS LOGIC ===
+  const getAdmins = useCallback(() => {
+    return admins;
+  }, [admins]);
+
+  const addPendingAdmin = useCallback((adminData: AdminUser) => {
+    const existingUser = admins.find(u => u.email === adminData.email);
+    if (existingUser) {
+        return { success: false, error: "An admin with this email already exists." };
+    }
+
+    const newAdmin = {
+        ...adminData,
+        role: "Admin",
+        permissions: [],
+        status: 'Pending' as const,
+    };
+    setAdmins(prev => [...prev, newAdmin]);
+    return { success: true };
+  }, [admins]);
+
+  const updateAdminPermissions = useCallback(async (email: string, permissions: string[]) => {
+    setAdmins(prev => prev.map(admin => {
+        if (admin.email === email && admin.role !== 'Super Admin') {
+            return { ...admin, permissions };
+        }
+        return admin;
+    }));
+    return { success: true, message: `Permissions for ${email} updated.` };
+  }, []);
+
+  const approveAdmin = useCallback(async (email: string) => {
+    let success = false;
+    let userName = '';
+    setAdmins(prev => prev.map(admin => {
+        if (admin.email === email && admin.status === 'Pending') {
+            success = true;
+            userName = admin.name;
+            return { ...admin, status: 'Approved' as const, permissions: ['dashboard'] };
+        }
+        return admin;
+    }));
+    if (success) {
+      return { success: true, message: `${userName} has been approved.` };
+    }
+    return { success: false, error: 'User not found or not pending.' };
+  }, []);
+
+  const toggleAdminStatus = useCallback(async (email: string, currentStatus: 'Approved' | 'Disabled') => {
+      let userToggled = false;
+      let newStatus: 'Approved' | 'Disabled' = 'Approved';
+      let userName = '';
+      
+      setAdmins(prev => prev.map(admin => {
+          if (admin.email === email && admin.role !== 'Super Admin') {
+              userToggled = true;
+              userName = admin.name;
+              newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
+              return { ...admin, status: newStatus };
+          }
+          return admin;
+      }));
+
+      if (userToggled) {
+          return { success: true, message: `${userName}'s account has been ${newStatus.toLowerCase()}.` };
+      }
+      return { success: false, error: 'User not found or is a Super Admin.' };
+  }, []);
 
   // === VALUE FOR PROVIDER ===
   const value: AppContextType = {
@@ -265,6 +348,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updateQuantity,
     cartCount,
     clearCart,
+    admins,
+    getAdmins,
+    addPendingAdmin,
+    updateAdminPermissions,
+    approveAdmin,
+    toggleAdminStatus,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

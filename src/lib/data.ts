@@ -1,19 +1,19 @@
 
 
-import type { Medicine, Order, Buyer } from './types';
+import type { Medicine, Order, Buyer, AdminUser } from './types';
 import { PlaceHolderImages } from './placeholder-images';
 
 export const placeholderImages = PlaceHolderImages;
 
 export const medicines: Medicine[] = [
-  { id: 'PROD001', name: 'Paracetamol 500mg', description: 'Standard analgesic and antipyretic.', price: 15.50, stock: 1200, category: 'Analgesics', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '', batchNumber: 'P001A', manufacturingDate: '2024-01', expiryDate: '2026-12', manufacturingCompany: 'Cipla', marketingCompany: 'Cipla' },
-  { id: 'PROD002', name: 'Amoxicillin 250mg', description: 'Broad-spectrum antibiotic.', price: 45.00, stock: 800, category: 'Antibiotics', imageUrl: placeholderImages.find(img => img.id === 'capsules')?.imageUrl || '', batchNumber: 'A002B', manufacturingDate: '2023-09', expiryDate: '2025-08', manufacturingCompany: 'Sun Pharma', marketingCompany: 'Sun Pharma' },
-  { id: 'PROD003', name: 'Cough Syrup 100ml', description: 'For relief from cough and cold.', price: 75.00, stock: 650, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '', batchNumber: 'CS003C', manufacturingDate: '2023-12', expiryDate: '2025-11', manufacturingCompany: 'Dr. Reddy\'s', marketingCompany: 'Dr. Reddy\'s' },
-  { id: 'PROD004', name: 'Antacid Gel 170ml', description: 'For heartburn and indigestion.', price: 60.25, stock: 900, category: 'Gastrointestinal', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '', batchNumber: 'AG004D', manufacturingDate: '2024-05', expiryDate: '2026-04', manufacturingCompany: 'Abbott', marketingCompany: 'Abbott' },
-  { id: 'PROD005', name: 'Diclofenac Gel 30g', description: 'Topical pain relief gel.', price: 55.00, stock: 750, category: 'Topical', imageUrl: placeholderImages.find(img => img.id === 'ointment-tube')?.imageUrl || '', batchNumber: 'DG005E', manufacturingDate: '2024-02', expiryDate: '2027-01', manufacturingCompany: 'Mankind', marketingCompany: 'Mankind' },
-  { id: 'PROD006', name: 'Salbutamol Inhaler', description: 'For asthma and COPD relief.', price: 120.00, stock: 400, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'inhaler')?.imageUrl || '', batchNumber: 'SI006F', manufacturingDate: '2023-10', expiryDate: '2025-09', manufacturingCompany: 'Cipla', marketingCompany: 'GSK' },
-  { id: 'PROD007', name: 'Vitamin C 500mg', description: 'Immunity booster supplement.', price: 30.00, stock: 2500, category: 'Vitamins', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '', batchNumber: 'VC007G', manufacturingDate: '2024-07', expiryDate: '2027-06', manufacturingCompany: 'Lupin', marketingCompany: 'Lupin' },
-  { id: 'PROD008', name: 'Insulin Injection', description: 'For management of diabetes.', price: 450.00, stock: 200, category: 'Endocrine', imageUrl: placeholderImages.find(img => img.id === 'vaccine-vial')?.imageUrl || '', batchNumber: 'IN008H', manufacturingDate: '2023-06', expiryDate: '2025-05', manufacturingCompany: 'Novo Nordisk', marketingCompany: 'Novo Nordisk' },
+  { id: 'PROD001', name: 'Paracetamol 500mg', description: 'Standard analgesic and antipyretic.', price: 15.50, stock: 1200, category: 'Analgesics', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '', batchNumber: 'P001A', manufacturingDate: '2024-01', expiryDate: '2026-12', manufacturingCompany: 'Cipla', marketingCompany: 'Cipla', priceUnit: 'strip', stockUnit: 'box' },
+  { id: 'PROD002', name: 'Amoxicillin 250mg', description: 'Broad-spectrum antibiotic.', price: 45.00, stock: 800, category: 'Antibiotics', imageUrl: placeholderImages.find(img => img.id === 'capsules')?.imageUrl || '', batchNumber: 'A002B', manufacturingDate: '2023-09', expiryDate: '2025-08', manufacturingCompany: 'Sun Pharma', marketingCompany: 'Sun Pharma', priceUnit: 'strip', stockUnit: 'box' },
+  { id: 'PROD003', name: 'Cough Syrup 100ml', description: 'For relief from cough and cold.', price: 75.00, stock: 650, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '', batchNumber: 'CS003C', manufacturingDate: '2023-12', expiryDate: '2025-11', manufacturingCompany: 'Dr. Reddy\'s', marketingCompany: 'Dr. Reddy\'s', priceUnit: 'bottle', stockUnit: 'bottle' },
+  { id: 'PROD004', name: 'Antacid Gel 170ml', description: 'For heartburn and indigestion.', price: 60.25, stock: 900, category: 'Gastrointestinal', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '', batchNumber: 'AG004D', manufacturingDate: '2024-05', expiryDate: '2026-04', manufacturingCompany: 'Abbott', marketingCompany: 'Abbott', priceUnit: 'bottle', stockUnit: 'bottle' },
+  { id: 'PROD005', name: 'Diclofenac Gel 30g', description: 'Topical pain relief gel.', price: 55.00, stock: 750, category: 'Topical', imageUrl: placeholderImages.find(img => img.id === 'ointment-tube')?.imageUrl || '', batchNumber: 'DG005E', manufacturingDate: '2024-02', expiryDate: '2027-01', manufacturingCompany: 'Mankind', marketingCompany: 'Mankind', priceUnit: 'piece', stockUnit: 'piece' },
+  { id: 'PROD006', name: 'Salbutamol Inhaler', description: 'For asthma and COPD relief.', price: 120.00, stock: 400, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'inhaler')?.imageUrl || '', batchNumber: 'SI006F', manufacturingDate: '2023-10', expiryDate: '2025-09', manufacturingCompany: 'Cipla', marketingCompany: 'GSK', priceUnit: 'piece', stockUnit: 'piece' },
+  { id: 'PROD007', name: 'Vitamin C 500mg', description: 'Immunity booster supplement.', price: 30.00, stock: 2500, category: 'Vitamins', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '', batchNumber: 'VC007G', manufacturingDate: '2024-07', expiryDate: '2027-06', manufacturingCompany: 'Lupin', marketingCompany: 'Lupin', priceUnit: 'strip', stockUnit: 'box' },
+  { id: 'PROD008', name: 'Insulin Injection', description: 'For management of diabetes.', price: 450.00, stock: 200, category: 'Endocrine', imageUrl: placeholderImages.find(img => img.id === 'vaccine-vial')?.imageUrl || '', batchNumber: 'IN008H', manufacturingDate: '2023-06', expiryDate: '2025-05', manufacturingCompany: 'Novo Nordisk', marketingCompany: 'Novo Nordisk', priceUnit: 'piece', stockUnit: 'piece' },
 ];
 
 export const orders: Order[] = [
@@ -47,6 +47,13 @@ export const buyers: Buyer[] = [
     { id: 'BUY006', name: 'HealthFirst Pharma', email: 'contact@healthfirst.com', password: 'password123', registeredOn: '2023-03-12', gstNumber: '33AAAAA1111B1Z5', type: 'Medical Store', status: 'Disabled', permanentAddress: '9 Pharma Lane, Farrukhabad, UP - 209625' },
 ];
 
+export const admins: AdminUser[] = [
+    { email: "superadmin@medicare.com", password: "superadminpassword", role: "Super Admin", name: "Super Admin", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'], status: 'Approved' },
+    { email: "admin@medicare.com", password: "adminpassword", role: "Admin", name: "Admin User", permissions: ['dashboard', 'orders'], status: 'Approved' },
+    { email: "testadmin@medicare.com", password: "testpassword", role: "Admin", name: "Test Admin", permissions: ['dashboard', 'drugs'], status: 'Approved' },
+    { email: "pending@medicare.com", password: "pendingpassword", role: "Admin", name: "Pending User", permissions: [], status: 'Pending' }
+];
+
 // This static data is no longer used by the dashboard.
 export const salesData = [
   { month: 'January', sales: 4000 },
@@ -56,5 +63,3 @@ export const salesData = [
   { month: 'May', sales: 6000 },
   { month: 'June', sales: 5500 },
 ];
-
-    

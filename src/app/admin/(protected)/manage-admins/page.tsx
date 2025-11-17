@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -21,35 +22,29 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { getAdmins, updateAdminPermissions, approveAdmin, toggleAdminStatus } from "@/app/admin/(public)/login/actions";
-import { MoreHorizontal, CheckCircle2, Eye, EyeOff } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import React from 'react';
+import { useAppContext } from "@/context/app-context";
+import type { AdminUser } from "@/lib/types";
 
-type AdminUser = {
-  email: string;
-  name: string;
-  role: string;
-  permissions: string[];
-  status: 'Approved' | 'Pending' | 'Disabled';
-};
-
-const allPermissions = [
+const allPermissionsList = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'orders', label: 'Orders' },
   { id: 'drugs', label: 'Medicines' },
   { id: 'buyers', label: 'Buyers' },
+  { id: 'manage_admins', label: 'Manage Admins' },
+  { id: 'settings', label: 'Settings' },
 ];
 
 export default function ManageAdminsPage() {
+  const { admins, getAdmins, updateAdminPermissions, approveAdmin, toggleAdminStatus } = useAppContext();
   const [allAdmins, setAllAdmins] = useState<AdminUser[]>([]);
   const [initialAdmins, setInitialAdmins] = useState<AdminUser[]>([]);
   const { toast } = useToast();
 
-  const fetchAdmins = async () => {
-    const adminData = await getAdmins();
-    // Filter out Super Admin from being managed
+  const fetchAdmins = () => {
+    const adminData = getAdmins();
     const manageableAdmins = adminData.filter(a => a.role !== 'Super Admin'); 
     setAllAdmins(manageableAdmins);
     setInitialAdmins(JSON.parse(JSON.stringify(manageableAdmins)));
@@ -57,7 +52,7 @@ export default function ManageAdminsPage() {
 
   useEffect(() => {
     fetchAdmins();
-  }, []);
+  }, [admins]); // Re-fetch when context's admin list changes
 
   const handlePermissionChange = (email: string, permissionId: string, checked: boolean) => {
     setAllAdmins(prevAdmins =>
@@ -80,7 +75,7 @@ export default function ManageAdminsPage() {
         title: "Permissions Updated",
         description: result.message,
       });
-      fetchAdmins(); // Refetch to update initial state
+      fetchAdmins();
     } else {
       toast({
         variant: "destructive",
@@ -181,7 +176,7 @@ export default function ManageAdminsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Admin</TableHead>
-                  {allPermissions.map(p => (
+                  {allPermissionsList.map(p => (
                     <TableHead key={p.id} className="text-center">{p.label}</TableHead>
                   ))}
                   <TableHead className="text-right">Actions</TableHead>
@@ -194,7 +189,7 @@ export default function ManageAdminsPage() {
                       <div className="font-medium">{admin.name}</div>
                       <div className="text-sm text-muted-foreground">{admin.email}</div>
                     </TableCell>
-                    {allPermissions.map(permission => (
+                    {allPermissionsList.map(permission => (
                       <TableCell key={permission.id} className="text-center">
                         <Checkbox
                           id={`${admin.email}-${permission.id}`}
