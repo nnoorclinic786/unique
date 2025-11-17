@@ -167,12 +167,15 @@ export default function AccountPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {buyer?.addresses && buyer.addresses.length > 0 ? (
-                        buyer.addresses.map(addr => (
+                        buyer.addresses.map((addr, index) => (
                             <div key={addr.id} className="p-4 border rounded-lg relative group">
-                                <div className="flex items-start gap-2">
-                                  {buyer.defaultAddressId === addr.id && <Star className="h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0 mt-0.5" />}
-                                  <div>
-                                    <p className="font-semibold">{addr.name}</p>
+                                <div className="flex items-start gap-4">
+                                  <span className="font-bold text-lg text-muted-foreground pt-0.5">{index + 1}.</span>
+                                  <div className="flex-1">
+                                    <div className="flex items-start gap-2">
+                                      {buyer.defaultAddressId === addr.id && <Star className="h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0 mt-1" />}
+                                      <p className="font-semibold">{addr.name}</p>
+                                    </div>
                                     <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
                                   </div>
                                 </div>
