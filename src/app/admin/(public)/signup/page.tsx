@@ -129,7 +129,7 @@ export default function AdminSignupPage() {
                                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                             >
                                 {showConfirmPassword ? <EyeOff /> : <Eye />}
-                                <span className="sr-only">{showConfirm-password ? 'Hide password' : 'Show password'}</span>
+                                <span className="sr-only">{showConfirmPassword ? 'Hide password' : 'Show password'}</span>
                             </Button>
                         </div>
                         <FormMessage />
