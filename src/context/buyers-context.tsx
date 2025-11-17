@@ -16,18 +16,6 @@ interface BuyerContextType {
 
 const BuyerContext = createContext<BuyerContextType | undefined>(undefined);
 
-const getInitialBuyers = () => {
-  if (typeof window === 'undefined') {
-    return [];
-  }
-  try {
-    const stored = localStorage.getItem('buyers');
-    return stored ? JSON.parse(stored) : [];
-  } catch (e) {
-    return [];
-  }
-}
-
 export function BuyerProvider({ children }: { children: ReactNode }) {
   const [allBuyers, setAllBuyers] = useState<Buyer[]>([]);
 
@@ -47,7 +35,8 @@ export function BuyerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (allBuyers.length > 0) {
+    // Only write to storage if there is something to write and we're on the client
+    if (allBuyers.length > 0 && typeof window !== 'undefined') {
       try {
         localStorage.setItem('buyers', JSON.stringify(allBuyers));
       } catch (e) {

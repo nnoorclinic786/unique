@@ -20,31 +20,34 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const getInitialCart = (): CartItem[] => {
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    // Initialize from localStorage on client-side
     if (typeof window !== 'undefined') {
         try {
             const storedCart = localStorage.getItem('cartItems');
-            return storedCart ? JSON.parse(storedCart) : [];
+            if(storedCart) {
+                setCartItems(JSON.parse(storedCart));
+            }
         } catch (error) {
             console.error("Failed to parse cart items from localStorage", error);
         }
     }
-    return [];
-};
-
-
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [cartItems, setCartItems] = useState<CartItem[]>(getInitialCart);
-  const [cartCount, setCartCount] = useState(0);
+  }, []);
 
   useEffect(() => {
     // Update cart count and persist to localStorage whenever cartItems change
     const count = cartItems.reduce((total, item) => total + item.quantity, 0);
     setCartCount(count);
-    try {
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    } catch (error) {
-        console.error("Failed to save cart to localStorage", error);
+    if (typeof window !== 'undefined') {
+        try {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        } catch (error) {
+            console.error("Failed to save cart to localStorage", error);
+        }
     }
   }, [cartItems]);
 

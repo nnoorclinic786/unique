@@ -12,33 +12,33 @@ interface MedicineContextType {
 
 const MedicineContext = createContext<MedicineContextType | undefined>(undefined);
 
-const getInitialMedicines = (): Medicine[] => {
-    if (typeof window === 'undefined') {
-        return [];
-    }
+export function MedicineProvider({ children }: { children: ReactNode }) {
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+
+   useEffect(() => {
     try {
         const stored = localStorage.getItem('medicines');
         if (stored) {
-            return JSON.parse(stored);
+            setMedicines(JSON.parse(stored));
         } else {
             localStorage.setItem('medicines', JSON.stringify(initialMedicines));
-            return initialMedicines;
+            setMedicines(initialMedicines);
         }
     } catch (error) {
         console.error("Failed to load medicines from localStorage", error);
         localStorage.setItem('medicines', JSON.stringify(initialMedicines));
-        return initialMedicines;
+        setMedicines(initialMedicines);
     }
-};
-
-export function MedicineProvider({ children }: { children: ReactNode }) {
-  const [medicines, setMedicines] = useState<Medicine[]>(getInitialMedicines);
+  }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('medicines', JSON.stringify(medicines));
-    } catch (e) {
-      console.error("Failed to save medicines to localStorage", e);
+    // Only write to storage if there is something to write and we're on the client
+    if (medicines.length > 0 && typeof window !== 'undefined') {
+        try {
+        localStorage.setItem('medicines', JSON.stringify(medicines));
+        } catch (e) {
+        console.error("Failed to save medicines to localStorage", e);
+        }
     }
   }, [medicines]);
 

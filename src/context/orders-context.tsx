@@ -35,15 +35,19 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // This effect persists any change in the orders state back to localStorage
-    if (orders.length > 0) { // Only write to storage if there is something to write
+    // This effect persists any change in the orders state back to localStorage, but only after initial load.
+    if (orders.length > 0) {
         try {
             localStorage.setItem('orders', JSON.stringify(orders));
         } catch (error) {
             console.error("Failed to save orders to localStorage", error);
         }
+    } else if (orders.length === 0 && typeof window !== 'undefined' && localStorage.getItem('orders')) {
+      // Handle case where all orders are cleared
+      localStorage.setItem('orders', '[]');
     }
   }, [orders]);
+
 
   const updateOrderStatus = useCallback((orderId: string, status: Order['status']) => {
     setOrders(prevOrders => 
