@@ -23,6 +23,9 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const storedOrders = localStorage.getItem('orders');
       if (storedOrders) {
         setOrders(JSON.parse(storedOrders));
+      } else {
+        // If no orders in storage, initialize with default data
+        localStorage.setItem('orders', JSON.stringify(initialOrders));
       }
     } catch (error) {
       console.error("Failed to parse orders from localStorage", error);
@@ -33,29 +36,39 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
   const updateOrdersStateAndStorage = (newOrders: Order[]) => {
     setOrders(newOrders);
-    localStorage.setItem('orders', JSON.stringify(newOrders));
+    try {
+      localStorage.setItem('orders', JSON.stringify(newOrders));
+    } catch (error) {
+        console.error("Failed to save orders to localStorage", error);
+    }
   };
 
 
   const updateOrderStatus = useCallback((orderId: string, status: Order['status']) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, status } : order
-    );
-    updateOrdersStateAndStorage(updatedOrders);
-    toast({
-      title: "Order Status Updated",
-      description: `Order ${orderId} has been marked as ${status}.`,
+    setOrders(prevOrders => {
+        const updatedOrders = prevOrders.map(order =>
+          order.id === orderId ? { ...order, status } : order
+        );
+        updateOrdersStateAndStorage(updatedOrders);
+        toast({
+          title: "Order Status Updated",
+          description: `Order ${orderId} has been marked as ${status}.`,
+        });
+        return updatedOrders;
     });
-  }, [orders, toast]);
+  }, [toast]);
   
   const addOrder = useCallback((order: Order) => {
-    const updatedOrders = [order, ...orders];
-    updateOrdersStateAndStorage(updatedOrders);
-     toast({
-      title: "Order Placed!",
-      description: `Your order ${order.id} has been successfully placed.`,
+    setOrders(prevOrders => {
+        const updatedOrders = [order, ...prevOrders];
+        updateOrdersStateAndStorage(updatedOrders);
+         toast({
+          title: "Order Placed!",
+          description: `Your order ${order.id} has been successfully placed.`,
+        });
+        return updatedOrders;
     });
-  }, [orders, toast]);
+  }, [toast]);
 
   return (
     <OrderContext.Provider value={{ orders, updateOrderStatus, addOrder }}>
