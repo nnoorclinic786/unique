@@ -4,12 +4,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark } from 'lucide-react';
+import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useOrderContext } from '@/context/orders-context';
 import { useRouter } from 'next/navigation';
@@ -17,23 +17,30 @@ import { useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
+// Mock user data, in a real app this would come from a user context or API
+const user = {
+  name: 'City Pharmacy',
+  address: '123, Main Market, Bangalore, Karnataka, 560001',
+};
+
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart } = useCart();
   const { addOrder } = useOrderContext();
   const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [checkoutStep, setCheckoutStep] = useState(1);
 
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
-  const handleCheckout = () => {
+  const handlePlaceOrder = () => {
     // This is a simplified checkout process
     // A real app would integrate with a payment gateway
     const newOrder = {
         id: `ORD-${Date.now()}`,
-        buyerName: localStorage.getItem('userName') || 'Unknown Buyer', // In a real app, get from user session
+        buyerName: localStorage.getItem('userName') || user.name, // In a real app, get from user session
         date: new Date().toISOString().split('T')[0],
         total: total,
         status: 'Pending' as const,
@@ -70,54 +77,79 @@ export default function CartPage() {
         <h1 className="text-3xl font-headline font-bold mb-8">Your Cart</h1>
         <div className="grid md:grid-cols-3 gap-12">
           <div className="md:col-span-2">
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px] hidden md:table-cell"></TableHead>
-                    <TableHead>Medicine</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead className="w-[40px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {cartItems.map((item) => {
-                    return (
-                      <TableRow key={item.id}>
-                        <TableCell className="hidden md:table-cell">
-                          {item.imageUrl && (
-                            <Image
-                              src={item.imageUrl}
-                              alt={item.name}
-                              width={64}
-                              height={64}
-                              className="rounded-md object-cover"
-                            />
-                          )}
-                        </TableCell>
-                        <TableCell className="font-medium">{item.name}</TableCell>
-                        <TableCell>
-                          <Input 
-                            type="number" 
-                            value={item.quantity} 
-                            className="w-20"
-                            onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 0)}
-                            min="0"
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
-                            <Trash2 className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Card>
+            {checkoutStep === 1 && (
+                <Card>
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[80px] hidden md:table-cell"></TableHead>
+                            <TableHead>Medicine</TableHead>
+                            <TableHead>Quantity</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="w-[40px]"></TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {cartItems.map((item) => {
+                            return (
+                            <TableRow key={item.id}>
+                                <TableCell className="hidden md:table-cell">
+                                {item.imageUrl && (
+                                    <Image
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    width={64}
+                                    height={64}
+                                    className="rounded-md object-cover"
+                                    />
+                                )}
+                                </TableCell>
+                                <TableCell className="font-medium">{item.name}</TableCell>
+                                <TableCell>
+                                <Input 
+                                    type="number" 
+                                    value={item.quantity} 
+                                    className="w-20"
+                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value, 10) || 0)}
+                                    min="0"
+                                />
+                                </TableCell>
+                                <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
+                                <TableCell>
+                                <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
+                                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+                                </TableCell>
+                            </TableRow>
+                            );
+                        })}
+                        </TableBody>
+                    </Table>
+                </Card>
+            )}
+             {checkoutStep === 2 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline">Confirm Shipping Address</CardTitle>
+                  <CardDescription>
+                    Please verify your address before placing the order.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-4 rounded-md border bg-muted/20 p-4">
+                    <Truck className="h-6 w-6 text-primary mt-1" />
+                    <div>
+                      <p className="font-semibold">{user.name}</p>
+                      <p className="text-muted-foreground">{user.address}</p>
+                    </div>
+                  </div>
+                  <Button variant="link" size="sm" className="p-0 h-auto">Change Address</Button>
+                </CardContent>
+                 <CardFooter>
+                    <Button onClick={() => setCheckoutStep(1)}>Back to Cart</Button>
+                </CardFooter>
+              </Card>
+            )}
           </div>
           <div>
             <Card>
@@ -139,48 +171,72 @@ export default function CartPage() {
                   <span>₹{total.toFixed(2)}</span>
                 </div>
                 
-                <Separator />
-                
-                <div>
-                    <h3 className="text-md font-medium mb-4">Payment Method</h3>
-                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
-                        <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                            <CreditCard />
-                            <div className="grid gap-1.5">
-                                <RadioGroupItem value="card" id="pay-card" className="sr-only" />
-                                <span className="font-medium">Credit / Debit Card</span>
-                                <span className="text-sm text-muted-foreground">Visa, Mastercard, RuPay</span>
-                            </div>
-                        </Label>
-                         <Label htmlFor="pay-upi" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                            <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
-                            <div className="grid gap-1.5">
-                                <RadioGroupItem value="upi" id="pay-upi" className="sr-only" />
-                                <span className="font-medium">UPI / QR Code</span>
-                                <span className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm</span>
-                            </div>
-                        </Label>
-                         <Label htmlFor="pay-netbanking" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                            <Landmark />
-                            <div className="grid gap-1.5">
-                                <RadioGroupItem value="netbanking" id="pay-netbanking" className="sr-only" />
-                                <span className="font-medium">Net Banking</span>
-                                <span className="text-sm text-muted-foreground">All major banks supported</span>
-                            </div>
-                        </Label>
-                         <Label htmlFor="pay-cod" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
-                            <Banknote />
-                            <div className="grid gap-1.5">
-                                <RadioGroupItem value="cod" id="pay-cod" className="sr-only"/>
-                                <span className="font-medium">Cash on Delivery</span>
-                                <span className="text-sm text-muted-foreground">Pay upon receiving your order</span>
-                            </div>
-                        </Label>
-                    </RadioGroup>
-                </div>
+                {checkoutStep === 1 && (
+                  <>
+                    <Separator />
+                    <div>
+                        <h3 className="text-md font-medium mb-4">Payment Method</h3>
+                        <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
+                            <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <CreditCard />
+                                <div className="grid gap-1.5">
+                                    <RadioGroupItem value="card" id="pay-card" className="sr-only" />
+                                    <span className="font-medium">Credit / Debit Card</span>
+                                    <span className="text-sm text-muted-foreground">Visa, Mastercard, RuPay</span>
+                                </div>
+                            </Label>
+                            <Label htmlFor="pay-upi" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
+                                <div className="grid gap-1.5">
+                                    <RadioGroupItem value="upi" id="pay-upi" className="sr-only" />
+                                    <span className="font-medium">UPI / QR Code</span>
+                                    <span className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm</span>
+                                </div>
+                            </Label>
+                            <Label htmlFor="pay-netbanking" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <Landmark />
+                                <div className="grid gap-1.5">
+                                    <RadioGroupItem value="netbanking" id="pay-netbanking" className="sr-only" />
+                                    <span className="font-medium">Net Banking</span>
+                                    <span className="text-sm text-muted-foreground">All major banks supported</span>
+                                </div>
+                            </Label>
+                            <Label htmlFor="pay-cod" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <Banknote />
+                                <div className="grid gap-1.5">
+                                    <RadioGroupItem value="cod" id="pay-cod" className="sr-only"/>
+                                    <span className="font-medium">Cash on Delivery</span>
+                                    <span className="text-sm text-muted-foreground">Pay upon receiving your order</span>
+                                </div>
+                            </Label>
+                        </RadioGroup>
+                    </div>
+                  </>
+                )}
+                 {checkoutStep === 2 && (
+                    <div className="space-y-2">
+                        <Separator />
+                        <h3 className="text-md font-medium">Selected Payment Method</h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            {paymentMethod === 'cod' && <Banknote className="h-5 w-5" />}
+                            {paymentMethod === 'card' && <CreditCard className="h-5 w-5" />}
+                            {paymentMethod === 'upi' && <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-5 w-5"/>}
+                             {paymentMethod === 'netbanking' && <Landmark className="h-5 w-5" />}
+                            <span className="font-semibold capitalize">{paymentMethod === 'cod' ? 'Cash on Delivery' : paymentMethod.replace('-', ' ')}</span>
+                        </div>
+                    </div>
+                )}
               </CardContent>
               <CardFooter>
-                <Button className="w-full" size="lg" onClick={handleCheckout}>Proceed to Checkout</Button>
+                 {checkoutStep === 1 ? (
+                  <Button className="w-full" size="lg" onClick={() => setCheckoutStep(2)}>
+                    Proceed to Checkout
+                  </Button>
+                ) : (
+                  <Button className="w-full" size="lg" onClick={handlePlaceOrder}>
+                    Place Order
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </div>
