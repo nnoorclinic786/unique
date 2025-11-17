@@ -133,6 +133,17 @@ export default function PrivacyPolicyPage() {
                       Buyers cannot challenge or object to such actions.
                     </p>
                   </div>
+
+                  <div>
+                    <h2 className="text-xl font-headline font-bold text-foreground mb-2">10. Contact Information</h2>
+                    <p>
+                      For business-level queries (not buyer complaints), buyers may contact:
+                    </p>
+                     <ul className="list-none space-y-1">
+                        <li>Unique Medicare – Wholesale Chemist</li>
+                        <li>Phone number: 8299400552</li>
+                    </ul>
+                  </div>
                 </CardContent>
               </Card>
             </div>
