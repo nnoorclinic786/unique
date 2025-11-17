@@ -9,40 +9,46 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck, Copy } from 'lucide-react';
+import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck } from 'lucide-react';
 import { useAppContext } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { AddressForm } from '@/components/address-form';
+import type { Buyer } from '@/lib/types';
 
-// Mock user data, in a real app this would come from a user context or API
-const user = {
-  name: 'City Pharmacy',
-  address: '123, Main Market, Bangalore, Karnataka, 560001',
-};
 
 export default function CartPage() {
-  const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings } = useAppContext();
+  const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings, buyers, updateBuyerAddress } = useAppContext();
   const router = useRouter();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isClient, setIsClient] = useState(false);
+  const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<Buyer | null>(null);
 
   useEffect(() => {
     setIsClient(true);
+    const storedUserName = localStorage.getItem('userName');
+    if (storedUserName) {
+        const foundBuyer = buyers.find(b => b.name === storedUserName);
+        if (foundBuyer) {
+            setCurrentUser(foundBuyer);
+        }
+    }
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment_success') === 'true') {
         const method = params.get('method');
         if(method) setPaymentMethod(method);
-        setCheckoutStep(2); // Move to address confirmation after successful payment
+        setCheckoutStep(2); 
         
-        // Clean up URL
         window.history.replaceState(null, '', window.location.pathname);
     }
-  }, []);
+  }, [buyers]);
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
@@ -51,7 +57,7 @@ export default function CartPage() {
   const handlePlaceOrder = () => {
     const newOrder = {
         id: `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        buyerName: localStorage.getItem('userName') || user.name, // In a real app, get from user session
+        buyerName: localStorage.getItem('userName') || currentUser?.name || 'Guest',
         date: new Date().toISOString().split('T')[0],
         total: total,
         status: 'Pending' as const,
@@ -64,10 +70,19 @@ export default function CartPage() {
         description: `Your order ${newOrder.id} has been successfully placed.`,
     });
     clearCart();
-    router.push('/account'); // Redirect to account page to see new order
+    router.push('/account');
   }
   
   const handleCheckoutProceed = () => {
+    if (!currentUser?.address) {
+        toast({
+            variant: "destructive",
+            title: "Address Required",
+            description: "Please add a shipping address before proceeding.",
+        });
+        setAddressDialogOpen(true);
+        return;
+    }
     if (paymentMethod === 'cod') {
         setCheckoutStep(2);
     } else {
@@ -81,6 +96,23 @@ export default function CartPage() {
         title: "Item Removed",
         description: `The item has been removed from your cart.`,
     });
+  };
+
+  const handleAddressSave = (newAddress: string) => {
+    if (currentUser) {
+        updateBuyerAddress(currentUser.id, newAddress);
+        toast({
+            title: "Address Updated",
+            description: "Your shipping address has been successfully updated.",
+        });
+        setAddressDialogOpen(false);
+    } else {
+         toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not find user to update address.",
+        });
+    }
   };
 
   if (!isClient) {
@@ -177,13 +209,21 @@ export default function CartPage() {
                         <div className="flex items-start gap-4 rounded-md border bg-muted/20 p-4">
                             <Truck className="h-6 w-6 text-primary mt-1" />
                             <div>
-                            <p className="font-semibold">{user.name}</p>
-                            <p className="text-muted-foreground">{user.address}</p>
+                            <p className="font-semibold">{currentUser?.name}</p>
+                            <p className="text-muted-foreground">{currentUser?.address}</p>
                             </div>
                         </div>
-                        <Button variant="link" size="sm" className="p-0 h-auto mt-2" asChild>
-                           <Link href="/account">Change Address</Link>
-                        </Button>
+                        <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="link" className="p-0 h-auto mt-2 text-sm">Change Address</Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Edit Shipping Address</DialogTitle>
+                                </DialogHeader>
+                                <AddressForm currentAddress={currentUser?.address} onSave={handleAddressSave} />
+                            </DialogContent>
+                        </Dialog>
                     </div>
 
                     <Separator />

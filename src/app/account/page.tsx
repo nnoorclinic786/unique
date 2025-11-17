@@ -14,9 +14,8 @@ import { useAppContext } from '@/context/app-context';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AddressForm } from '@/components/address-form';
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     'Pending': 'secondary',
@@ -25,30 +24,6 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
     'Delivered': 'default',
     'Cancelled': 'destructive',
 };
-
-function AddressForm({ currentAddress, onSave }: { currentAddress?: string; onSave: (newAddress: string) => void }) {
-    const [address, setAddress] = useState(currentAddress || '');
-
-    const handleSave = () => {
-        onSave(address);
-    };
-
-    return (
-        <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-                <Label htmlFor="address">Full Shipping Address</Label>
-                <Textarea
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Enter your full shipping address, including city, state, and pincode."
-                    className="min-h-[100px]"
-                />
-            </div>
-        </div>
-    );
-}
-
 
 export default function AccountPage() {
   const { orders, updateOrderStatus, buyers, updateBuyerAddress } = useAppContext();
@@ -129,14 +104,6 @@ export default function AccountPage() {
                                 <DialogTitle>Edit Shipping Address</DialogTitle>
                             </DialogHeader>
                             <AddressForm currentAddress={buyer?.address} onSave={handleAddressSave} />
-                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setAddressDialogOpen(false)}>Cancel</Button>
-                                <Button type="submit" onClick={() => {
-                                    // A bit of a hack to trigger form save from outside
-                                    const form = document.querySelector('textarea'); // Assuming one textarea
-                                    if(form) handleAddressSave(form.value);
-                                }}>Save Address</Button>
-                            </DialogFooter>
                         </DialogContent>
                     </Dialog>
                 </div>
