@@ -36,12 +36,10 @@ export function BuyerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Only write to storage if there is something to write and we're on the client
-    if (allBuyers.length > 0 && typeof window !== 'undefined') {
-      try {
+    try {
         localStorage.setItem('buyers', JSON.stringify(allBuyers));
-      } catch (e) {
+    } catch (e) {
         console.error("Failed to save buyers to localStorage", e);
-      }
     }
   }, [allBuyers]);
 

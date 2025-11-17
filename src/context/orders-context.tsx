@@ -23,7 +23,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         if (storedOrders) {
             setOrders(JSON.parse(storedOrders));
         } else {
-            // If no orders in storage, seed it with the initial data
+            // If no orders in storage, seed it with the initial data ONCE.
             localStorage.setItem('orders', JSON.stringify(initialOrders));
             setOrders(initialOrders);
         }
@@ -35,7 +35,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // This effect persists any change in the orders state back to localStorage, but only after initial load.
+    // This effect persists any change in the orders state back to localStorage.
     if (orders.length > 0) {
         try {
             localStorage.setItem('orders', JSON.stringify(orders));
