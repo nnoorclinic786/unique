@@ -9,15 +9,19 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { Trash2, ShoppingCart } from 'lucide-react';
+import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useOrderContext } from '@/context/orders-context';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart } = useCart();
   const { addOrder } = useOrderContext();
   const router = useRouter();
+  const [paymentMethod, setPaymentMethod] = useState('cod');
 
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -134,9 +138,48 @@ export default function CartPage() {
                   <span>Total</span>
                   <span>₹{total.toFixed(2)}</span>
                 </div>
+                
+                <Separator />
+                
+                <div>
+                    <h3 className="text-md font-medium mb-4">Payment Method</h3>
+                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
+                        <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <CreditCard />
+                            <div className="grid gap-1.5">
+                                <RadioGroupItem value="card" id="pay-card" className="sr-only" />
+                                <span className="font-medium">Credit / Debit Card</span>
+                                <span className="text-sm text-muted-foreground">Visa, Mastercard, RuPay</span>
+                            </div>
+                        </Label>
+                         <Label htmlFor="pay-upi" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
+                            <div className="grid gap-1.5">
+                                <RadioGroupItem value="upi" id="pay-upi" className="sr-only" />
+                                <span className="font-medium">UPI / QR Code</span>
+                                <span className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm</span>
+                            </div>
+                        </Label>
+                         <Label htmlFor="pay-netbanking" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <Landmark />
+                            <div className="grid gap-1.5">
+                                <RadioGroupItem value="netbanking" id="pay-netbanking" className="sr-only" />
+                                <span className="font-medium">Net Banking</span>
+                                <span className="text-sm text-muted-foreground">All major banks supported</span>
+                            </div>
+                        </Label>
+                         <Label htmlFor="pay-cod" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                            <Banknote />
+                            <div className="grid gap-1.5">
+                                <RadioGroupItem value="cod" id="pay-cod" className="sr-only"/>
+                                <span className="font-medium">Cash on Delivery</span>
+                                <span className="text-sm text-muted-foreground">Pay upon receiving your order</span>
+                            </div>
+                        </Label>
+                    </RadioGroup>
+                </div>
               </CardContent>
-              <CardFooter className="flex-col gap-2">
-                <p className="text-sm text-muted-foreground">Payment Method: Cash on Delivery</p>
+              <CardFooter>
                 <Button className="w-full" size="lg" onClick={handleCheckout}>Proceed to Checkout</Button>
               </CardFooter>
             </Card>
