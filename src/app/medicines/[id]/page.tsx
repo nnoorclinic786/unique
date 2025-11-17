@@ -8,17 +8,20 @@ import { useCart } from '@/context/cart-context';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ChevronLeft, Plus, Pill, Building, Tag, Info, Package, Calendar } from 'lucide-react';
+import { ChevronLeft, Plus, Pill, Building, Tag, Info, Package, Calendar, Minus } from 'lucide-react';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export default function MedicineDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { medicines } = useMedicineContext();
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, updateQuantity } = useCart();
+  const { toast } = useToast();
 
   const id = params.id as string;
   const medicine = medicines.find((m) => m.id === id);
+  const cartItem = medicine ? cartItems.find((item) => item.id === medicine.id) : undefined;
 
   if (!medicine) {
     return (
@@ -35,6 +38,26 @@ export default function MedicineDetailPage() {
       </>
     );
   }
+
+  const handleAddToCart = () => {
+    addToCart(medicine);
+    toast({
+      title: "Added to Cart",
+      description: `${medicine.name} has been added to your cart.`,
+    });
+  };
+
+  const handleIncrement = () => {
+    if (cartItem) {
+      updateQuantity(medicine.id, cartItem.quantity + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (cartItem) {
+      updateQuantity(medicine.id, cartItem.quantity - 1);
+    }
+  };
   
   const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value?: string | number | null }) => {
     if (!value) return null;
@@ -93,10 +116,22 @@ export default function MedicineDetailPage() {
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <p className="text-3xl font-bold">₹{medicine.price.toFixed(2)}</p>
-                <Button size="lg" className="w-full sm:w-auto" onClick={() => addToCart(medicine)}>
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add to Cart
-                </Button>
+                 {!cartItem ? (
+                    <Button size="lg" className="w-full sm:w-auto" onClick={handleAddToCart}>
+                        <Plus className="mr-2 h-5 w-5" />
+                        Add to Cart
+                    </Button>
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <Button size="icon" variant="outline" className="h-12 w-12" onClick={handleDecrement}>
+                            <Minus className="h-5 w-5" />
+                        </Button>
+                        <span className="font-bold text-2xl w-12 text-center">{cartItem.quantity}</span>
+                        <Button size="icon" variant="outline" className="h-12 w-12" onClick={handleIncrement}>
+                            <Plus className="h-5 w-5" />
+                        </Button>
+                    </div>
+                )}
             </div>
           </div>
         </div>
