@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 // In a real application, these should be stored securely in a database and passwords should be hashed.
 const ADMIN_USERS = [
-    { email: "superadmin@medicare.com", password: "superadminpassword", role: "Super Admin", name: "Super Admin", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins'], status: 'Approved' },
+    { email: "superadmin@medicare.com", password: "superadminpassword", role: "Super Admin", name: "Super Admin", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'], status: 'Approved' },
     { email: "admin@medicare.com", password: "adminpassword", role: "Admin", name: "Admin User", permissions: ['dashboard', 'orders'], status: 'Approved' },
     { email: "testadmin@medicare.com", password: "testpassword", role: "Admin", name: "Test Admin", permissions: ['dashboard', 'drugs'], status: 'Approved' },
     { email: "pending@medicare.com", password: "pendingpassword", role: "Admin", name: "Pending User", permissions: [], status: 'Pending' }
@@ -33,7 +33,7 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
       email: user.email,
       role: user.role,
       name: user.name,
-      permissions: user.role === 'Super Admin' ? ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins'] : user.permissions
+      permissions: user.role === 'Super Admin' ? ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'] : user.permissions
   };
 
   cookieStore.set("admin_session", JSON.stringify(sessionData), {
