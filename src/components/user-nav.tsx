@@ -1,5 +1,5 @@
 
-"use client";
+'use client';
 
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
 
 interface AdminSession {
   name: string;
@@ -30,43 +31,38 @@ interface AdminSession {
 export function UserNav() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    setIsClient(true);
     const adminCookie = Cookies.get('admin_session');
     if (adminCookie) {
       try {
         const sessionData = JSON.parse(adminCookie);
         if (sessionData.isLoggedIn) {
           setSession(sessionData);
-          return; // Admin session found, no need to check for user
+          setIsLoading(false);
+          return;
         }
       } catch (e) {
         setSession(null);
       }
     }
 
-    // Check for regular user login only if no admin session
     if (localStorage.getItem('userLoggedIn') === 'true') {
         setUserName(localStorage.getItem('userName'));
     }
-
+    setIsLoading(false);
   }, []);
 
   const handleLogout = async () => {
     const isAdmin = !!session?.isLoggedIn;
     
-    // Clear local storage for regular user
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userName');
 
-    // Clear admin cookie via server action
     await logout();
     
-    // The server action will handle the redirect for admins.
-    // For regular users, we redirect client-side.
     if(!isAdmin){
         router.push('/');
         router.refresh();
@@ -77,8 +73,8 @@ export function UserNav() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase() || 'A';
   }
 
-  if (!isClient) {
-      return null;
+  if (isLoading) {
+      return <Skeleton className="h-8 w-8 rounded-full" />;
   }
   
   if (session?.isLoggedIn) {
