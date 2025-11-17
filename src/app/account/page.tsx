@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Badge } from '@/components/ui/badge';
-import { useOrderContext } from '@/context/orders-context';
+import { useAppContext } from '@/context/app-context';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -32,7 +32,7 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
 };
 
 export default function AccountPage() {
-  const { orders, updateOrderStatus } = useOrderContext();
+  const { orders, updateOrderStatus } = useAppContext();
   const { toast } = useToast();
   const [userName, setUserName] = useState<string | null>(null);
 

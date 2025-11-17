@@ -3,9 +3,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useOrderContext } from '@/context/orders-context';
-import { useBuyerContext } from '@/context/buyers-context';
-import { useMedicineContext } from '@/context/medicines-context';
+import { useAppContext } from '@/context/app-context';
 import {
   Card,
   CardContent,
@@ -47,9 +45,7 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
 export default function OrderDetailsPage() {
   const params = useParams();
   const { id } = params;
-  const { orders } = useOrderContext();
-  const { buyers } = useBuyerContext();
-  const { medicines } = useMedicineContext();
+  const { orders, buyers, medicines } = useAppContext();
 
   const order = orders.find((o) => o.id === id);
   const buyer = order ? buyers.find((b) => b.name === order.buyerName) : null;

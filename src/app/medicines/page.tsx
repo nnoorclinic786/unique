@@ -5,10 +5,10 @@ import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { MedicineCard } from '@/components/medicine-card';
-import { useMedicineContext } from '@/context/medicines-context';
+import { useAppContext } from '@/context/app-context';
 
 export default function MedicinesPage() {
-  const { medicines } = useMedicineContext();
+  const { medicines } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredMedicines = medicines.filter(medicine =>

@@ -10,13 +10,11 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
 import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck, Copy } from 'lucide-react';
-import { useCart } from '@/context/cart-context';
-import { useOrderContext } from '@/context/orders-context';
+import { useAppContext } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { useSettings } from '@/context/settings-context';
 import { useToast } from '@/hooks/use-toast';
 
 // Mock user data, in a real app this would come from a user context or API
@@ -26,9 +24,7 @@ const user = {
 };
 
 export default function CartPage() {
-  const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart } = useCart();
-  const { addOrder } = useOrderContext();
-  const { settings } = useSettings();
+  const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings } = useAppContext();
   const router = useRouter();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -54,7 +50,7 @@ export default function CartPage() {
 
   const handlePlaceOrder = () => {
     const newOrder = {
-        id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         buyerName: localStorage.getItem('userName') || user.name, // In a real app, get from user session
         date: new Date().toISOString().split('T')[0],
         total: total,

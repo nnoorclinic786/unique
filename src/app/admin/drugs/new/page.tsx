@@ -35,7 +35,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft, UploadCloud, Link as LinkIcon, Eye, Trash2 } from "lucide-react";
 import type { Medicine } from "@/lib/types";
-import { useMedicineContext } from "@/context/medicines-context";
+import { useAppContext } from "@/context/app-context";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Medicine name must be at least 2 characters." }),
@@ -58,7 +58,7 @@ const formSchema = z.object({
 export default function AddMedicinePage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { medicines, addMedicine } = useMedicineContext();
+  const { medicines, addMedicine } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

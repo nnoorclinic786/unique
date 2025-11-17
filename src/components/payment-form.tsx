@@ -4,7 +4,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useSettings } from "@/context/settings-context";
+import { useAppContext } from "@/context/app-context";
 import { Copy } from "lucide-react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +25,7 @@ const banks = [
 ]
 
 export function PaymentForm({ method, onValidationChange }: PaymentFormProps) {
-  const { settings } = useSettings();
+  const { settings } = useAppContext();
   const { toast } = useToast();
   
   // State for card details

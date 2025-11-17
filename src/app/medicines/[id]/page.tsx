@@ -3,8 +3,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useMedicineContext } from '@/context/medicines-context';
-import { useCart } from '@/context/cart-context';
+import { useAppContext } from '@/context/app-context';
 import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -15,8 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function MedicineDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { medicines } = useMedicineContext();
-  const { cartItems, addToCart, updateQuantity } = useCart();
+  const { medicines, cartItems, addToCart, updateQuantity } = useAppContext();
   const { toast } = useToast();
 
   const id = params.id as string;

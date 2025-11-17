@@ -2,13 +2,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { MedicineProvider } from '@/context/medicines-context';
-import { BuyerProvider } from '@/context/buyers-context';
-import { OrderProvider } from '@/context/orders-context';
 import { AdminSearchProvider } from '@/context/admin-search-context';
-import { Footer } from '@/components/footer';
-import { CartProvider } from '@/context/cart-context';
-import { SettingsProvider } from '@/context/settings-context';
+import { AppProvider } from '@/context/app-context';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -29,21 +24,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
-        <SettingsProvider>
-          <AdminSearchProvider>
-            <OrderProvider>
-              <MedicineProvider>
-              <BuyerProvider>
-                  <CartProvider>
-                      <div className="flex-grow">
-                          {children}
-                      </div>
-                  </CartProvider>
-              </BuyerProvider>
-              </MedicineProvider>
-            </OrderProvider>
-          </AdminSearchProvider>
-        </SettingsProvider>
+        <AdminSearchProvider>
+          <AppProvider>
+            <div className="flex-grow">{children}</div>
+          </AppProvider>
+        </AdminSearchProvider>
         <Toaster />
       </body>
     </html>

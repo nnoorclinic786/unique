@@ -9,14 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { useSettings } from "@/context/settings-context";
+import { useAppContext } from "@/context/app-context";
 
 const formSchema = z.object({
   upiId: z.string().min(3, "Please enter a valid UPI ID").regex(/^[\w.-]+@[\w.-]+$/, "Invalid UPI ID format."),
 });
 
 export default function AdminSettingsPage() {
-  const { settings, setSettings } = useSettings();
+  const { settings, setSettings } = useAppContext();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({

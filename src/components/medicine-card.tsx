@@ -5,7 +5,7 @@ import type { Medicine } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
-import { useCart } from '@/context/cart-context';
+import { useAppContext } from '@/context/app-context';
 import { useToast } from '@/hooks/use-toast';
 
 interface MedicineCardProps {
@@ -13,7 +13,7 @@ interface MedicineCardProps {
 }
 
 export function MedicineCard({ medicine }: MedicineCardProps) {
-  const { cartItems, addToCart, updateQuantity } = useCart();
+  const { cartItems, addToCart, updateQuantity } = useAppContext();
   const { toast } = useToast();
   const cartItem = cartItems.find((item) => item.id === medicine.id);
 

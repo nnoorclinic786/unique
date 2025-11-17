@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
-import { useBuyerContext } from "@/context/buyers-context";
+import { useAppContext } from "@/context/app-context";
 import { Eye, EyeOff } from "lucide-react";
 import Cookies from 'js-cookie';
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { buyers, pendingBuyers, disabledBuyers } = useBuyerContext();
+  const { buyers, pendingBuyers, disabledBuyers } = useAppContext();
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   useEffect(() => {

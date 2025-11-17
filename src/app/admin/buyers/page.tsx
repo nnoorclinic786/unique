@@ -28,12 +28,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useBuyerContext } from "@/context/buyers-context";
+import { useAppContext } from "@/context/app-context";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
 export default function AdminBuyersPage() {
-  const { buyers, pendingBuyers, disabledBuyers, approveBuyer, toggleBuyerStatus } = useBuyerContext();
+  const { buyers, pendingBuyers, disabledBuyers, approveBuyer, toggleBuyerStatus } = useAppContext();
   const { query } = useAdminSearch();
 
   const filterBuyers = (buyers: any[]) => {

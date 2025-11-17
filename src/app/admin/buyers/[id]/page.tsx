@@ -3,7 +3,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useBuyerContext } from "@/context/buyers-context";
+import { useAppContext } from "@/context/app-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ export default function BuyerDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
-  const { buyers, pendingBuyers, disabledBuyers } = useBuyerContext();
+  const { buyers, pendingBuyers, disabledBuyers } = useAppContext();
 
   const allBuyers = [...buyers, ...pendingBuyers, ...disabledBuyers];
   const buyer = allBuyers.find((b) => b.id === id);

@@ -36,8 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
 import { useAdminSearch } from "@/context/admin-search-context";
-import { useOrderContext } from "@/context/orders-context";
-import { useBuyerContext } from "@/context/buyers-context";
+import { useAppContext } from "@/context/app-context";
 import React from 'react';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -52,8 +51,7 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
 };
 
 const OrderTable = ({ ordersToShow }: { ordersToShow: Order[] }) => {
-    const { updateOrderStatus } = useOrderContext();
-    const { buyers } = useBuyerContext();
+    const { updateOrderStatus, buyers } = useAppContext();
 
     const getBuyerEmail = (buyerName: string) => {
         const buyer = buyers.find(b => b.name === buyerName);
@@ -134,7 +132,7 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: Order[] }) => {
 export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const { query } = useAdminSearch();
-  const { orders } = useOrderContext();
+  const { orders } = useAppContext();
 
   const filterOrders = (orders: Order[]) => {
     if (!query) return orders;

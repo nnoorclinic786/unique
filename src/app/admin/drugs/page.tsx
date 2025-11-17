@@ -28,12 +28,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMedicineContext } from "@/context/medicines-context";
+import { useAppContext } from "@/context/app-context";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
 export default function AdminDrugsPage() {
-  const { medicines } = useMedicineContext();
+  const { medicines } = useAppContext();
   const { query } = useAdminSearch();
 
   const filteredMedicines = medicines.filter(medicine => {

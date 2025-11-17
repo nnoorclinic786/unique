@@ -12,7 +12,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
-import { useBuyerContext } from "@/context/buyers-context";
+import { useAppContext } from "@/context/app-context";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from 'date-fns';
 import { Textarea } from "@/components/ui/textarea";
@@ -39,7 +39,7 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const { toast } = useToast();
-  const { addPendingBuyer } = useBuyerContext();
+  const { addPendingBuyer } = useAppContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

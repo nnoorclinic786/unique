@@ -8,7 +8,7 @@ import { Logo } from '@/components/icons';
 import { ShoppingCart } from 'lucide-react';
 import { UserNav } from './user-nav';
 import Cookies from 'js-cookie';
-import { useCart } from '@/context/cart-context';
+import { useAppContext } from '@/context/app-context';
 import { Badge } from './ui/badge';
 
 
@@ -16,7 +16,7 @@ export function Header() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { cartCount } = useCart();
+  const { cartCount } = useAppContext();
 
   useEffect(() => {
     setIsClient(true);
@@ -89,15 +89,11 @@ export function Header() {
               <Link href="/account" className="transition-colors hover:text-primary">
                   My Account
               </Link>
-              <Link href="/about" className="transition-colors hover:text-primary">
-                About Us
-              </Link>
             </>
-          ) : (
+          ) : null}
             <Link href="/about" className="transition-colors hover:text-primary">
               About Us
             </Link>
-          )}
           {isAdminLoggedIn && (
             <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
               Admin
