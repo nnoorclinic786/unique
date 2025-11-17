@@ -2,12 +2,11 @@
 "use client";
 
 import Link from "next/link";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -24,14 +23,45 @@ import { useAppContext } from "@/context/app-context";
 import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
+import { format, parseISO } from 'date-fns';
 
 export default function DashboardPage() {
   const { query } = useAdminSearch();
-  const { orders, buyers, medicines, salesData } = useAppContext();
+  const { orders, buyers, medicines } = useAppContext();
 
   const totalRevenue = orders
     .filter(o => o.status === 'Delivered')
     .reduce((acc, order) => acc + order.total, 0);
+    
+  const salesData = React.useMemo(() => {
+    const monthlySales: { [key: string]: number } = {};
+    orders
+      .filter(o => o.status === 'Delivered')
+      .forEach(order => {
+        try {
+            const month = format(parseISO(order.date), 'MMM yyyy');
+            if (!monthlySales[month]) {
+                monthlySales[month] = 0;
+            }
+            monthlySales[month] += order.total;
+        } catch (e) {
+            console.warn(`Invalid date format for order ${order.id}: ${order.date}`);
+        }
+      });
+      
+    // Get last 6 months for display
+    const lastSixMonths = Array.from({length: 6}, (_, i) => {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        return format(d, 'MMM yyyy');
+    }).reverse();
+
+    return lastSixMonths.map(month => ({
+        month,
+        sales: monthlySales[month] || 0,
+    }));
+  }, [orders]);
+
 
   const filteredOrders = orders.filter(order => {
       if (!query) return true;
@@ -54,7 +84,7 @@ export default function DashboardPage() {
             <CardContent>
                 <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN')}</div>
                 <p className="text-xs text-muted-foreground">
-                +20.1% from last month
+                Based on all delivered orders
                 </p>
             </CardContent>
             </Card>
@@ -68,7 +98,7 @@ export default function DashboardPage() {
             <CardContent>
                 <div className="text-2xl font-bold">+{buyers.length}</div>
                 <p className="text-xs text-muted-foreground">
-                +10 since last month
+                Total approved buyers
                 </p>
             </CardContent>
             </Card>
@@ -110,6 +140,7 @@ export default function DashboardPage() {
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle>Sales Overview</CardTitle>
+            <CardDescription>Sales from delivered orders over the last 6 months.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={350}>
@@ -126,7 +157,13 @@ export default function DashboardPage() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `₹${value / 1000}K`}
+                  tickFormatter={(value) => `₹${Number(value) / 1000}K`}
+                />
+                <Tooltip
+                    cursor={{ fill: 'hsla(var(--muted))' }}
+                    contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
+                    labelStyle={{ fontWeight: 'bold' }}
+                    formatter={(value) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Sales']}
                 />
                 <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>

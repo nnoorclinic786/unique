@@ -24,6 +24,12 @@ export const orders: Order[] = [
   { id: 'ORD-2407-005', buyerName: 'Central Clinic', date: '2024-07-22', total: 990.00, status: 'Delivered', itemCount: 4 },
   { id: 'ORD-2407-006', buyerName: 'City Pharmacy', date: '2024-07-23', total: 2100.00, status: 'Pending', itemCount: 6 },
   { id: 'ORD-2407-007', buyerName: 'Wellness Hospital', date: '2024-07-23', total: 8500.00, status: 'Cancelled', itemCount: 9 },
+  // Adding more data for better chart
+  { id: 'ORD-2406-001', buyerName: 'City Pharmacy', date: '2024-06-15', total: 3200.00, status: 'Delivered', itemCount: 7 },
+  { id: 'ORD-2406-002', buyerName: 'Dr. Anita Sharma', date: '2024-06-20', total: 1200.00, status: 'Delivered', itemCount: 2 },
+  { id: 'ORD-2405-001', buyerName: 'Wellness Hospital', date: '2024-05-10', total: 15000.00, status: 'Delivered', itemCount: 20 },
+  { id: 'ORD-2404-001', buyerName: 'QuickMed Retail', date: '2024-04-25', total: 4500.00, status: 'Delivered', itemCount: 10 },
+  { id: 'ORD-2403-001', buyerName: 'Central Clinic', date: '2024-03-18', total: 2500.00, status: 'Delivered', itemCount: 5 },
 ];
 
 const initialShippingAddresses = [
@@ -41,6 +47,7 @@ export const buyers: Buyer[] = [
     { id: 'BUY006', name: 'HealthFirst Pharma', email: 'contact@healthfirst.com', password: 'password123', registeredOn: '2023-03-12', gstNumber: '33AAAAA1111B1Z5', type: 'Medical Store', status: 'Disabled', permanentAddress: '9 Pharma Lane, Farrukhabad, UP - 209625' },
 ];
 
+// This static data is no longer used by the dashboard.
 export const salesData = [
   { month: 'January', sales: 4000 },
   { month: 'February', sales: 3000 },
