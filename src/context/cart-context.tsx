@@ -20,30 +20,32 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const getInitialCart = (): CartItem[] => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
+    try {
+        const storedCart = localStorage.getItem('cartItems');
+        return storedCart ? JSON.parse(storedCart) : [];
+    } catch (error) {
+        console.error("Failed to parse cart items from localStorage", error);
+        return [];
+    }
+};
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(getInitialCart);
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
-    // On initial load, try to get cart items from localStorage
-    try {
-        const storedCart = localStorage.getItem('cartItems');
-        if (storedCart) {
-            const parsedCart = JSON.parse(storedCart);
-            setCartItems(parsedCart);
-        }
-    } catch (error) {
-        console.error("Failed to parse cart items from localStorage", error);
-        localStorage.removeItem('cartItems');
-    }
-  }, []);
-
-  useEffect(() => {
-    // Update cart count whenever cartItems change
+    // Update cart count and persist to localStorage whenever cartItems change
     const count = cartItems.reduce((total, item) => total + item.quantity, 0);
     setCartCount(count);
-    // Persist cart to localStorage
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    try {
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } catch (error) {
+        console.error("Failed to save cart to localStorage", error);
+    }
   }, [cartItems]);
 
 

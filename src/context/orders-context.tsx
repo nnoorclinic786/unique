@@ -13,55 +13,52 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
+const getInitialOrders = (): Order[] => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
+    try {
+        const storedOrders = localStorage.getItem('orders');
+        if (storedOrders) {
+            return JSON.parse(storedOrders);
+        } else {
+            localStorage.setItem('orders', JSON.stringify(initialOrders));
+            return initialOrders;
+        }
+    } catch (error) {
+        console.error("Failed to read orders from localStorage", error);
+        // In case of error, fall back to initial data and reset storage
+        localStorage.setItem('orders', JSON.stringify(initialOrders));
+        return initialOrders;
+    }
+};
+
+
 export function OrderProvider({ children }: { children: ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>(getInitialOrders);
 
   useEffect(() => {
-    // This effect runs once on the client to safely initialize state from localStorage.
-    // It prevents re-injecting initialOrders on subsequent renders or page navigations.
+    // This effect ensures that any updates to the orders state are persisted to localStorage.
     try {
-      const storedOrders = localStorage.getItem('orders');
-      if (storedOrders) {
-        setOrders(JSON.parse(storedOrders));
-      } else {
-        // Only set initial orders if localStorage is empty
-        localStorage.setItem('orders', JSON.stringify(initialOrders));
-        setOrders(initialOrders);
-      }
-    } catch (error) {
-      console.error("Failed to read or initialize orders from localStorage", error);
-      // Fallback to initial orders and reset storage in case of corruption
-      localStorage.setItem('orders', JSON.stringify(initialOrders));
-      setOrders(initialOrders);
-    }
-  }, []); // The empty dependency array ensures this runs only once on mount.
-
-  const updateOrdersStateAndStorage = (newOrders: Order[]) => {
-    setOrders(newOrders);
-    try {
-      localStorage.setItem('orders', JSON.stringify(newOrders));
+      localStorage.setItem('orders', JSON.stringify(orders));
     } catch (error) {
         console.error("Failed to save orders to localStorage", error);
     }
-  };
+  }, [orders]);
 
 
   const updateOrderStatus = useCallback((orderId: string, status: Order['status']) => {
-    setOrders(prevOrders => {
-        const updatedOrders = prevOrders.map(order =>
+    setOrders(prevOrders => 
+        prevOrders.map(order =>
           order.id === orderId ? { ...order, status } : order
-        );
-        updateOrdersStateAndStorage(updatedOrders);
-        return updatedOrders;
-    });
+        )
+    );
   }, []);
   
   const addOrder = useCallback((order: Order) => {
-    setOrders(prevOrders => {
-        const updatedOrders = [order, ...prevOrders];
-        updateOrdersStateAndStorage(updatedOrders);
-        return updatedOrders;
-    });
+    setOrders(prevOrders => 
+        [order, ...prevOrders]
+    );
   }, []);
 
   return (
