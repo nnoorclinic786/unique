@@ -66,8 +66,7 @@ interface AppContextType {
 
   // Admins
   admins: AdminUser[];
-  getAdmins: () => AdminUser[];
-  addPendingAdmin: (admin: AdminUser) => { success: boolean, error?: string };
+  addPendingAdmin: (admin: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => { success: boolean, error?: string };
   updateAdminPermissions: (email: string, permissions: string[]) => Promise<{ success: boolean; message: string; }>;
   approveAdmin: (email: string) => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
   toggleAdminStatus: (email: string, currentStatus: 'Approved' | 'Disabled') => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
@@ -254,17 +253,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   
   // === ADMINS LOGIC ===
-  const getAdmins = useCallback(() => {
-    return admins;
-  }, [admins]);
-
-  const addPendingAdmin = useCallback((adminData: AdminUser) => {
+  const addPendingAdmin = useCallback((adminData: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => {
     const existingUser = admins.find(u => u.email === adminData.email);
     if (existingUser) {
         return { success: false, error: "An admin with this email already exists." };
     }
 
-    const newAdmin = {
+    const newAdmin: AdminUser = {
         ...adminData,
         role: "Admin",
         permissions: [],
@@ -349,7 +344,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     cartCount,
     clearCart,
     admins,
-    getAdmins,
     addPendingAdmin,
     updateAdminPermissions,
     approveAdmin,

@@ -46,7 +46,11 @@ function AdminSignupPageContent() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const result = addPendingAdmin(values);
+    const result = addPendingAdmin({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+    });
 
     if (result.success) {
       toast({
