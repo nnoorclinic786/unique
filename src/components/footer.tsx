@@ -85,7 +85,7 @@ export function Footer() {
                 <li><Link href="/refund-policy" className="text-muted-foreground hover:text-primary">Refund & Cancellation Policy</Link></li>
                 <li><Link href="/shipping-and-delivery-policy" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
                 <li><Link href="/return-and-replacement-policy" className="text-muted-foreground hover:text-primary">Return & Replacement Policy</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Payment Policy</Link></li>
+                <li><Link href="/payment-policy" className="text-muted-foreground hover:text-primary">Payment Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Data Protection & Security Policy</Link></li>
               </ul>
             </div>
