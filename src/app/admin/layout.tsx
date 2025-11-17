@@ -15,23 +15,14 @@ export default function AdminLayout({
 }) {
   const sessionCookie = cookies().get('admin_session');
   
-  // If we are on a public page (no session cookie needed), just render the children.
-  // The middleware handles redirecting logged-in users away from public pages.
-  if (!sessionCookie) {
-    return (
-      <AdminSearchProvider>
-        {children}
-      </AdminSearchProvider>
-    );
-  }
-
   let session;
-  try {
-    session = JSON.parse(sessionCookie.value);
-  } catch (e) {
-    // If cookie is malformed, treat as logged out and redirect.
-    // This case is unlikely if middleware is correct, but good for safety.
-    redirect('/admin/login');
+  if (sessionCookie) {
+    try {
+      session = JSON.parse(sessionCookie.value);
+    } catch (e) {
+      session = null;
+      // Malformed cookie, let middleware handle redirect
+    }
   }
 
   // If there's a valid session, render the full admin dashboard UI
@@ -46,6 +37,11 @@ export default function AdminLayout({
     );
   }
 
-  // Fallback for any other case is to just render the children (e.g., login page)
-  return <AdminSearchProvider>{children}</AdminSearchProvider>;
+  // If there is no session, we are on a public page (login/signup),
+  // so just render the children for that page.
+  return (
+      <AdminSearchProvider>
+        {children}
+      </AdminSearchProvider>
+  );
 }
