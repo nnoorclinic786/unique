@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { Textarea } from "@/components/ui/textarea";
 import { FileUp } from "lucide-react";
 import type { Buyer } from "@/lib/types";
+import ClientLayout from "../client-layout";
 
 const formSchema = z.object({
   personName: z.string().min(2, "Person name is required."),
@@ -38,7 +39,7 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
-export default function SignupPage() {
+function SignupPageContent() {
   const { toast } = useToast();
   const { addPendingBuyer } = useAppContext();
 
@@ -307,4 +308,11 @@ export default function SignupPage() {
   );
 }
 
+export default function SignupPage() {
+    return (
+        <ClientLayout>
+            <SignupPageContent />
+        </ClientLayout>
+    )
+}
     
