@@ -4,7 +4,6 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from "react";
 import type { Order } from "@/lib/types";
 import { orders as initialOrders } from "@/lib/data";
-import { useToast } from "@/hooks/use-toast";
 
 interface OrderContextType {
   orders: Order[];
@@ -15,8 +14,7 @@ interface OrderContextType {
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export function OrderProvider({ children }: { children: ReactNode }) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const { toast } = useToast();
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     // This effect runs once on the client to safely initialize state from localStorage.
@@ -33,8 +31,8 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to read or initialize orders from localStorage", error);
       // If there's an error (e.g., corrupted data), reset to default and clean up.
-      setOrders(initialOrders);
       localStorage.setItem('orders', JSON.stringify(initialOrders));
+      setOrders(initialOrders);
     }
   }, []);
 
@@ -54,13 +52,9 @@ export function OrderProvider({ children }: { children: ReactNode }) {
           order.id === orderId ? { ...order, status } : order
         );
         updateOrdersStateAndStorage(updatedOrders);
-        toast({
-          title: "Order Status Updated",
-          description: `Order ${orderId} has been marked as ${status}.`,
-        });
         return updatedOrders;
     });
-  }, [toast]);
+  }, []);
   
   const addOrder = useCallback((order: Order) => {
     setOrders(prevOrders => {
