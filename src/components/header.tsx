@@ -81,7 +81,7 @@ export function Header() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {isUserLoggedIn ? (
+          {isUserLoggedIn && (
             <>
               <Link href="/medicines" className="transition-colors hover:text-primary">
                   Medicines
@@ -90,7 +90,7 @@ export function Header() {
                   My Account
               </Link>
             </>
-          ) : null}
+          )}
             <Link href="/about" className="transition-colors hover:text-primary">
               About Us
             </Link>
