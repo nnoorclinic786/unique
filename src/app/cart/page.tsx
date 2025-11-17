@@ -178,33 +178,33 @@ export default function CartPage() {
                         <h3 className="text-md font-medium mb-4">Payment Method</h3>
                         <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
                             <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <RadioGroupItem value="card" id="pay-card" />
                                 <CreditCard />
                                 <div className="grid gap-1.5">
-                                    <RadioGroupItem value="card" id="pay-card" className="sr-only" />
                                     <span className="font-medium">Credit / Debit Card</span>
                                     <span className="text-sm text-muted-foreground">Visa, Mastercard, RuPay</span>
                                 </div>
                             </Label>
                             <Label htmlFor="pay-upi" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <RadioGroupItem value="upi" id="pay-upi" />
                                 <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
                                 <div className="grid gap-1.5">
-                                    <RadioGroupItem value="upi" id="pay-upi" className="sr-only" />
                                     <span className="font-medium">UPI / QR Code</span>
                                     <span className="text-sm text-muted-foreground">Google Pay, PhonePe, Paytm</span>
                                 </div>
                             </Label>
                             <Label htmlFor="pay-netbanking" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <RadioGroupItem value="netbanking" id="pay-netbanking" />
                                 <Landmark />
                                 <div className="grid gap-1.5">
-                                    <RadioGroupItem value="netbanking" id="pay-netbanking" className="sr-only" />
                                     <span className="font-medium">Net Banking</span>
                                     <span className="text-sm text-muted-foreground">All major banks supported</span>
                                 </div>
                             </Label>
                             <Label htmlFor="pay-cod" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                                <RadioGroupItem value="cod" id="pay-cod" />
                                 <Banknote />
                                 <div className="grid gap-1.5">
-                                    <RadioGroupItem value="cod" id="pay-cod" className="sr-only"/>
                                     <span className="font-medium">Cash on Delivery</span>
                                     <span className="text-sm text-muted-foreground">Pay upon receiving your order</span>
                                 </div>
