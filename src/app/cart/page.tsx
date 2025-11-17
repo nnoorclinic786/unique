@@ -61,9 +61,13 @@ export default function CartPage() {
         status: 'Pending' as const,
         itemCount: cartCount,
     };
-    addOrder(newOrder);
-    clearCart();
-    router.push('/account'); // Redirect to account page to see new order
+    
+    // Defer state updates to prevent render conflicts
+    setTimeout(() => {
+        addOrder(newOrder);
+        clearCart();
+        router.push('/account'); // Redirect to account page to see new order
+    }, 0);
   }
   
   const handleCheckoutProceed = () => {
