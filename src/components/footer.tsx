@@ -83,36 +83,33 @@ export function Footer() {
                 <li><Link href="/privacy-policy" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
                 <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
                 <li><Link href="/refund-policy" className="text-muted-foreground hover:text-primary">Refund & Cancellation Policy</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
+                <li><Link href="/shipping-and-delivery-policy" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Return & Replacement Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Payment Policy</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Data Protection & Security Policy</Link></li>
-                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Disclaimer</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-headline font-semibold mb-4">Contact</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 mt-1 flex-shrink-0" />
-                  <span>uniquemedicare786@gmail.com</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 mt-1 flex-shrink-0" />
-                  <span>8299400552</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
-                  <span>4/79, Diwan Mubarak, Farrukhabad</span>
-                </li>
-              </ul>
+              <h3 className="font-headline font-semibold mb-4">Contact Us</h3>
+              <address className="space-y-2 text-sm not-italic text-muted-foreground">
+                <p className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
+                  <span>4/79, Moh. Diwan Mubarak, Mau Darwaza, Farrukhabad, Uttar Pradesh – 209625</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-primary" />
+                  <a href="tel:8299400552" className="hover:text-primary">8299400552</a>
+                </p>
+                <p className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-primary" />
+                  <a href="mailto:uniquemedicare786@gmail.com" className="hover:text-primary">uniquemedicare786@gmail.com</a>
+                </p>
+              </address>
             </div>
           </div>
         </div>
-      </div>
-      <div className="bg-muted py-4">
-        <div className="container mx-auto px-4 md:px-6 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Unique Medicare. All rights reserved.</p>
+        <div className="border-t border-muted-foreground/10 mt-8 pt-6 text-center text-xs text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} Unique Medicare. All rights reserved.</p>
         </div>
       </div>
     </footer>
