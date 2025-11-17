@@ -22,9 +22,9 @@ export default function AdminLayout({
         if (session.isLoggedIn) {
             return (
                 <AdminSearchProvider>
-                <AdminClientLayout permissions={session.permissions || []}>
-                    {children}
-                </AdminClientLayout>
+                    <AdminClientLayout permissions={session.permissions || []}>
+                        {children}
+                    </AdminClientLayout>
                 </AdminSearchProvider>
             );
         }
