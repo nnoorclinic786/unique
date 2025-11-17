@@ -273,29 +273,36 @@ export default function CartPage() {
                 <Separator />
                 <div>
                   <h3 className="text-md font-medium mb-2">Shipping To</h3>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between">
-                            <div className="truncate pr-2">
-                                <p className="text-sm font-medium text-left">{selectedAddress?.name}</p>
-                                <p className="text-xs text-muted-foreground text-left truncate">{selectedAddress?.fullAddress}</p>
-                            </div>
-                            <ChevronsUpDown className="h-4 w-4 opacity-50 flex-shrink-0" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                        {currentUser?.addresses?.map(addr => (
-                            <DropdownMenuItem key={addr.id} onSelect={() => setSelectedAddress(addr)}>
-                                {addr.name}
-                            </DropdownMenuItem>
-                        ))}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => setAddressDialogOpen(true)}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add new address
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {currentUser?.addresses && currentUser.addresses.length > 0 ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between">
+                              <div className="truncate pr-2">
+                                  <p className="text-sm font-medium text-left">{selectedAddress?.name}</p>
+                                  <p className="text-xs text-muted-foreground text-left truncate">{selectedAddress?.fullAddress}</p>
+                              </div>
+                              <ChevronsUpDown className="h-4 w-4 opacity-50 flex-shrink-0" />
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                          {currentUser?.addresses?.map(addr => (
+                              <DropdownMenuItem key={addr.id} onSelect={() => setSelectedAddress(addr)}>
+                                  {addr.name}
+                              </DropdownMenuItem>
+                          ))}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onSelect={() => setAddressDialogOpen(true)}>
+                              <PlusCircle className="mr-2 h-4 w-4" />
+                              Add new address
+                          </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Button variant="outline" className="w-full" onClick={() => setAddressDialogOpen(true)}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Shipping Address
+                    </Button>
+                  )}
                 </div>
                 </>
                 )}
