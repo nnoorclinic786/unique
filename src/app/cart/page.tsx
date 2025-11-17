@@ -62,12 +62,13 @@ export default function CartPage() {
         itemCount: cartCount,
     };
     
-    // Defer state updates to prevent render conflicts
-    setTimeout(() => {
-        addOrder(newOrder);
-        clearCart();
-        router.push('/account'); // Redirect to account page to see new order
-    }, 0);
+    addOrder(newOrder);
+    toast({
+        title: "Order Placed!",
+        description: `Your order ${newOrder.id} has been successfully placed.`,
+    });
+    clearCart();
+    router.push('/account'); // Redirect to account page to see new order
   }
   
   const handleCheckoutProceed = () => {
@@ -77,6 +78,14 @@ export default function CartPage() {
         router.push(`/payment/${paymentMethod}`);
     }
   }
+
+  const handleRemoveFromCart = (itemId: string) => {
+    removeFromCart(itemId);
+    toast({
+        title: "Item Removed",
+        description: `The item has been removed from your cart.`,
+    });
+  };
 
   if (!isClient) {
       return null;
@@ -147,7 +156,7 @@ export default function CartPage() {
                                 </TableCell>
                                 <TableCell className="text-right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
                                 <TableCell>
-                                <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.id)}>
+                                <Button variant="ghost" size="icon" onClick={() => handleRemoveFromCart(item.id)}>
                                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                                 </TableCell>
@@ -289,5 +298,3 @@ export default function CartPage() {
     </>
   );
 }
-
-    

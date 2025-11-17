@@ -62,13 +62,9 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     setOrders(prevOrders => {
         const updatedOrders = [order, ...prevOrders];
         updateOrdersStateAndStorage(updatedOrders);
-         toast({
-          title: "Order Placed!",
-          description: `Your order ${order.id} has been successfully placed.`,
-        });
         return updatedOrders;
     });
-  }, [toast]);
+  }, []);
 
   return (
     <OrderContext.Provider value={{ orders, updateOrderStatus, addOrder }}>

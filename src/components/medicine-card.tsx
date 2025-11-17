@@ -4,20 +4,26 @@ import Link from 'next/link';
 import type { Medicine } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, Trash2 } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 interface MedicineCardProps {
   medicine: Medicine;
 }
 
 export function MedicineCard({ medicine }: MedicineCardProps) {
-  const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, addToCart, updateQuantity } = useCart();
+  const { toast } = useToast();
   const cartItem = cartItems.find((item) => item.id === medicine.id);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     addToCart(medicine);
+    toast({
+        title: "Added to Cart",
+        description: `${medicine.name} has been added to your cart.`,
+    });
   };
   
   const handleIncrement = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
