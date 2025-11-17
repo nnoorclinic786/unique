@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, {
@@ -37,6 +38,7 @@ interface AppContextType {
   addPendingBuyer: (buyer: Buyer) => void;
   approveBuyer: (buyerId: string) => void;
   toggleBuyerStatus: (buyerId: string, status: 'Approved' | 'Disabled') => void;
+  updateBuyerAddress: (buyerId: string, address: string) => void;
 
   // Medicines
   medicines: Medicine[];
@@ -156,6 +158,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const updateBuyerAddress = useCallback((buyerId: string, address: string) => {
+    setBuyers((prev) =>
+        prev.map((b) => (b.id === buyerId ? { ...b, address } : b))
+    );
+  }, []);
+
   const approvedBuyers = buyers.filter((b) => b.status === 'Approved');
   const pendingBuyers = buyers.filter((b) => b.status === 'Pending');
   const disabledBuyers = buyers.filter((b) => b.status === 'Disabled');
@@ -209,6 +217,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addPendingBuyer,
     approveBuyer,
     toggleBuyerStatus,
+    updateBuyerAddress,
     medicines,
     addMedicine,
     settings,

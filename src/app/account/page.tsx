@@ -14,14 +14,9 @@ import { useAppContext } from '@/context/app-context';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-const user = {
-  name: 'City Pharmacy',
-  email: 'contact@citypharm.com',
-  mobile: '9876543210',
-  gst: '29ABCDE1234F1Z5',
-  address: '123, Main Market, Bangalore, Karnataka, 560001',
-};
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     'Pending': 'secondary',
@@ -31,10 +26,35 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
     'Cancelled': 'destructive',
 };
 
+function AddressForm({ currentAddress, onSave }: { currentAddress?: string; onSave: (newAddress: string) => void }) {
+    const [address, setAddress] = useState(currentAddress || '');
+
+    const handleSave = () => {
+        onSave(address);
+    };
+
+    return (
+        <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+                <Label htmlFor="address">Full Shipping Address</Label>
+                <Textarea
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter your full shipping address, including city, state, and pincode."
+                    className="min-h-[100px]"
+                />
+            </div>
+        </div>
+    );
+}
+
+
 export default function AccountPage() {
-  const { orders, updateOrderStatus } = useAppContext();
+  const { orders, updateOrderStatus, buyers, updateBuyerAddress } = useAppContext();
   const { toast } = useToast();
   const [userName, setUserName] = useState<string | null>(null);
+  const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
 
   useEffect(() => {
     // In a real app, you'd get the user from a session.
@@ -50,8 +70,27 @@ export default function AccountPage() {
         description: `Order ${orderId} has been cancelled.`,
     });
   };
-
+  
+  const buyer = buyers.find(b => b.name === userName);
   const userOrders = userName ? orders.filter(order => order.buyerName === userName) : [];
+
+  const handleAddressSave = (newAddress: string) => {
+    if (buyer) {
+        updateBuyerAddress(buyer.id, newAddress);
+        toast({
+            title: "Address Updated",
+            description: "Your shipping address has been successfully updated.",
+        });
+        setAddressDialogOpen(false);
+    } else {
+         toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not find user to update address.",
+        });
+    }
+  };
+
 
   return (
     <>
@@ -62,21 +101,44 @@ export default function AccountPage() {
           <div className="md:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline">{userName || 'User'}</CardTitle>
-                <CardDescription>{user.email}</CardDescription>
+                <CardTitle className="font-headline">{buyer?.name || 'User'}</CardTitle>
+                <CardDescription>{buyer?.email}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <div>
                   <h3 className="font-semibold">Mobile</h3>
-                  <p className="text-muted-foreground">{user.mobile}</p>
+                  <p className="text-muted-foreground">{buyer?.mobileNumber1}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold">GST Number</h3>
-                  <p className="text-muted-foreground">{user.gst}</p>
+                  <p className="text-muted-foreground">{buyer?.gstNumber}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold">Delivery Address</h3>
-                  <p className="text-muted-foreground">{user.address}</p>
+                   {buyer?.address ? (
+                        <p className="text-muted-foreground">{buyer.address}</p>
+                   ) : (
+                        <p className="text-muted-foreground italic">No address set.</p>
+                   )}
+                   <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="link" className="p-0 h-auto mt-2 text-sm">{buyer?.address ? 'Change Address' : 'Add Shipping Address'}</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Edit Shipping Address</DialogTitle>
+                            </DialogHeader>
+                            <AddressForm currentAddress={buyer?.address} onSave={handleAddressSave} />
+                             <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setAddressDialogOpen(false)}>Cancel</Button>
+                                <Button type="submit" onClick={() => {
+                                    // A bit of a hack to trigger form save from outside
+                                    const form = document.querySelector('textarea'); // Assuming one textarea
+                                    if(form) handleAddressSave(form.value);
+                                }}>Save Address</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
               </CardContent>
             </Card>
