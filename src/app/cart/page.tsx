@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -13,7 +12,7 @@ import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck, Copy } fro
 import { useCart } from '@/context/cart-context';
 import { useOrderContext } from '@/context/orders-context';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useSettings } from '@/context/settings-context';
@@ -33,6 +32,20 @@ export default function CartPage() {
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [checkoutStep, setCheckoutStep] = useState(1);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment_success') === 'true') {
+        const method = params.get('method');
+        if(method) setPaymentMethod(method);
+        setCheckoutStep(2); // Move to address confirmation after successful payment
+        
+        // Clean up URL
+        window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
 
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -40,8 +53,6 @@ export default function CartPage() {
   const total = subtotal + tax;
 
   const handlePlaceOrder = () => {
-    // This is a simplified checkout process
-    // A real app would integrate with a payment gateway
     const newOrder = {
         id: `ORD-${Date.now()}`,
         buyerName: localStorage.getItem('userName') || user.name, // In a real app, get from user session
@@ -55,14 +66,18 @@ export default function CartPage() {
     router.push('/account'); // Redirect to account page to see new order
   }
   
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-        title: "Copied to clipboard!",
-        description: "UPI ID has been copied."
-    });
+  const handleCheckoutProceed = () => {
+    if (paymentMethod === 'cod') {
+        setCheckoutStep(2);
+    } else {
+        router.push(`/payment/${paymentMethod}`);
+    }
   }
 
+  if (!isClient) {
+      return null;
+  }
+  
   if (cartItems.length === 0) {
     return (
         <>
@@ -165,22 +180,21 @@ export default function CartPage() {
                     <div>
                         <h3 className="font-semibold mb-2">Payment Details</h3>
                         {paymentMethod === 'upi' && settings.upiId ? (
-                            <div className="space-y-3">
-                                <p className="text-sm text-muted-foreground">Please complete the payment using the following UPI ID. After payment, click "Place Order".</p>
-                                <div className="flex items-center gap-4 rounded-md border bg-muted/20 p-4">
-                                    <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
-                                    <span className="font-mono text-lg">{settings.upiId}</span>
-                                    <Button size="icon" variant="ghost" className="ml-auto" onClick={() => copyToClipboard(settings.upiId)}>
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                </div>
+                             <div className="flex items-center gap-2 text-sm">
+                                <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="h-6 w-6"/>
+                                <span className="font-semibold">Paid via UPI</span>
                             </div>
                         ) : (
                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 {paymentMethod === 'cod' && <Banknote className="h-5 w-5" />}
                                 {paymentMethod === 'card' && <CreditCard className="h-5 w-5" />}
                                 {paymentMethod === 'netbanking' && <Landmark className="h-5 w-5" />}
-                                <span className="font-semibold capitalize">{paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment (Not Configured)'}</span>
+                                <span className="font-semibold capitalize">
+                                    {paymentMethod === 'cod' ? 'Cash on Delivery' :
+                                    paymentMethod === 'card' ? 'Paid via Card' :
+                                    paymentMethod === 'netbanking' ? 'Paid via Net Banking' :
+                                    'Payment details confirmed'}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -219,7 +233,7 @@ export default function CartPage() {
                     <Separator />
                     <div>
                         <h3 className="text-md font-medium mb-4">Payment Method</h3>
-                        <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
+                         <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid gap-4">
                             <Label htmlFor="pay-card" className="flex items-center gap-4 rounded-md border p-4 hover:bg-muted/50 transition-colors cursor-pointer has-[input:checked]:border-primary">
                                 <RadioGroupItem value="card" id="pay-card" />
                                 <CreditCard />
@@ -259,8 +273,8 @@ export default function CartPage() {
               </CardContent>
               <CardFooter>
                  {checkoutStep === 1 && (
-                  <Button className="w-full" size="lg" onClick={() => setCheckoutStep(2)}>
-                    Proceed to Checkout
+                  <Button className="w-full" size="lg" onClick={handleCheckoutProceed}>
+                    {paymentMethod === 'cod' ? 'Proceed to Checkout' : 'Proceed to Payment'}
                   </Button>
                 )}
               </CardFooter>
