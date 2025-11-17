@@ -5,14 +5,14 @@ import { PlaceHolderImages } from './placeholder-images';
 export const placeholderImages = PlaceHolderImages;
 
 export const medicines: Medicine[] = [
-  { id: 'PROD001', name: 'Paracetamol 500mg', description: 'Standard analgesic and antipyretic.', price: 15.50, stock: 1200, category: 'Analgesics', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '' },
-  { id: 'PROD002', name: 'Amoxicillin 250mg', description: 'Broad-spectrum antibiotic.', price: 45.00, stock: 800, category: 'Antibiotics', imageUrl: placeholderImages.find(img => img.id === 'capsules')?.imageUrl || '' },
-  { id: 'PROD003', name: 'Cough Syrup 100ml', description: 'For relief from cough and cold.', price: 75.00, stock: 650, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '' },
-  { id: 'PROD004', name: 'Antacid Gel 170ml', description: 'For heartburn and indigestion.', price: 60.25, stock: 900, category: 'Gastrointestinal', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '' },
-  { id: 'PROD005', name: 'Diclofenac Gel 30g', description: 'Topical pain relief gel.', price: 55.00, stock: 750, category: 'Topical', imageUrl: placeholderImages.find(img => img.id === 'ointment-tube')?.imageUrl || '' },
-  { id: 'PROD006', name: 'Salbutamol Inhaler', description: 'For asthma and COPD relief.', price: 120.00, stock: 400, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'inhaler')?.imageUrl || '' },
-  { id: 'PROD007', name: 'Vitamin C 500mg', description: 'Immunity booster supplement.', price: 30.00, stock: 2500, category: 'Vitamins', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '' },
-  { id: 'PROD008', name: 'Insulin Injection', description: 'For management of diabetes.', price: 450.00, stock: 200, category: 'Endocrine', imageUrl: placeholderImages.find(img => img.id === 'vaccine-vial')?.imageUrl || '' },
+  { id: 'PROD001', name: 'Paracetamol 500mg', description: 'Standard analgesic and antipyretic.', price: 15.50, stock: 1200, category: 'Analgesics', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '', batchNumber: 'P001A', expiryDate: '2026-12' },
+  { id: 'PROD002', name: 'Amoxicillin 250mg', description: 'Broad-spectrum antibiotic.', price: 45.00, stock: 800, category: 'Antibiotics', imageUrl: placeholderImages.find(img => img.id === 'capsules')?.imageUrl || '', batchNumber: 'A002B', expiryDate: '2025-08' },
+  { id: 'PROD003', name: 'Cough Syrup 100ml', description: 'For relief from cough and cold.', price: 75.00, stock: 650, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '', batchNumber: 'CS003C', expiryDate: '2025-11' },
+  { id: 'PROD004', name: 'Antacid Gel 170ml', description: 'For heartburn and indigestion.', price: 60.25, stock: 900, category: 'Gastrointestinal', imageUrl: placeholderImages.find(img => img.id === 'syrup')?.imageUrl || '', batchNumber: 'AG004D', expiryDate: '2026-04' },
+  { id: 'PROD005', name: 'Diclofenac Gel 30g', description: 'Topical pain relief gel.', price: 55.00, stock: 750, category: 'Topical', imageUrl: placeholderImages.find(img => img.id === 'ointment-tube')?.imageUrl || '', batchNumber: 'DG005E', expiryDate: '2027-01' },
+  { id: 'PROD006', name: 'Salbutamol Inhaler', description: 'For asthma and COPD relief.', price: 120.00, stock: 400, category: 'Respiratory', imageUrl: placeholderImages.find(img => img.id === 'inhaler')?.imageUrl || '', batchNumber: 'SI006F', expiryDate: '2025-09' },
+  { id: 'PROD007', name: 'Vitamin C 500mg', description: 'Immunity booster supplement.', price: 30.00, stock: 2500, category: 'Vitamins', imageUrl: placeholderImages.find(img => img.id === 'pills-bottle')?.imageUrl || '', batchNumber: 'VC007G', expiryDate: '2027-06' },
+  { id: 'PROD008', name: 'Insulin Injection', description: 'For management of diabetes.', price: 450.00, stock: 200, category: 'Endocrine', imageUrl: placeholderImages.find(img => img.id === 'vaccine-vial')?.imageUrl || '', batchNumber: 'IN008H', expiryDate: '2025-05' },
 ];
 
 export const orders: Order[] = [

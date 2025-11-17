@@ -13,6 +13,8 @@ export type Medicine = {
   stockUnit?: 'strip' | 'piece' | 'bottle' | 'box';
   companyName?: string;
   imageSource?: string;
+  batchNumber?: string;
+  expiryDate?: string;
 };
 
 export type Order = {

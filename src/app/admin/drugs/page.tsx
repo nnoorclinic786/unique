@@ -75,6 +75,8 @@ export default function AdminDrugsPage() {
               <TableHead>Category</TableHead>
               <TableHead className="hidden md:table-cell">Stock</TableHead>
               <TableHead className="hidden md:table-cell">Price</TableHead>
+              <TableHead className="hidden md:table-cell">Batch No.</TableHead>
+              <TableHead className="hidden md:table-cell">Expiry</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -101,6 +103,8 @@ export default function AdminDrugsPage() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{medicine.stock}</TableCell>
                   <TableCell className="hidden md:table-cell">₹{medicine.price.toFixed(2)}</TableCell>
+                   <TableCell className="hidden md:table-cell">{medicine.batchNumber || 'N/A'}</TableCell>
+                  <TableCell className="hidden md:table-cell">{medicine.expiryDate || 'N/A'}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
