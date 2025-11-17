@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { cookies } from 'next/headers';
 import AdminClientLayout from './client-layout';
 import { AdminSearchProvider } from '@/context/admin-search-context';
+import { AppProvider } from '@/context/app-context';
 
 export default function ProtectedAdminLayout({
   children,
@@ -14,10 +16,12 @@ export default function ProtectedAdminLayout({
   const session = JSON.parse(sessionCookie!.value);
 
   return (
-    <AdminSearchProvider>
-      <AdminClientLayout permissions={session.permissions || []}>
-        {children}
-      </AdminClientLayout>
-    </AdminSearchProvider>
+    <AppProvider>
+      <AdminSearchProvider>
+        <AdminClientLayout permissions={session.permissions || []}>
+          {children}
+        </AdminClientLayout>
+      </AdminSearchProvider>
+    </AppProvider>
   );
 }
