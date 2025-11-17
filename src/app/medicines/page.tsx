@@ -1,7 +1,6 @@
 
 "use client";
 import { useState } from 'react';
-import { Header } from '@/components/header';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { MedicineCard } from '@/components/medicine-card';
@@ -19,7 +18,6 @@ export default function MedicinesPage() {
 
   return (
     <>
-      <Header />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">

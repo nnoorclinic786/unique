@@ -4,7 +4,6 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAppContext } from '@/context/app-context';
-import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ChevronLeft, Plus, Pill, Building, Tag, Info, Package, Calendar, Minus } from 'lucide-react';
@@ -24,7 +23,6 @@ export default function MedicineDetailPage() {
   if (!medicine) {
     return (
       <>
-        <Header />
         <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">Medicine not found</h1>
@@ -72,7 +70,6 @@ export default function MedicineDetailPage() {
 
   return (
     <>
-      <Header />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <div className="mb-6">
           <Button variant="outline" size="sm" onClick={() => router.back()}>

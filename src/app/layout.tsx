@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 import { AppProvider } from '@/context/app-context';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className="font-body antialiased min-h-screen flex flex-col">
         <AdminSearchProvider>
           <AppProvider>
+            <Header />
             <div className="flex-grow">{children}</div>
           </AppProvider>
         </AdminSearchProvider>

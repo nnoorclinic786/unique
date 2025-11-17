@@ -9,7 +9,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Header } from '@/components/header';
 import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck, PlusCircle, ChevronsUpDown } from 'lucide-react';
 import { useAppContext } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
@@ -127,7 +126,6 @@ export default function CartPage() {
   if (cartItems.length === 0) {
     return (
         <>
-            <Header />
             <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
                 <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                     <ShoppingCart className="w-24 h-24 text-muted-foreground mb-6" />
@@ -145,7 +143,6 @@ export default function CartPage() {
 
   return (
     <>
-      <Header />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <h1 className="text-3xl font-headline font-bold mb-8">Your Cart</h1>
         <div className="grid md:grid-cols-3 gap-12">

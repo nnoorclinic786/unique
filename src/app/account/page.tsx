@@ -1,8 +1,6 @@
 
-
 'use client';
 
-import { Header } from '@/components/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   Accordion,
@@ -124,7 +122,6 @@ export default function AccountPage() {
 
   return (
     <>
-      <Header />
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <h1 className="text-3xl font-headline font-bold mb-8">My Account</h1>
         <div className="grid md:grid-cols-3 gap-8">

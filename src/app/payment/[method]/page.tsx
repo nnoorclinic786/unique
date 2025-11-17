@@ -3,7 +3,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PaymentForm } from "@/components/payment-form";
@@ -39,7 +38,6 @@ export default function PaymentPage() {
     if (!details) {
         return (
              <>
-                <Header />
                 <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
                     <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                         <h1 className="text-2xl font-bold mb-4">Invalid Payment Method</h1>
@@ -55,7 +53,6 @@ export default function PaymentPage() {
 
     return (
         <>
-            <Header />
             <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
                 <div className="max-w-md mx-auto">
                      <div className="mb-6">
