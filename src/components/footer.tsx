@@ -5,19 +5,54 @@ import Link from 'next/link';
 import { Logo } from './icons';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export function Footer() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
-    if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
-      setIsUserLoggedIn(true);
-    } else {
-      setIsUserLoggedIn(false);
-    }
+    const checkLoginStatus = () => {
+      if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
+        setIsUserLoggedIn(true);
+      } else {
+        setIsUserLoggedIn(false);
+      }
+    };
+
+    checkLoginStatus();
+    
+    window.addEventListener('storage', checkLoginStatus);
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
+
   }, []);
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    if (isUserLoggedIn) {
+      router.push(href);
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "Please sign up or log in first to access this page.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const QuickLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <li>
+      <a href={href} onClick={(e) => handleLinkClick(e, href)} className="text-muted-foreground hover:text-primary cursor-pointer">
+        {children}
+      </a>
+    </li>
+  );
 
   return (
     <footer className="bg-secondary text-secondary-foreground">
@@ -37,22 +72,25 @@ export function Footer() {
           <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8">
             <div>
               <h3 className="font-headline font-semibold mb-4">Quick Links</h3>
-              {isClient && isUserLoggedIn ? (
-                <ul className="space-y-2 text-sm">
-                  <li><Link href="/medicines" className="text-muted-foreground hover:text-primary">Products</Link></li>
-                  <li><Link href="/account" className="text-muted-foreground hover:text-primary">Orders</Link></li>
-                  <li><Link href="/cart" className="text-muted-foreground hover:text-primary">Cart</Link></li>
-                </ul>
-              ) : (
-                 <p className="text-sm text-muted-foreground">
-                    Please <Link href="/signup" className="underline hover:text-primary">sign up</Link> first.
-                </p>
-              )}
+              {isClient ? (
+                  <ul className="space-y-2 text-sm">
+                    <QuickLink href="/medicines">Products</QuickLink>
+                    <QuickLink href="/account">Orders</QuickLink>
+                    <QuickLink href="/cart">Cart</QuickLink>
+                  </ul>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted-foreground/20 rounded w-20"></div>
+                    <div className="h-4 bg-muted-foreground/20 rounded w-16"></div>
+                    <div className="h-4 bg-muted-foreground/20 rounded w-12"></div>
+                  </div>
+                )
+              }
             </div>
             <div>
               <h3 className="font-headline font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
+                <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
               </ul>
