@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -43,13 +44,11 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
     }
 
     // Check against the permission map for exact matches
-    const requiredPermission = Object.keys(permissionMap).find(key => {
-        const regex = new RegExp(`^${key.replace(/\[.*?\]/g, '[^/]+')}$`);
-        return regex.test(pathname);
-    });
+    const requiredPermission = permissionMap[pathname];
 
-    if (requiredPermission && permissionMap[requiredPermission]) {
-      return userPermissions.includes(permissionMap[requiredPermission]);
+    // If a specific permission is required for this path, check if the user has it
+    if (requiredPermission) {
+        return userPermissions.includes(requiredPermission);
     }
 
     // Default to allow for paths not explicitly in the map (like /admin)
