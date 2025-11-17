@@ -50,7 +50,8 @@ const formSchema = z.object({
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   stock: z.coerce.number().int().min(0, { message: "Stock must be a positive integer." }),
   stockUnit: z.enum(['strip', 'piece', 'bottle', 'box'], { required_error: "Please select a stock unit."}),
-  companyName: z.string().min(2, { message: "Company name must be at least 2 characters." }),
+  manufacturingCompany: z.string().min(2, { message: "Manufacturing company is required." }),
+  marketingCompany: z.string().optional(),
 });
 
 export default function AddMedicinePage() {
@@ -71,7 +72,8 @@ export default function AddMedicinePage() {
       category: "",
       description: "",
       stock: 0,
-      companyName: "",
+      manufacturingCompany: "",
+      marketingCompany: "",
     },
   });
 
@@ -288,12 +290,25 @@ export default function AddMedicinePage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
-                    name="companyName"
+                    name="manufacturingCompany"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Company Name</FormLabel>
+                        <FormLabel>Manufacturing Company</FormLabel>
                         <FormControl>
                           <Input placeholder="e.g., Cipla" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                 <FormField
+                    control={form.control}
+                    name="marketingCompany"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Marketing Company (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., GSK" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -375,5 +390,3 @@ export default function AddMedicinePage() {
     </Card>
   );
 }
-
-    

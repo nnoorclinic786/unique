@@ -40,7 +40,8 @@ export default function AdminDrugsPage() {
     if (!query) return true;
     const lowerCaseQuery = query.toLowerCase();
     return medicine.name.toLowerCase().includes(lowerCaseQuery) ||
-           (medicine.companyName && medicine.companyName.toLowerCase().includes(lowerCaseQuery)) ||
+           (medicine.manufacturingCompany && medicine.manufacturingCompany.toLowerCase().includes(lowerCaseQuery)) ||
+           (medicine.marketingCompany && medicine.marketingCompany.toLowerCase().includes(lowerCaseQuery)) ||
            (medicine.description && medicine.description.toLowerCase().includes(lowerCaseQuery)) ||
            (medicine.category && medicine.category.toLowerCase().includes(lowerCaseQuery));
   });
@@ -73,8 +74,8 @@ export default function AdminDrugsPage() {
                 <span className="sr-only">Image</span>
               </TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead>Manufacturing Co.</TableHead>
+              <TableHead>Marketing Co.</TableHead>
               <TableHead className="hidden md:table-cell">Stock</TableHead>
               <TableHead className="hidden md:table-cell">Price</TableHead>
               <TableHead className="hidden md:table-cell">Batch No.</TableHead>
@@ -100,10 +101,8 @@ export default function AdminDrugsPage() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{medicine.name}</TableCell>
-                  <TableCell className="hidden md:table-cell">{medicine.companyName || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{medicine.category}</Badge>
-                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{medicine.manufacturingCompany || 'N/A'}</TableCell>
+                  <TableCell className="hidden md:table-cell">{medicine.marketingCompany || 'N/A'}</TableCell>
                   <TableCell className="hidden md:table-cell">{medicine.stock}</TableCell>
                   <TableCell className="hidden md:table-cell">₹{medicine.price.toFixed(2)}</TableCell>
                    <TableCell className="hidden md:table-cell">{medicine.batchNumber || 'N/A'}</TableCell>

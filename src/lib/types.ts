@@ -11,7 +11,8 @@ export type Medicine = {
   hsnCode?: string;
   priceUnit?: 'strip' | 'piece' | 'bottle' | 'box';
   stockUnit?: 'strip' | 'piece' | 'bottle' | 'box';
-  companyName?: string;
+  manufacturingCompany?: string;
+  marketingCompany?: string;
   imageSource?: string;
   batchNumber?: string;
   expiryDate?: string;
