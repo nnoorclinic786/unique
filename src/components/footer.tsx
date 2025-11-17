@@ -1,9 +1,24 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Logo } from './icons';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function Footer() {
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
+      setIsUserLoggedIn(true);
+    } else {
+      setIsUserLoggedIn(false);
+    }
+  }, []);
+
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container mx-auto px-4 md:px-6 py-12">
@@ -22,11 +37,17 @@ export function Footer() {
           <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8">
             <div>
               <h3 className="font-headline font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm">
-                <li><Link href="/medicines" className="text-muted-foreground hover:text-primary">Products</Link></li>
-                <li><Link href="/account" className="text-muted-foreground hover:text-primary">Orders</Link></li>
-                <li><Link href="/cart" className="text-muted-foreground hover:text-primary">Cart</Link></li>
-              </ul>
+              {isClient && isUserLoggedIn ? (
+                <ul className="space-y-2 text-sm">
+                  <li><Link href="/medicines" className="text-muted-foreground hover:text-primary">Products</Link></li>
+                  <li><Link href="/account" className="text-muted-foreground hover:text-primary">Orders</Link></li>
+                  <li><Link href="/cart" className="text-muted-foreground hover:text-primary">Cart</Link></li>
+                </ul>
+              ) : (
+                 <p className="text-sm text-muted-foreground">
+                    Please <Link href="/signup" className="underline hover:text-primary">sign up</Link> first.
+                </p>
+              )}
             </div>
             <div>
               <h3 className="font-headline font-semibold mb-4">Support</h3>
@@ -64,4 +85,3 @@ export function Footer() {
     </footer>
   );
 }
-
