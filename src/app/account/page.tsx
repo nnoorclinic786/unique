@@ -3,7 +3,7 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
@@ -51,7 +51,7 @@ export default function AccountPage() {
     if (storedUserName) {
       setBuyer(buyers.find(b => b.name === storedUserName) || null);
     }
-  }, [buyers]);
+  }, [buyers, userName]);
 
   const handleCancelOrder = (orderId: string) => {
     updateOrderStatus(orderId, 'Cancelled');
@@ -162,12 +162,8 @@ export default function AccountPage() {
             </Card>
 
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader>
                     <CardTitle className="font-headline text-xl">Shipping Addresses</CardTitle>
-                     <Button variant="outline" size="sm" onClick={openAddDialog}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add New
-                    </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {buyer?.addresses && buyer.addresses.length > 0 ? (
@@ -209,6 +205,12 @@ export default function AccountPage() {
                         <p className="text-sm text-muted-foreground text-center py-4">You have not added any shipping addresses yet.</p>
                     )}
                 </CardContent>
+                <CardFooter className="border-t pt-6">
+                    <Button variant="outline" className="w-full" onClick={openAddDialog}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add New Address
+                    </Button>
+                </CardFooter>
             </Card>
           </div>
           <div className="md:col-span-2">
@@ -276,7 +278,7 @@ export default function AccountPage() {
         
         {/* Profile Dialog */}
         <Dialog open={isProfileDialogOpen} onOpenChange={setProfileDialogOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md overflow-y-auto max-h-[90vh]">
                 <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>
                     <CardDescription>Make changes to your account details here.</CardDescription>
@@ -291,5 +293,3 @@ export default function AccountPage() {
     </>
   );
 }
-
-    
