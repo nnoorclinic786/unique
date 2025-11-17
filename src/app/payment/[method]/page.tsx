@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PaymentForm } from "@/components/payment-form";
 import { ChevronLeft, CreditCard, Landmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const paymentMethodDetails = {
     card: { icon: <CreditCard className="w-8 h-8" />, title: "Credit/Debit Card" },
@@ -22,6 +23,7 @@ export default function PaymentPage() {
     const { toast } = useToast();
     const method = params.method as keyof typeof paymentMethodDetails;
     const details = paymentMethodDetails[method];
+    const [isFormValid, setIsFormValid] = useState(false);
 
     const handlePayment = () => {
         // In a real app, this would handle the payment submission to a gateway
@@ -73,8 +75,10 @@ export default function PaymentPage() {
                             <CardDescription>Please enter your payment details below.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <PaymentForm method={method} />
-                            <Button className="w-full" size="lg" onClick={handlePayment}>Pay Now</Button>
+                            <PaymentForm method={method} onValidationChange={setIsFormValid} />
+                            <Button className="w-full" size="lg" onClick={handlePayment} disabled={!isFormValid}>
+                                Pay Now
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>
