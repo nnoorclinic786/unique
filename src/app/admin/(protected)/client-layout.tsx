@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -29,7 +28,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
-import { logout } from "./(public)/login/actions";
+import { logout } from "../(public)/login/actions";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { useAdminSearch } from "@/context/admin-search-context";
@@ -113,9 +112,9 @@ export default function AdminClientLayout({ children, permissions }: { children:
             </SidebarContent>
              <SidebarFooter>
                 <SidebarMenu>
-                    <SidebarMenuItem>
+                    {hasPermission('settings') && <SidebarMenuItem>
                         <Link href="/admin/settings" passHref><SidebarMenuButton tooltip="Settings"><Settings /><span>Settings</span></SidebarMenuButton></Link>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem>}
                     <SidebarMenuItem>
                         <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
                             <LogOut /><span>Log Out</span>

@@ -20,13 +20,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { orders, buyers, salesData, medicines } from "@/lib/data";
+import { useAppContext } from "@/context/app-context";
 import { DollarSign, Users, Package, ShoppingCart } from "lucide-react";
 import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
 export default function DashboardPage() {
   const { query } = useAdminSearch();
+  const { orders, buyers, medicines, salesData } = useAppContext();
 
   const totalRevenue = orders
     .filter(o => o.status === 'Delivered')

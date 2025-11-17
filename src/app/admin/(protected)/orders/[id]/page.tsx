@@ -178,7 +178,7 @@ export default function OrderDetailsPage() {
                         <div className="grid gap-0.5">
                             <span className="font-medium">Shipping Address</span>
                             <address className="not-italic text-muted-foreground">
-                                {buyer.address}
+                                {buyer.addresses?.find(a => a.id === buyer.defaultAddressId)?.fullAddress || buyer.permanentAddress}
                             </address>
                         </div>
                     </div>
