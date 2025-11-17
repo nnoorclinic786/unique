@@ -32,14 +32,14 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
 
     const userPermissions = session.permissions || [];
     
-    // Allow access to dynamic buyer/order detail pages if they have the base permission
+    // Allow access to dynamic detail pages if they have the base permission
     if (/^\/admin\/buyers\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('buyers');
     }
     if (/^\/admin\/orders\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('orders');
     }
-    if (/^\/admin\/drugs\/[^/]+$/.test(pathname)) {
+     if (/^\/admin\/drugs\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('drugs');
     }
 
