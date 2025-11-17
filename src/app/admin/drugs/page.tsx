@@ -40,6 +40,7 @@ export default function AdminDrugsPage() {
     if (!query) return true;
     const lowerCaseQuery = query.toLowerCase();
     return medicine.name.toLowerCase().includes(lowerCaseQuery) ||
+           (medicine.companyName && medicine.companyName.toLowerCase().includes(lowerCaseQuery)) ||
            (medicine.description && medicine.description.toLowerCase().includes(lowerCaseQuery)) ||
            (medicine.category && medicine.category.toLowerCase().includes(lowerCaseQuery));
   });
@@ -72,6 +73,7 @@ export default function AdminDrugsPage() {
                 <span className="sr-only">Image</span>
               </TableHead>
               <TableHead>Name</TableHead>
+              <TableHead>Company</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="hidden md:table-cell">Stock</TableHead>
               <TableHead className="hidden md:table-cell">Price</TableHead>
@@ -98,6 +100,7 @@ export default function AdminDrugsPage() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{medicine.name}</TableCell>
+                  <TableCell className="hidden md:table-cell">{medicine.companyName || 'N/A'}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{medicine.category}</Badge>
                   </TableCell>
