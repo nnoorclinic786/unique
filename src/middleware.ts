@@ -12,17 +12,6 @@ interface AdminSession {
   role: string;
 }
 
-// Map pathnames to required permissions
-const permissionMap: Record<string, AdminPermission> = {
-  '/admin/dashboard': 'dashboard',
-  '/admin/orders': 'orders',
-  '/admin/drugs': 'drugs',
-  '/admin/drugs/new': 'drugs',
-  '/admin/buyers': 'buyers',
-  '/admin/manage-admins': 'manage_admins',
-  '/admin/settings': 'settings',
-};
-
 // Function to check permission for a given path
 const hasPermissionForPath = (pathname: string, session: AdminSession): boolean => {
     // Super Admins have access to everything.
@@ -32,6 +21,17 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
 
     const userPermissions = session.permissions || [];
     
+    // Map pathnames to required permissions
+    const permissionMap: Record<string, AdminPermission> = {
+      '/admin/dashboard': 'dashboard',
+      '/admin/orders': 'orders',
+      '/admin/drugs': 'drugs',
+      '/admin/drugs/new': 'drugs',
+      '/admin/buyers': 'buyers',
+      '/admin/manage-admins': 'manage_admins',
+      '/admin/settings': 'settings',
+    };
+
     // Allow access to dynamic detail pages if they have the base permission
     if (/^\/admin\/buyers\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('buyers');
@@ -83,8 +83,10 @@ export function middleware(request: NextRequest) {
     }
     // If they access a protected path, check for permissions
     if (isProtectedAdminPath && !hasPermissionForPath(pathname, session)) {
-      // If no permission, redirect to dashboard (or a dedicated 'access-denied' page)
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      // If no permission, and they are not already on the dashboard, redirect to dashboard.
+      if (pathname !== '/admin/dashboard') {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
     }
   } 
   // Scenario 2: User is NOT logged in
@@ -100,7 +102,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Ensure we are not matching paths for public assets
-  // and only matching page routes.
-  matcher: ['/((?!api|_next/static|_next/image|.*\\..*).*)'],
+  // Match all paths except for API routes, static files, and image optimization files.
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

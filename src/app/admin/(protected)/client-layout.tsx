@@ -55,12 +55,12 @@ function AdminHeader() {
                   <Logo className="h-6 w-6 transition-all group-hover:scale-110" />
                   <span className="sr-only">Unique Medicare</span>
                 </Link>
-                <a href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</a>
-                <a href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</a>
-                <a href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</a>
-                <a href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</a>
-                <a href="/admin/manage-admins" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</a>
-                <a href="/admin/settings" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Settings className="h-5 w-5" />Settings</a>
+                <Link href="/admin/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Home className="h-5 w-5" />Dashboard</Link>
+                <Link href="/admin/orders" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShoppingCart className="h-5 w-5" />Orders</Link>
+                <Link href="/admin/drugs" className="flex items-center gap-4 px-2.5 text-foreground"><Package className="h-5 w-5" />Medicines</Link>
+                <Link href="/admin/buyers" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Users className="h-5 w-5" />Customers</Link>
+                <Link href="/admin/manage-admins" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><ShieldCheck className="h-5 w-5" />Manage Admins</Link>
+                <Link href="/admin/settings" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"><Settings className="h-5 w-5" />Settings</Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -97,24 +97,24 @@ export default function AdminClientLayout({ children, permissions }: { children:
       <div className="relative flex min-h-screen w-full bg-muted/40">
         <Sidebar className="border-r bg-background">
             <SidebarHeader>
-            <a href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+            <Link href="/admin/dashboard" passHref className="flex items-center gap-2 font-semibold">
                 <Logo className="h-10 w-10 text-primary" />
                 <span className="font-headline">Unique Medicare Admin</span>
-            </a>
+            </Link>
             </SidebarHeader>
             <SidebarContent>
             <SidebarMenu>
-                {hasPermission('dashboard') && <SidebarMenuItem><a href="/admin/dashboard"><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></a></SidebarMenuItem>}
-                {hasPermission('orders') && <SidebarMenuItem><a href="/admin/orders"><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></a></SidebarMenuItem>}
-                {hasPermission('drugs') && <SidebarMenuItem><a href="/admin/drugs"><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></a></SidebarMenuItem>}
-                {hasPermission('buyers') && <SidebarMenuItem><a href="/admin/buyers"><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></a></SidebarMenuItem>}
-                {hasPermission('manage_admins') && <SidebarMenuItem><a href="/admin/manage-admins"><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></a></SidebarMenuItem>}
+                {hasPermission('dashboard') && <SidebarMenuItem><Link href="/admin/dashboard" passHref><SidebarMenuButton tooltip="Dashboard"><Home /><span>Dashboard</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('orders') && <SidebarMenuItem><Link href="/admin/orders" passHref><SidebarMenuButton tooltip="Orders"><ShoppingCart /><span>Orders</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('drugs') && <SidebarMenuItem><Link href="/admin/drugs" passHref><SidebarMenuButton tooltip="Medicines"><Package /><span>Medicines</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('buyers') && <SidebarMenuItem><Link href="/admin/buyers" passHref><SidebarMenuButton tooltip="Customers"><Users /><span>Buyers</span></SidebarMenuButton></Link></SidebarMenuItem>}
+                {hasPermission('manage_admins') && <SidebarMenuItem><Link href="/admin/manage-admins" passHref><SidebarMenuButton tooltip="Manage Admins"><ShieldCheck /><span>Manage Admins</span></SidebarMenuButton></Link></SidebarMenuItem>}
             </SidebarMenu>
             </SidebarContent>
              <SidebarFooter>
                 <SidebarMenu>
                     {hasPermission('settings') && <SidebarMenuItem>
-                        <a href="/admin/settings"><SidebarMenuButton tooltip="Settings"><Settings /><span>Settings</span></SidebarMenuButton></a>
+                        <Link href="/admin/settings" passHref><SidebarMenuButton tooltip="Settings"><Settings /><span>Settings</span></SidebarMenuButton></Link>
                     </SidebarMenuItem>}
                     <SidebarMenuItem>
                         <SidebarMenuButton onClick={handleLogout} tooltip="Log Out">
