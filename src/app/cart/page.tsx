@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -47,7 +48,6 @@ export default function CartPage() {
     }
   }, []);
 
-
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
@@ -70,7 +70,7 @@ export default function CartPage() {
     if (paymentMethod === 'cod') {
         setCheckoutStep(2);
     } else {
-        router.push(`/payment/${paymentMethod}`);
+        router.push(`/payment/${method}`);
     }
   }
 
