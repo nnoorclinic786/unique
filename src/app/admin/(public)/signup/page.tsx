@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
 import { addPendingAdmin } from "@/app/admin/(public)/login/actions";
+import { Eye, EyeOff } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -28,6 +30,8 @@ const formSchema = z.object({
 export default function AdminSignupPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,17 +94,45 @@ export default function AdminSignupPage() {
                 />
                 <FormField control={form.control} name="password" render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                    <FormMessage />
+                        <FormLabel>Password</FormLabel>
+                        <div className="relative">
+                            <FormControl>
+                                <Input type={showPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                            </FormControl>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                                onClick={() => setShowPassword((prev) => !prev)}
+                            >
+                                {showPassword ? <EyeOff /> : <Eye />}
+                                <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                            </Button>
+                        </div>
+                        <FormMessage />
                     </FormItem>
                 )}
                 />
                 <FormField control={form.control} name="confirmPassword" render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                    <FormMessage />
+                        <FormLabel>Confirm Password</FormLabel>
+                         <div className="relative">
+                            <FormControl>
+                                <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" {...field} />
+                            </FormControl>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                            >
+                                {showConfirmPassword ? <EyeOff /> : <Eye />}
+                                <span className="sr-only">{showConfirm-password ? 'Hide password' : 'Show password'}</span>
+                            </Button>
+                        </div>
+                        <FormMessage />
                     </FormItem>
                 )}
                 />
