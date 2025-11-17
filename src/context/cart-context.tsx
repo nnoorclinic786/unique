@@ -14,6 +14,7 @@ interface CartContextType {
   addToCart: (item: Medicine) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
+  decrementQuantity: (itemId: string) => void;
   cartCount: number;
   clearCart: () => void;
 }
@@ -87,12 +88,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  const decrementQuantity = (itemId: string) => {
+    setCartItems((prevItems) => {
+        const existingItem = prevItems.find((i) => i.id === itemId);
+        if (existingItem && existingItem.quantity > 1) {
+            return prevItems.map((i) =>
+                i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
+            );
+        } else {
+            return prevItems.filter((i) => i.id !== itemId);
+        }
+    });
+  }
+  
   const clearCart = () => {
     setCartItems([]);
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, cartCount, clearCart }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, decrementQuantity, cartCount, clearCart }}>
       {children}
     </CartContext.Provider>
   );
