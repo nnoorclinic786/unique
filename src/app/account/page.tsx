@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AddressForm } from '@/components/address-form';
 import type { Address, Buyer } from '@/lib/types';
-import { Home, Trash2, Edit, PlusCircle, Star } from 'lucide-react';
+import { Home, Trash2, Edit, PlusCircle, Star, Building } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { BuyerProfileForm } from '@/components/buyer-profile-form';
 
@@ -154,12 +154,16 @@ export default function AccountPage() {
                   <h3 className="font-semibold">GST Number</h3>
                   <p className="text-muted-foreground">{buyer?.gstNumber}</p>
                 </div>
+                 <div className="pt-4 border-t">
+                    <h3 className="font-semibold flex items-center gap-2"><Building className="h-4 w-4 text-muted-foreground" />Permanent Address</h3>
+                    <p className="text-muted-foreground pl-6">{buyer?.permanentAddress}</p>
+                 </div>
               </CardContent>
             </Card>
 
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="font-headline text-xl">My Addresses</CardTitle>
+                    <CardTitle className="font-headline text-xl">Shipping Addresses</CardTitle>
                      <Button variant="outline" size="sm" onClick={openAddDialog}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Add New
@@ -202,7 +206,7 @@ export default function AccountPage() {
                             </div>
                         ))
                     ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">You have not added any addresses yet.</p>
+                        <p className="text-sm text-muted-foreground text-center py-4">You have not added any shipping addresses yet.</p>
                     )}
                 </CardContent>
             </Card>
@@ -257,7 +261,7 @@ export default function AccountPage() {
       <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
+                    <DialogTitle>{editingAddress ? 'Edit Shipping Address' : 'Add New Shipping Address'}</DialogTitle>
                 </DialogHeader>
                 <AddressForm
                   address={editingAddress}
@@ -272,7 +276,7 @@ export default function AccountPage() {
         
         {/* Profile Dialog */}
         <Dialog open={isProfileDialogOpen} onOpenChange={setProfileDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>
                     <CardDescription>Make changes to your account details here.</CardDescription>
@@ -287,3 +291,5 @@ export default function AccountPage() {
     </>
   );
 }
+
+    

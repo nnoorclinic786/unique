@@ -28,7 +28,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, "Password must be at least 6 characters."),
   confirmPassword: z.string(),
-  address: z.string().min(10, "A valid business address is required."),
+  permanentAddress: z.string().min(10, "A valid permanent address is required."),
   businessLocation: z.string().min(2, "Business location is required."),
   type: z.enum(['Medical Store', 'Doctor', 'Hospital'], { required_error: "Please select a buyer type."}),
   doctorRegNumber: z.string().optional(),
@@ -52,7 +52,7 @@ export default function SignupPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      address: "",
+      permanentAddress: "",
       businessLocation: "",
       doctorRegNumber: "",
       gstNumber: "",
@@ -66,16 +66,17 @@ export default function SignupPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const addressId = `addr-${Date.now()}`;
-    const newBuyer: Omit<Buyer, 'id' | 'registeredOn' | 'status'> & {address: string} = {
-      name: values.businessName, // Main name for display
+    const newBuyer: Omit<Buyer, 'id' | 'registeredOn' | 'status'> = {
+      name: values.businessName,
       personName: values.personName,
       businessName: values.businessName,
       mobileNumber1: values.mobileNumber1,
       mobileNumber2: values.mobileNumber2,
       email: values.email,
       password: values.password,
-      address: values.address, // temporary
-      addresses: [{ id: addressId, name: 'Primary', fullAddress: values.address }],
+      permanentAddress: values.permanentAddress,
+      // For convenience, the first shipping address is the same as the permanent one.
+      addresses: [{ id: addressId, name: 'Primary', fullAddress: values.permanentAddress }],
       defaultAddressId: addressId,
       businessLocation: values.businessLocation,
       type: values.type,
@@ -235,11 +236,11 @@ export default function SignupPage() {
               {/* Address Details */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium font-headline border-b pb-2">Address Details</h3>
-                <FormField control={form.control} name="address" render={({ field }) => (
+                <FormField control={form.control} name="permanentAddress" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary Business Address</FormLabel>
+                      <FormLabel>Permanent Business Address</FormLabel>
                       <FormControl><Textarea placeholder="Enter your full business address" {...field} /></FormControl>
-                      <FormDescription>You can add more addresses later from your account page.</FormDescription>
+                      <FormDescription>This is your official registered address. Shipping addresses can be added later.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -305,3 +306,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+    

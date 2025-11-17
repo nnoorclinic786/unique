@@ -26,19 +26,19 @@ export const orders: Order[] = [
   { id: 'ORD-2407-007', buyerName: 'Wellness Hospital', date: '2024-07-23', total: 8500.00, status: 'Cancelled', itemCount: 9 },
 ];
 
-const initialAddresses = [
+const initialShippingAddresses = [
     { id: 'addr-1', name: 'Main Branch', fullAddress: '123, Main Street, Farrukhabad, Uttar Pradesh - 209625' },
     { id: 'addr-2', name: 'Warehouse', fullAddress: '456, Industrial Area, Farrukhabad, Uttar Pradesh - 209626' }
 ];
 
 
 export const buyers: Buyer[] = [
-    { id: 'BUY001', name: 'City Pharmacy', email: 'contact@citypharm.com', password: 'password123', registeredOn: '2023-01-15', gstNumber: '29ABCDE1234F1Z5', type: 'Medical Store', status: 'Approved', addresses: [initialAddresses[0]], defaultAddressId: 'addr-1' },
-    { id: 'BUY002', name: 'Dr. Anita Sharma', email: 'anita.sharma@clinic.com', password: 'password123', registeredOn: '2023-02-20', gstNumber: '07HIJKL6789M1Z2', type: 'Doctor', status: 'Approved', addresses: [{ id: 'addr-3', name: 'Clinic', fullAddress: '789 Health Ave, Farrukhabad, Uttar Pradesh - 209625' }], defaultAddressId: 'addr-3'},
-    { id: 'BUY003', name: 'Wellness Hospital', email: 'procurement@wellness.com', password: 'password123', registeredOn: '2022-11-10', gstNumber: '27NOPQR2468T1Z4', type: 'Hospital', status: 'Approved', addresses: initialAddresses, defaultAddressId: 'addr-2' },
-    { id: 'BUY004', name: 'QuickMed Retail', email: 'orders@quickmed.com', password: 'password123', registeredOn: '2023-05-01', gstNumber: '36UVWXY9876P1Z9', type: 'Medical Store', status: 'Pending' },
-    { id: 'BUY005', name: 'Central Clinic', email: 'admin@centralclinic.org', password: 'password123', registeredOn: '2023-06-25', gstNumber: '21GHIJK1357S1Z7', type: 'Hospital', status: 'Pending' },
-    { id: 'BUY006', name: 'HealthFirst Pharma', email: 'contact@healthfirst.com', password: 'password123', registeredOn: '2023-03-12', gstNumber: '33AAAAA1111B1Z5', type: 'Medical Store', status: 'Disabled' },
+    { id: 'BUY001', name: 'City Pharmacy', email: 'contact@citypharm.com', password: 'password123', registeredOn: '2023-01-15', gstNumber: '29ABCDE1234F1Z5', type: 'Medical Store', status: 'Approved', permanentAddress: '123 Business Rd, Farrukhabad, UP - 209625', addresses: [initialShippingAddresses[0]], defaultAddressId: 'addr-1' },
+    { id: 'BUY002', name: 'Dr. Anita Sharma', email: 'anita.sharma@clinic.com', password: 'password123', registeredOn: '2023-02-20', gstNumber: '07HIJKL6789M1Z2', type: 'Doctor', status: 'Approved', permanentAddress: 'Clinic Building, Health Ave, Farrukhabad, UP - 209625', addresses: [{ id: 'addr-3', name: 'Clinic', fullAddress: '789 Health Ave, Farrukhabad, Uttar Pradesh - 209625' }], defaultAddressId: 'addr-3'},
+    { id: 'BUY003', name: 'Wellness Hospital', email: 'procurement@wellness.com', password: 'password123', registeredOn: '2022-11-10', gstNumber: '27NOPQR2468T1Z4', type: 'Hospital', status: 'Approved', permanentAddress: '10 Wellness Way, Farrukhabad, UP - 209625', addresses: initialShippingAddresses, defaultAddressId: 'addr-2' },
+    { id: 'BUY004', name: 'QuickMed Retail', email: 'orders@quickmed.com', password: 'password123', registeredOn: '2023-05-01', gstNumber: '36UVWXY9876P1Z9', type: 'Medical Store', status: 'Pending', permanentAddress: 'Shop 42, Market Place, Farrukhabad, UP - 209625' },
+    { id: 'BUY005', name: 'Central Clinic', email: 'admin@centralclinic.org', password: 'password123', registeredOn: '2023-06-25', gstNumber: '21GHIJK1357S1Z7', type: 'Hospital', status: 'Pending', permanentAddress: '5 Central Road, Farrukhabad, UP - 209625' },
+    { id: 'BUY006', name: 'HealthFirst Pharma', email: 'contact@healthfirst.com', password: 'password123', registeredOn: '2023-03-12', gstNumber: '33AAAAA1111B1Z5', type: 'Medical Store', status: 'Disabled', permanentAddress: '9 Pharma Lane, Farrukhabad, UP - 209625' },
 ];
 
 export const salesData = [
@@ -49,3 +49,5 @@ export const salesData = [
   { month: 'May', sales: 6000 },
   { month: 'June', sales: 5500 },
 ];
+
+    

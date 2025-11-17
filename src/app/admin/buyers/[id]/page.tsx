@@ -88,17 +88,28 @@ export default function BuyerDetailsPage() {
 
         {/* Address Details */}
         <div>
-            <h3 className="text-lg font-medium font-headline mb-4 border-b pb-2">Addresses</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {buyer.addresses?.map(addr => (
-                <div key={addr.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    {buyer.defaultAddressId === addr.id && <Star className="h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
-                    <p className="font-semibold">{addr.name}</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+            <h3 className="text-lg font-medium font-headline mb-4 border-b pb-2">Address Details</h3>
+            <div className="space-y-4">
+                 <div className="p-4 border rounded-lg bg-muted/50">
+                    <h4 className="font-semibold mb-2">Permanent Address</h4>
+                    <p className="text-sm text-muted-foreground">{buyer.permanentAddress}</p>
+                 </div>
+
+                <h4 className="font-semibold pt-2">Shipping Addresses</h4>
+                <div className="grid sm:grid-cols-2 gap-4">
+                {buyer.addresses?.map(addr => (
+                    <div key={addr.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                        {buyer.defaultAddressId === addr.id && <Star className="h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
+                        <p className="font-semibold">{addr.name}</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+                    </div>
+                ))}
+                {(!buyer.addresses || buyer.addresses.length === 0) && (
+                    <p className="text-sm text-muted-foreground">No shipping addresses found.</p>
+                )}
                 </div>
-              ))}
             </div>
              <div className="grid sm:grid-cols-2 gap-6 mt-4">
                 <DetailItem icon={<MapPin size={16}/>} label="City / Area" value={buyer.businessLocation} />
@@ -125,3 +136,5 @@ export default function BuyerDetailsPage() {
     </Card>
   );
 }
+
+    

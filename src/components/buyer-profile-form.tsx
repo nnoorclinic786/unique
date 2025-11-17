@@ -5,11 +5,12 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { DialogFooter } from './ui/dialog';
 import type { Buyer } from '@/lib/types';
 import { useEffect } from "react";
+import { Textarea } from "./ui/textarea";
 
 interface BuyerProfileFormProps {
     buyer: Buyer | null;
@@ -23,6 +24,7 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address."),
   mobileNumber1: z.string().min(10, "A valid mobile number is required."),
   gstNumber: z.string().optional(),
+  permanentAddress: z.string().min(10, "Permanent address is required.")
 });
 
 export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormProps) {
@@ -34,6 +36,7 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
       email: buyer?.email || "",
       mobileNumber1: buyer?.mobileNumber1 || "",
       gstNumber: buyer?.gstNumber || "",
+      permanentAddress: buyer?.permanentAddress || "",
     },
   });
   
@@ -44,7 +47,8 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
             personName: buyer.personName,
             email: buyer.email,
             mobileNumber1: buyer.mobileNumber1,
-            gstNumber: buyer.gstNumber
+            gstNumber: buyer.gstNumber,
+            permanentAddress: buyer.permanentAddress,
         });
     }
   }, [buyer, form]);
@@ -80,6 +84,14 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
                     <FormMessage />
                 </FormItem>
             )} />
+             <FormField control={form.control} name="permanentAddress" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Permanent Address</FormLabel>
+                    <FormControl><Textarea placeholder="Enter your full business address" {...field} /></FormControl>
+                    <FormDescription>Your official registered address.</FormDescription>
+                    <FormMessage />
+                </FormItem>
+            )} />
             <FormField control={form.control} name="gstNumber" render={({ field }) => (
                 <FormItem>
                     <FormLabel>GST Number</FormLabel>
@@ -96,3 +108,5 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
     </Form>
   );
 }
+
+    

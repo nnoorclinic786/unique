@@ -45,6 +45,7 @@ export type Buyer = {
     personName?: string;
     mobileNumber1?: string;
     mobileNumber2?: string;
+    permanentAddress?: string;
     addresses?: Address[];
     defaultAddressId?: string;
     doctorRegNumber?: string;
@@ -52,5 +53,7 @@ export type Buyer = {
     // For file uploads, we'll just store a boolean or a path in a real app.
     // For now, we'll omit them from the type as we're not handling file uploads yet.
 };
+
+    
 
     

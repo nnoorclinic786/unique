@@ -39,7 +39,7 @@ interface AppContextType {
   addPendingBuyer: (buyer: Buyer) => void;
   approveBuyer: (buyerId: string) => void;
   toggleBuyerStatus: (buyerId: string, status: 'Approved' | 'Disabled') => void;
-  updateBuyerDetails: (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber'>>) => void;
+  updateBuyerDetails: (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => void;
   
   // Buyer Addresses
   addBuyerAddress: (buyerId: string, address: Omit<Address, 'id'>) => void;
@@ -149,13 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // === BUYERS LOGIC ===
   const addPendingBuyer = useCallback((buyer: Buyer) => {
-    const newBuyerWithAddress = {
-      ...buyer,
-      addresses: [{ id: `addr-${Date.now()}`, name: 'Primary', fullAddress: buyer.address || '' }],
-      defaultAddressId: `addr-${Date.now()}`
-    }
-    delete newBuyerWithAddress.address; // remove old address field
-    setBuyers((prev) => [...prev, newBuyerWithAddress]);
+    setBuyers((prev) => [...prev, buyer]);
   }, []);
 
   const approveBuyer = useCallback((buyerId: string) => {
@@ -171,7 +165,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
   
-  const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber'>>) => {
+  const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => {
     setBuyers(prev => prev.map(buyer => {
         if (buyer.id === buyerId) {
             return { ...buyer, ...details };
@@ -303,3 +297,5 @@ export function useAppContext() {
   }
   return context;
 }
+
+    
