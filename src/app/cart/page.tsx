@@ -21,8 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AddressForm } from '@/components/address-form';
 import type { Buyer, Address } from '@/lib/types';
 
-
-export default function CartPage() {
+function CartPageContent() {
   const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings, buyers, addBuyerAddress } = useAppContext();
   const router = useRouter();
   const { toast } = useToast();
@@ -125,24 +124,21 @@ export default function CartPage() {
   
   if (cartItems.length === 0) {
     return (
-        <ClientLayout>
-            <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
-                <div className="flex flex-col items-center justify-center h-[50vh] text-center">
-                    <ShoppingCart className="w-24 h-24 text-muted-foreground mb-6" />
-                    <h1 className="text-3xl font-headline font-bold mb-4">Your Cart is Empty</h1>
-                    <p className="text-muted-foreground mb-8">Looks like you haven't added anything to your cart yet.</p>
-                    <Button asChild>
-                        <Link href="/medicines">Start Shopping</Link>
-                    </Button>
-                </div>
-            </main>
-        </ClientLayout>
+      <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
+          <div className="flex flex-col items-center justify-center h-[50vh] text-center">
+              <ShoppingCart className="w-24 h-24 text-muted-foreground mb-6" />
+              <h1 className="text-3xl font-headline font-bold mb-4">Your Cart is Empty</h1>
+              <p className="text-muted-foreground mb-8">Looks like you haven't added anything to your cart yet.</p>
+              <Button asChild>
+                  <Link href="/medicines">Start Shopping</Link>
+              </Button>
+          </div>
+      </main>
     );
   }
 
 
   return (
-    <ClientLayout>
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <h1 className="text-3xl font-headline font-bold mb-8">Your Cart</h1>
         <div className="grid md:grid-cols-3 gap-12">
@@ -363,7 +359,6 @@ export default function CartPage() {
             </Card>
           </div>
         </div>
-      </main>
       <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -375,6 +370,15 @@ export default function CartPage() {
             />
         </DialogContent>
     </Dialog>
+      </main>
+  );
+}
+
+
+export default function CartPage() {
+  return (
+    <ClientLayout>
+      <CartPageContent />
     </ClientLayout>
   );
 }
