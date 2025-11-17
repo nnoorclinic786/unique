@@ -44,7 +44,7 @@ export function Footer() {
     }
   };
 
-  const QuickLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+  const QuickLink = ({ href, children }: { href: string; children: React.ReactNode; }) => (
     <li>
       <a href={href} onClick={(e) => handleLinkClick(e, href)} className="text-muted-foreground hover:text-primary cursor-pointer">
         {children}
@@ -84,9 +84,9 @@ export function Footer() {
                 <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
                 <li><Link href="/refund-policy" className="text-muted-foreground hover:text-primary">Refund & Cancellation Policy</Link></li>
                 <li><Link href="/shipping-and-delivery-policy" className="text-muted-foreground hover:text-primary">Shipping & Delivery Policy</Link></li>
-                <li><Link href="/return-and-replacement-policy" className="text-muted-foreground hover:text-primary">Return & Replacement Policy</Link></li>
+                <li><Link href="/return-and-replacement-policy" className="text-muted-foreground hover:text-primary">Return &amp; Replacement Policy</Link></li>
                 <li><Link href="/payment-policy" className="text-muted-foreground hover:text-primary">Payment Policy</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Data Protection & Security Policy</Link></li>
+                <li><Link href="/data-protection-and-security-policy" className="text-muted-foreground hover:text-primary">Data Protection &amp; Security Policy</Link></li>
               </ul>
             </div>
             <div>
