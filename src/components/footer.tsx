@@ -81,14 +81,24 @@ export function Footer() {
                 <QuickLink href="/medicines">Products</QuickLink>
                 <QuickLink href="/account">My Account</QuickLink>
                 <QuickLink href="/cart">Cart & Orders</QuickLink>
+                 <li>
+                    <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                        About Us
+                    </Link>
+                </li>
             </ul>
           </div>
           <div>
-            <h3 className="font-headline font-semibold mb-4">Company</h3>
+            <h3 className="font-headline font-semibold mb-4">Our Policies</h3>
             <ul className="space-y-2 text-sm">
-                <PolicyLink href="/about">About Us</PolicyLink>
                 <PolicyLink href="/privacy-policy">Privacy Policy</PolicyLink>
                 <PolicyLink href="/terms-of-service">Terms of Service</PolicyLink>
+                <PolicyLink href="/refund-policy">Refund & Cancellation</PolicyLink>
+                <PolicyLink href="/shipping-and-delivery-policy">Shipping & Delivery</PolicyLink>
+                <PolicyLink href="/return-and-replacement-policy">Return & Replacement</PolicyLink>
+                <PolicyLink href="/payment-policy">Payment Policy</PolicyLink>
+                <PolicyLink href="/data-protection-and-security-policy">Data Protection & Security</PolicyLink>
+                <PolicyLink href="/disclaimer">Disclaimer</PolicyLink>
             </ul>
           </div>
            <div>
@@ -109,21 +119,10 @@ export function Footer() {
               </address>
             </div>
         </div>
-        
-         <div className="border-t border-muted-foreground/10 py-6">
-            <h3 className="font-headline font-semibold mb-4">Our Policies</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-2 text-sm">
-                <PolicyLink href="/refund-policy">Refund & Cancellation</PolicyLink>
-                <PolicyLink href="/shipping-and-delivery-policy">Shipping & Delivery</PolicyLink>
-                <PolicyLink href="/return-and-replacement-policy">Return & Replacement</PolicyLink>
-                <PolicyLink href="/payment-policy">Payment Policy</PolicyLink>
-                <PolicyLink href="/data-protection-and-security-policy">Data Protection & Security</PolicyLink>
-                <PolicyLink href="/disclaimer">Disclaimer</PolicyLink>
-            </div>
-         </div>
 
-        <div className="border-t border-muted-foreground/10 mt-6 py-6 text-center text-xs text-muted-foreground">
+        <div className="border-t border-muted-foreground/10 py-6 text-center text-xs text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Unique Medicare. All rights reserved.</p>
+            <p className="mt-1">Disclaimer: The information on this website is for informational purposes only and not a substitute for professional medical advice.</p>
         </div>
       </div>
     </footer>
