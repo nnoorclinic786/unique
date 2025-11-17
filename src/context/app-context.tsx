@@ -67,21 +67,22 @@ interface AppContextType {
 // == CONTEXT CREATION ==
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// == INITIAL STATE FUNCTION ==
-function getInitialState<T>(key: string, initialData: T[]): T[] {
+// == LAZY INITIALIZER FUNCTION ==
+function getInitialState<T>(key: string, initialData: T): T {
   if (typeof window === 'undefined') {
     return initialData;
   }
   try {
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      return JSON.parse(stored);
+    const item = window.localStorage.getItem(key);
+    if (item) {
+      return JSON.parse(item);
     } else {
-      localStorage.setItem(key, JSON.stringify(initialData));
+      // If no item, set it in localStorage and return initial data
+      window.localStorage.setItem(key, JSON.stringify(initialData));
       return initialData;
     }
   } catch (error) {
-    console.error(`Failed to process ${key} from localStorage`, error);
+    console.error(`Error reading from localStorage for key "${key}":`, error);
     return initialData;
   }
 }
@@ -89,51 +90,31 @@ function getInitialState<T>(key: string, initialData: T[]): T[] {
 // == PROVIDER COMPONENT ==
 export function AppProvider({ children }: { children: ReactNode }) {
   // === STATE MANAGEMENT ===
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [buyers, setBuyers] = useState<Buyer[]>([]);
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [settings, setSettings] = useState<Settings>({ upiId: '' });
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    // This effect runs once on the client to initialize all states from localStorage
-    setOrders(getInitialState('orders', initialOrders));
-    setBuyers(getInitialState('buyers', initialBuyers));
-    setMedicines(getInitialState('medicines', initialMedicines));
-    setCartItems(getInitialState('cartItems', []));
-    
-    try {
-        const storedSettings = localStorage.getItem('appSettings');
-        if (storedSettings) {
-            const parsed = JSON.parse(storedSettings);
-            if (parsed) setSettings(parsed);
-        }
-    } catch(e) { console.error(e); }
-
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (isClient) localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders, isClient]);
-
-  useEffect(() => {
-    if (isClient) localStorage.setItem('buyers', JSON.stringify(buyers));
-  }, [buyers, isClient]);
+  const [orders, setOrders] = useState<Order[]>(() => getInitialState('orders', initialOrders));
+  const [buyers, setBuyers] = useState<Buyer[]>(() => getInitialState('buyers', initialBuyers));
+  const [medicines, setMedicines] = useState<Medicine[]>(() => getInitialState('medicines', initialMedicines));
+  const [settings, setSettings] = useState<Settings>(() => getInitialState('appSettings', { upiId: '' }));
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => getInitialState('cartItems', []));
   
   useEffect(() => {
-    if (isClient) localStorage.setItem('medicines', JSON.stringify(medicines));
-  }, [medicines, isClient]);
+    localStorage.setItem('orders', JSON.stringify(orders));
+  }, [orders]);
 
   useEffect(() => {
-    if (isClient) localStorage.setItem('appSettings', JSON.stringify(settings));
-  }, [settings, isClient]);
+    localStorage.setItem('buyers', JSON.stringify(buyers));
+  }, [buyers]);
+  
+  useEffect(() => {
+    localStorage.setItem('medicines', JSON.stringify(medicines));
+  }, [medicines]);
 
   useEffect(() => {
-    if (isClient) localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems, isClient]);
+    localStorage.setItem('appSettings', JSON.stringify(settings));
+  }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems]);
 
 
   // === ORDERS LOGIC ===
@@ -297,5 +278,3 @@ export function useAppContext() {
   }
   return context;
 }
-
-    
