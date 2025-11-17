@@ -1,9 +1,9 @@
 
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import type { Buyer } from "@/lib/types";
-import { buyers as initialBuyers } from "@/lib/data";
+import { buyers as initialBuyersData } from "@/lib/data";
 
 interface BuyerContextType {
   buyers: Buyer[];
@@ -16,39 +16,62 @@ interface BuyerContextType {
 
 const BuyerContext = createContext<BuyerContextType | undefined>(undefined);
 
-export function BuyerProvider({ children }: { children: ReactNode }) {
-  const [buyers, setBuyers] = useState<Buyer[]>(initialBuyers.filter(b => b.status === 'Approved'));
-  const [pendingBuyers, setPendingBuyers] = useState<Buyer[]>(initialBuyers.filter(b => b.status === 'Pending'));
-  const [disabledBuyers, setDisabledBuyers] = useState<Buyer[]>(initialBuyers.filter(b => b.status === 'Disabled'));
+const getInitialBuyers = () => {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+  try {
+    const stored = localStorage.getItem('buyers');
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
 
+export function BuyerProvider({ children }: { children: ReactNode }) {
+  const [allBuyers, setAllBuyers] = useState<Buyer[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('buyers');
+      if (stored) {
+        setAllBuyers(JSON.parse(stored));
+      } else {
+        localStorage.setItem('buyers', JSON.stringify(initialBuyersData));
+        setAllBuyers(initialBuyersData);
+      }
+    } catch (e) {
+      console.error("Failed to process buyers from localStorage", e);
+      setAllBuyers(initialBuyersData);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (allBuyers.length > 0) {
+      try {
+        localStorage.setItem('buyers', JSON.stringify(allBuyers));
+      } catch (e) {
+        console.error("Failed to save buyers to localStorage", e);
+      }
+    }
+  }, [allBuyers]);
 
   const addPendingBuyer = (buyer: Buyer) => {
-    setPendingBuyers((prev) => [...prev, buyer]);
+    setAllBuyers((prev) => [...prev, buyer]);
   };
   
   const approveBuyer = (buyerId: string) => {
-    const buyerToApprove = pendingBuyers.find(b => b.id === buyerId);
-    if (buyerToApprove) {
-        setPendingBuyers(prev => prev.filter(b => b.id !== buyerId));
-        setBuyers(prev => [...prev, { ...buyerToApprove, status: 'Approved' }]);
-    }
+    setAllBuyers(prev => prev.map(b => b.id === buyerId ? { ...b, status: 'Approved' } : b));
   };
 
   const toggleBuyerStatus = (buyerId: string, currentStatus: 'Approved' | 'Disabled') => {
-    if (currentStatus === 'Approved') {
-      const buyerToDisable = buyers.find(b => b.id === buyerId);
-      if (buyerToDisable) {
-        setBuyers(prev => prev.filter(b => b.id !== buyerId));
-        setDisabledBuyers(prev => [...prev, { ...buyerToDisable, status: 'Disabled' }]);
-      }
-    } else { // currentStatus is 'Disabled'
-      const buyerToEnable = disabledBuyers.find(b => b.id === buyerId);
-      if (buyerToEnable) {
-        setDisabledBuyers(prev => prev.filter(b => b.id !== buyerId));
-        setBuyers(prev => [...prev, { ...buyerToEnable, status: 'Approved' }]);
-      }
-    }
+    const newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
+    setAllBuyers(prev => prev.map(b => b.id === buyerId ? { ...b, status: newStatus } : b));
   };
+
+  const buyers = allBuyers.filter(b => b.status === 'Approved');
+  const pendingBuyers = allBuyers.filter(b => b.status === 'Pending');
+  const disabledBuyers = allBuyers.filter(b => b.status === 'Disabled');
 
   return (
     <BuyerContext.Provider value={{ buyers, pendingBuyers, disabledBuyers, addPendingBuyer, approveBuyer, toggleBuyerStatus }}>

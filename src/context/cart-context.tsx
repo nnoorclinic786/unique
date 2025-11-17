@@ -21,17 +21,17 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const getInitialCart = (): CartItem[] => {
-    if (typeof window === 'undefined') {
-        return [];
+    if (typeof window !== 'undefined') {
+        try {
+            const storedCart = localStorage.getItem('cartItems');
+            return storedCart ? JSON.parse(storedCart) : [];
+        } catch (error) {
+            console.error("Failed to parse cart items from localStorage", error);
+        }
     }
-    try {
-        const storedCart = localStorage.getItem('cartItems');
-        return storedCart ? JSON.parse(storedCart) : [];
-    } catch (error) {
-        console.error("Failed to parse cart items from localStorage", error);
-        return [];
-    }
+    return [];
 };
+
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>(getInitialCart);
