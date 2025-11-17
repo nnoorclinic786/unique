@@ -98,7 +98,7 @@ export function middleware(request: NextRequest) {
     // If NOT logged in...
     else {
       // and trying to access any admin page that is NOT public, redirect to login.
-      if (!publicAdminPaths.includes(pathname)) {
+      if (!publicAdminPaths.includes(pathname) && pathname.startsWith('/admin/')) {
         return NextResponse.redirect(new URL('/admin/login', request.url));
       }
     }
