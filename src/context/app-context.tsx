@@ -91,7 +91,7 @@ function getInitialState<T>(key: string, initialData: T): T {
 export function AppProvider({ children }: { children: ReactNode }) {
   // === STATE MANAGEMENT ===
   const [orders, setOrders] = useState<Order[]>(() => getInitialState('orders', initialOrders));
-  const [buyers, setBuyers] = useState<Buyer[]>(() => getInitialState('buyers', initialBuyers));
+  const [allBuyers, setAllBuyers] = useState<Buyer[]>(() => getInitialState('buyers', initialBuyers));
   const [medicines, setMedicines] = useState<Medicine[]>(() => getInitialState('medicines', initialMedicines));
   const [settings, setSettings] = useState<Settings>(() => getInitialState('appSettings', { upiId: '' }));
   const [cartItems, setCartItems] = useState<CartItem[]>(() => getInitialState('cartItems', []));
@@ -101,8 +101,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [orders]);
 
   useEffect(() => {
-    localStorage.setItem('buyers', JSON.stringify(buyers));
-  }, [buyers]);
+    localStorage.setItem('buyers', JSON.stringify(allBuyers));
+  }, [allBuyers]);
   
   useEffect(() => {
     localStorage.setItem('medicines', JSON.stringify(medicines));
@@ -130,24 +130,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // === BUYERS LOGIC ===
   const addPendingBuyer = useCallback((buyer: Buyer) => {
-    setBuyers((prev) => [...prev, buyer]);
+    setAllBuyers((prev) => [...prev, buyer]);
   }, []);
 
   const approveBuyer = useCallback((buyerId: string) => {
-    setBuyers((prev) =>
+    setAllBuyers((prev) =>
       prev.map((b) => (b.id === buyerId ? { ...b, status: 'Approved' } : b))
     );
   }, []);
 
   const toggleBuyerStatus = useCallback((buyerId: string, currentStatus: 'Approved' | 'Disabled') => {
     const newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
-    setBuyers((prev) =>
+    setAllBuyers((prev) =>
       prev.map((b) => (b.id === buyerId ? { ...b, status: newStatus } : b))
     );
   }, []);
   
   const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => {
-    setBuyers(prev => prev.map(buyer => {
+    setAllBuyers(prev => prev.map(buyer => {
         if (buyer.id === buyerId) {
             return { ...buyer, ...details };
         }
@@ -157,7 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 
   const addBuyerAddress = useCallback((buyerId: string, address: Omit<Address, 'id'>) => {
-    setBuyers(prev => prev.map(buyer => {
+    setAllBuyers(prev => prev.map(buyer => {
       if (buyer.id === buyerId) {
         const newAddress = { ...address, id: `addr-${Date.now()}` };
         const updatedAddresses = [...(buyer.addresses || []), newAddress];
@@ -168,7 +168,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateBuyerAddress = useCallback((buyerId: string, updatedAddress: Address) => {
-    setBuyers(prev => prev.map(buyer => {
+    setAllBuyers(prev => prev.map(buyer => {
       if (buyer.id === buyerId) {
         const updatedAddresses = buyer.addresses?.map(addr => 
           addr.id === updatedAddress.id ? updatedAddress : addr
@@ -180,7 +180,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const deleteBuyerAddress = useCallback((buyerId: string, addressId: string) => {
-    setBuyers(prev => prev.map(buyer => {
+    setAllBuyers(prev => prev.map(buyer => {
       if (buyer.id === buyerId) {
         const updatedAddresses = buyer.addresses?.filter(addr => addr.id !== addressId);
         // If the deleted address was the default, set a new default
@@ -192,14 +192,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setBuyerDefaultAddress = useCallback((buyerId: string, addressId: string) => {
-    setBuyers(prev => prev.map(buyer => 
+    setAllBuyers(prev => prev.map(buyer => 
       buyer.id === buyerId ? { ...buyer, defaultAddressId: addressId } : buyer
     ));
   }, []);
 
-  const approvedBuyers = buyers.filter((b) => b.status === 'Approved');
-  const pendingBuyers = buyers.filter((b) => b.status === 'Pending');
-  const disabledBuyers = buyers.filter((b) => b.status === 'Disabled');
+  const approvedBuyers = allBuyers.filter((b) => b.status === 'Approved');
+  const pendingBuyers = allBuyers.filter((b) => b.status === 'Pending');
+  const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
   const addMedicine = useCallback((medicine: Medicine) => {

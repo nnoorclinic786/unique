@@ -73,7 +73,8 @@ export async function addPendingAdmin(data: {name: string, email: string, passwo
 
 export async function getAdmins() {
     // In a real app, this would fetch from a database.
-    return ADMIN_USERS;
+    // Return a copy to avoid direct mutation of the constant
+    return JSON.parse(JSON.stringify(ADMIN_USERS));
 }
 
 export async function updateAdminPermissions(email: string, permissions: string[]) {
