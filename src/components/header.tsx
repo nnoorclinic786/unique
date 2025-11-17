@@ -81,19 +81,23 @@ export function Header() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          {isUserLoggedIn && (
-            <Link href="/medicines" className="transition-colors hover:text-primary">
-                Medicines
-            </Link>
-          )}
-          {isUserLoggedIn && (
-            <Link href="/account" className="transition-colors hover:text-primary">
-                My Account
-            </Link>
-          )}
-           <Link href="/about" className="transition-colors hover:text-primary">
+          {isUserLoggedIn ? (
+            <>
+              <Link href="/medicines" className="transition-colors hover:text-primary">
+                  Medicines
+              </Link>
+              <Link href="/account" className="transition-colors hover:text-primary">
+                  My Account
+              </Link>
+              <Link href="/about" className="transition-colors hover:text-primary">
+                About Us
+              </Link>
+            </>
+          ) : (
+            <Link href="/about" className="transition-colors hover:text-primary">
               About Us
             </Link>
+          )}
           {isAdminLoggedIn && (
             <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
               Admin
