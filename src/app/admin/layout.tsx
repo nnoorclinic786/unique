@@ -14,24 +14,27 @@ export default function AdminLayout({
   const sessionCookie = cookies().get('admin_session');
   
   // If a session exists, the user is logged in. Render the full admin dashboard.
+  // The middleware ensures that only authenticated users can reach this point for private routes.
   if (sessionCookie) {
-    const session = JSON.parse(sessionCookie.value);
-    
-    // This check is a safeguard, middleware should prevent unauthenticated sessions.
-    if (!session.isLoggedIn) {
-        return <>{children}</>;
+    try {
+        const session = JSON.parse(sessionCookie.value);
+        
+        if (session.isLoggedIn) {
+            return (
+                <AdminSearchProvider>
+                <AdminClientLayout permissions={session.permissions}>
+                    {children}
+                </AdminClientLayout>
+                </AdminSearchProvider>
+            );
+        }
+    } catch(e) {
+        // If cookie is malformed, treat as logged out.
     }
-      
-    return (
-        <AdminSearchProvider>
-          <AdminClientLayout permissions={session.permissions}>
-            {children}
-          </AdminClientLayout>
-        </AdminSearchProvider>
-    );
   }
 
-  // If no session cookie, the user is on a public page (like /admin/login).
+  // If no session cookie, or cookie is invalid, we're on a public page (like /admin/login).
   // Just render the page content without the admin layout.
+  // The route group layout `(public)/layout.tsx` will handle this.
   return <>{children}</>;
 }

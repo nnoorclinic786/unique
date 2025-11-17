@@ -40,14 +40,15 @@ export default function AdminSettingsPage() {
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle className="font-headline">Payment Settings</CardTitle>
+        <CardTitle className="font-headline">Platform Settings</CardTitle>
         <CardDescription>
-          Configure how you receive online payments from your buyers.
+          Configure general settings for the application.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <h3 className="text-lg font-medium font-headline border-b pb-2">Payment Settings</h3>
             <FormField
               control={form.control}
               name="upiId"
