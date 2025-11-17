@@ -18,23 +18,23 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // This effect runs once on the client to safely initialize state from localStorage.
+    // It prevents re-injecting initialOrders on subsequent renders or page navigations.
     try {
       const storedOrders = localStorage.getItem('orders');
       if (storedOrders) {
-        // If orders exist in storage, use them.
         setOrders(JSON.parse(storedOrders));
       } else {
-        // If no orders are in storage, initialize storage with the default data.
+        // Only set initial orders if localStorage is empty
         localStorage.setItem('orders', JSON.stringify(initialOrders));
         setOrders(initialOrders);
       }
     } catch (error) {
       console.error("Failed to read or initialize orders from localStorage", error);
-      // If there's an error (e.g., corrupted data), reset to default and clean up.
+      // Fallback to initial orders and reset storage in case of corruption
       localStorage.setItem('orders', JSON.stringify(initialOrders));
       setOrders(initialOrders);
     }
-  }, []);
+  }, []); // The empty dependency array ensures this runs only once on mount.
 
   const updateOrdersStateAndStorage = (newOrders: Order[]) => {
     setOrders(newOrders);
