@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -64,8 +65,8 @@ export default function SignupPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newBuyer: Buyer = {
-      id: `BUYER-${Date.now()}`,
+    const addressId = `addr-${Date.now()}`;
+    const newBuyer: Omit<Buyer, 'id' | 'registeredOn' | 'status'> & {address: string} = {
       name: values.businessName, // Main name for display
       personName: values.personName,
       businessName: values.businessName,
@@ -73,16 +74,21 @@ export default function SignupPage() {
       mobileNumber2: values.mobileNumber2,
       email: values.email,
       password: values.password,
-      address: values.address,
+      address: values.address, // temporary
+      addresses: [{ id: addressId, name: 'Primary', fullAddress: values.address }],
+      defaultAddressId: addressId,
       businessLocation: values.businessLocation,
       type: values.type,
       doctorRegNumber: values.doctorRegNumber,
       gstNumber: values.gstNumber,
-      registeredOn: format(new Date(), 'yyyy-MM-dd'),
-      status: 'Pending' as const,
     };
     
-    addPendingBuyer(newBuyer);
+    addPendingBuyer({
+        ...newBuyer,
+        id: `BUYER-${Date.now()}`,
+        registeredOn: format(new Date(), 'yyyy-MM-dd'),
+        status: 'Pending' as const,
+    });
     
     toast({
       title: "Registration Submitted!",
@@ -231,8 +237,9 @@ export default function SignupPage() {
                 <h3 className="text-lg font-medium font-headline border-b pb-2">Address Details</h3>
                 <FormField control={form.control} name="address" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Buyer Business Address</FormLabel>
+                      <FormLabel>Primary Business Address</FormLabel>
                       <FormControl><Textarea placeholder="Enter your full business address" {...field} /></FormControl>
+                      <FormDescription>You can add more addresses later from your account page.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

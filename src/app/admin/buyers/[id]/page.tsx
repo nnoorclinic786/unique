@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft, Mail, Phone, Building, MapPin, FileText, User } from "lucide-react";
+import { ChevronLeft, Mail, Phone, Building, MapPin, FileText, User, Star } from "lucide-react";
 
 export default function BuyerDetailsPage() {
   const router = useRouter();
@@ -87,9 +88,19 @@ export default function BuyerDetailsPage() {
 
         {/* Address Details */}
         <div>
-            <h3 className="text-lg font-medium font-headline mb-4 border-b pb-2">Address</h3>
-             <div className="grid sm:grid-cols-2 gap-6">
-                <DetailItem icon={<MapPin size={16}/>} label="Full Address" value={buyer.address} />
+            <h3 className="text-lg font-medium font-headline mb-4 border-b pb-2">Addresses</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {buyer.addresses?.map(addr => (
+                <div key={addr.id} className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    {buyer.defaultAddressId === addr.id && <Star className="h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
+                    <p className="font-semibold">{addr.name}</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+                </div>
+              ))}
+            </div>
+             <div className="grid sm:grid-cols-2 gap-6 mt-4">
                 <DetailItem icon={<MapPin size={16}/>} label="City / Area" value={buyer.businessLocation} />
             </div>
         </div>

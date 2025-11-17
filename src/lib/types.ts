@@ -1,5 +1,11 @@
 
 
+export type Address = {
+  id: string;
+  name: string; // e.g. "Main Clinic", "Warehouse"
+  fullAddress: string;
+}
+
 export type Medicine = {
   id: string;
   name: string;
@@ -39,8 +45,8 @@ export type Buyer = {
     personName?: string;
     mobileNumber1?: string;
     mobileNumber2?: string;
-    address?: string;
-    businessLocation?: string;
+    addresses?: Address[];
+    defaultAddressId?: string;
     doctorRegNumber?: string;
     password?: string;
     // For file uploads, we'll just store a boolean or a path in a real app.

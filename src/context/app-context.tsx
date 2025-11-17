@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, {
@@ -9,7 +10,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import type { Order, Buyer, Medicine } from '@/lib/types';
+import type { Order, Buyer, Medicine, Address } from '@/lib/types';
 import {
   orders as initialOrders,
   buyers as initialBuyers,
@@ -38,7 +39,12 @@ interface AppContextType {
   addPendingBuyer: (buyer: Buyer) => void;
   approveBuyer: (buyerId: string) => void;
   toggleBuyerStatus: (buyerId: string, status: 'Approved' | 'Disabled') => void;
-  updateBuyerAddress: (buyerId: string, address: string) => void;
+  
+  // Buyer Addresses
+  addBuyerAddress: (buyerId: string, address: Omit<Address, 'id'>) => void;
+  updateBuyerAddress: (buyerId: string, address: Address) => void;
+  deleteBuyerAddress: (buyerId: string, addressId: string) => void;
+  setBuyerDefaultAddress: (buyerId: string, addressId: string) => void;
 
   // Medicines
   medicines: Medicine[];
@@ -142,7 +148,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // === BUYERS LOGIC ===
   const addPendingBuyer = useCallback((buyer: Buyer) => {
-    setBuyers((prev) => [...prev, buyer]);
+    const newBuyerWithAddress = {
+      ...buyer,
+      addresses: [{ id: `addr-${Date.now()}`, name: 'Primary', fullAddress: buyer.address || '' }],
+      defaultAddressId: `addr-${Date.now()}`
+    }
+    delete newBuyerWithAddress.address; // remove old address field
+    setBuyers((prev) => [...prev, newBuyerWithAddress]);
   }, []);
 
   const approveBuyer = useCallback((buyerId: string) => {
@@ -158,10 +170,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const updateBuyerAddress = useCallback((buyerId: string, address: string) => {
-    setBuyers((prev) =>
-        prev.map((b) => (b.id === buyerId ? { ...b, address } : b))
-    );
+  const addBuyerAddress = useCallback((buyerId: string, address: Omit<Address, 'id'>) => {
+    setBuyers(prev => prev.map(buyer => {
+      if (buyer.id === buyerId) {
+        const newAddress = { ...address, id: `addr-${Date.now()}` };
+        const updatedAddresses = [...(buyer.addresses || []), newAddress];
+        return { ...buyer, addresses: updatedAddresses };
+      }
+      return buyer;
+    }));
+  }, []);
+
+  const updateBuyerAddress = useCallback((buyerId: string, updatedAddress: Address) => {
+    setBuyers(prev => prev.map(buyer => {
+      if (buyer.id === buyerId) {
+        const updatedAddresses = buyer.addresses?.map(addr => 
+          addr.id === updatedAddress.id ? updatedAddress : addr
+        ) || [];
+        return { ...buyer, addresses: updatedAddresses };
+      }
+      return buyer;
+    }));
+  }, []);
+
+  const deleteBuyerAddress = useCallback((buyerId: string, addressId: string) => {
+    setBuyers(prev => prev.map(buyer => {
+      if (buyer.id === buyerId) {
+        const updatedAddresses = buyer.addresses?.filter(addr => addr.id !== addressId);
+        // If the deleted address was the default, set a new default
+        const newDefault = buyer.defaultAddressId === addressId ? updatedAddresses?.[0]?.id : buyer.defaultAddressId;
+        return { ...buyer, addresses: updatedAddresses, defaultAddressId: newDefault };
+      }
+      return buyer;
+    }));
+  }, []);
+
+  const setBuyerDefaultAddress = useCallback((buyerId: string, addressId: string) => {
+    setBuyers(prev => prev.map(buyer => 
+      buyer.id === buyerId ? { ...buyer, defaultAddressId: addressId } : buyer
+    ));
   }, []);
 
   const approvedBuyers = buyers.filter((b) => b.status === 'Approved');
@@ -217,7 +264,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addPendingBuyer,
     approveBuyer,
     toggleBuyerStatus,
+    addBuyerAddress,
     updateBuyerAddress,
+    deleteBuyerAddress,
+    setBuyerDefaultAddress,
     medicines,
     addMedicine,
     settings,

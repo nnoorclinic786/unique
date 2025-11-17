@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import { Header } from '@/components/header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
@@ -16,6 +17,10 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AddressForm } from '@/components/address-form';
+import type { Address } from '@/lib/types';
+import { Home, Trash2, Edit, PlusCircle, Star } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     'Pending': 'secondary',
@@ -26,14 +31,16 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
 };
 
 export default function AccountPage() {
-  const { orders, updateOrderStatus, buyers, updateBuyerAddress } = useAppContext();
+  const { 
+    orders, updateOrderStatus, buyers, 
+    addBuyerAddress, updateBuyerAddress, deleteBuyerAddress, setBuyerDefaultAddress
+  } = useAppContext();
   const { toast } = useToast();
   const [userName, setUserName] = useState<string | null>(null);
   const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | undefined>(undefined);
 
   useEffect(() => {
-    // In a real app, you'd get the user from a session.
-    // For this prototype, we'll use localStorage to get the logged-in user's name.
     const storedUserName = localStorage.getItem('userName');
     setUserName(storedUserName);
   }, []);
@@ -49,22 +56,51 @@ export default function AccountPage() {
   const buyer = buyers.find(b => b.name === userName);
   const userOrders = userName ? orders.filter(order => order.buyerName === userName) : [];
 
-  const handleAddressSave = (newAddress: string) => {
+  const handleAddressSave = (addressData: Omit<Address, 'id'>) => {
     if (buyer) {
-        updateBuyerAddress(buyer.id, newAddress);
-        toast({
-            title: "Address Updated",
-            description: "Your shipping address has been successfully updated.",
-        });
-        setAddressDialogOpen(false);
+      if (editingAddress) {
+        // Update existing address
+        updateBuyerAddress(buyer.id, { ...editingAddress, ...addressData });
+        toast({ title: "Address Updated", description: "Your address has been successfully updated." });
+      } else {
+        // Add new address
+        addBuyerAddress(buyer.id, addressData);
+        toast({ title: "Address Added", description: "Your new address has been saved." });
+      }
+      setAddressDialogOpen(false);
+      setEditingAddress(undefined);
     } else {
-         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not find user to update address.",
-        });
+       toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not find user to update address.",
+      });
     }
   };
+
+  const openAddDialog = () => {
+    setEditingAddress(undefined);
+    setAddressDialogOpen(true);
+  }
+
+  const openEditDialog = (address: Address) => {
+    setEditingAddress(address);
+    setAddressDialogOpen(true);
+  }
+
+  const handleDeleteAddress = (addressId: string) => {
+    if (buyer) {
+      deleteBuyerAddress(buyer.id, addressId);
+      toast({ title: "Address Deleted", description: "The address has been removed." });
+    }
+  }
+
+  const handleSetDefault = (addressId: string) => {
+    if (buyer) {
+      setBuyerDefaultAddress(buyer.id, addressId);
+      toast({ title: "Default Address Set", description: "This is now your primary shipping address."});
+    }
+  }
 
 
   return (
@@ -73,7 +109,7 @@ export default function AccountPage() {
       <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
         <h1 className="text-3xl font-headline font-bold mb-8">My Account</h1>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-1">
+          <div className="md:col-span-1 space-y-8">
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline">{buyer?.name || 'User'}</CardTitle>
@@ -88,26 +124,57 @@ export default function AccountPage() {
                   <h3 className="font-semibold">GST Number</h3>
                   <p className="text-muted-foreground">{buyer?.gstNumber}</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold">Delivery Address</h3>
-                   {buyer?.address ? (
-                        <p className="text-muted-foreground">{buyer.address}</p>
-                   ) : (
-                        <p className="text-muted-foreground italic">No address set.</p>
-                   )}
-                   <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button variant="link" className="p-0 h-auto mt-2 text-sm">{buyer?.address ? 'Change Address' : 'Add Shipping Address'}</Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Edit Shipping Address</DialogTitle>
-                            </DialogHeader>
-                            <AddressForm currentAddress={buyer?.address} onSave={handleAddressSave} />
-                        </DialogContent>
-                    </Dialog>
-                </div>
               </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="font-headline text-xl">My Addresses</CardTitle>
+                     <Button variant="outline" size="sm" onClick={openAddDialog}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add New
+                    </Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {buyer?.addresses && buyer.addresses.length > 0 ? (
+                        buyer.addresses.map(addr => (
+                            <div key={addr.id} className="p-4 border rounded-lg relative group">
+                                <div className="flex items-start gap-2">
+                                  {buyer.defaultAddressId === addr.id && <Star className="h-4 w-4 text-amber-500 fill-amber-500 flex-shrink-0 mt-0.5" />}
+                                  <div>
+                                    <p className="font-semibold">{addr.name}</p>
+                                    <p className="text-sm text-muted-foreground">{addr.fullAddress}</p>
+                                  </div>
+                                </div>
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(addr)}><Edit className="h-4 w-4" /></Button>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" disabled={buyer.defaultAddressId === addr.id}><Trash2 className="h-4 w-4" /></Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            This will permanently delete this address. You cannot undo this action.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDeleteAddress(addr.id)}>Delete</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                                {buyer.defaultAddressId !== addr.id && (
+                                    <Button variant="link" size="sm" className="p-0 h-auto mt-2" onClick={() => handleSetDefault(addr.id)}>Set as default</Button>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">You have not added any addresses yet.</p>
+                    )}
+                </CardContent>
             </Card>
           </div>
           <div className="md:col-span-2">
@@ -155,6 +222,21 @@ export default function AccountPage() {
           </div>
         </div>
       </main>
+      <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
+                </DialogHeader>
+                <AddressForm
+                  address={editingAddress}
+                  onSave={handleAddressSave}
+                  onCancel={() => {
+                    setAddressDialogOpen(false);
+                    setEditingAddress(undefined);
+                  }}
+                />
+            </DialogContent>
+        </Dialog>
     </>
   );
 }

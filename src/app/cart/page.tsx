@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Link from 'next/link';
@@ -9,20 +10,21 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Header } from '@/components/header';
-import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck } from 'lucide-react';
+import { Trash2, ShoppingCart, CreditCard, Banknote, Landmark, Truck, PlusCircle, ChevronsUpDown } from 'lucide-react';
 import { useAppContext } from '@/context/app-context';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { AddressForm } from '@/components/address-form';
-import type { Buyer } from '@/lib/types';
+import type { Buyer, Address } from '@/lib/types';
 
 
 export default function CartPage() {
-  const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings, buyers, updateBuyerAddress } = useAppContext();
+  const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings, buyers, addBuyerAddress } = useAppContext();
   const router = useRouter();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState('cod');
@@ -30,6 +32,8 @@ export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<Buyer | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -38,6 +42,8 @@ export default function CartPage() {
         const foundBuyer = buyers.find(b => b.name === storedUserName);
         if (foundBuyer) {
             setCurrentUser(foundBuyer);
+            const defaultAddress = foundBuyer.addresses?.find(a => a.id === foundBuyer.defaultAddressId);
+            setSelectedAddress(defaultAddress || foundBuyer.addresses?.[0] || null);
         }
     }
     const params = new URLSearchParams(window.location.search);
@@ -74,13 +80,12 @@ export default function CartPage() {
   }
   
   const handleCheckoutProceed = () => {
-    if (!currentUser?.address) {
+    if (!selectedAddress) {
         toast({
             variant: "destructive",
             title: "Address Required",
-            description: "Please add a shipping address before proceeding.",
+            description: "Please select or add a shipping address before proceeding.",
         });
-        setAddressDialogOpen(true);
         return;
     }
     if (paymentMethod === 'cod') {
@@ -98,12 +103,12 @@ export default function CartPage() {
     });
   };
 
-  const handleAddressSave = (newAddress: string) => {
+  const handleAddressSave = (addressData: Omit<Address, 'id'>) => {
     if (currentUser) {
-        updateBuyerAddress(currentUser.id, newAddress);
+        addBuyerAddress(currentUser.id, addressData);
         toast({
-            title: "Address Updated",
-            description: "Your shipping address has been successfully updated.",
+            title: "Address Added",
+            description: "Your new address has been saved.",
         });
         setAddressDialogOpen(false);
     } else {
@@ -209,21 +214,10 @@ export default function CartPage() {
                         <div className="flex items-start gap-4 rounded-md border bg-muted/20 p-4">
                             <Truck className="h-6 w-6 text-primary mt-1" />
                             <div>
-                            <p className="font-semibold">{currentUser?.name}</p>
-                            <p className="text-muted-foreground">{currentUser?.address}</p>
+                                <p className="font-semibold">{selectedAddress?.name}</p>
+                                <p className="text-muted-foreground">{selectedAddress?.fullAddress}</p>
                             </div>
                         </div>
-                        <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button variant="link" className="p-0 h-auto mt-2 text-sm">Change Address</Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Edit Shipping Address</DialogTitle>
-                                </DialogHeader>
-                                <AddressForm currentAddress={currentUser?.address} onSave={handleAddressSave} />
-                            </DialogContent>
-                        </Dialog>
                     </div>
 
                     <Separator />
@@ -273,6 +267,39 @@ export default function CartPage() {
                   <span>GST Rate 5%</span>
                   <span>₹{tax.toFixed(2)}</span>
                 </div>
+
+                {checkoutStep === 1 && (
+                <>
+                <Separator />
+                <div>
+                  <h3 className="text-md font-medium mb-2">Shipping To</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between">
+                            <div className="truncate pr-2">
+                                <p className="text-sm font-medium text-left">{selectedAddress?.name}</p>
+                                <p className="text-xs text-muted-foreground text-left truncate">{selectedAddress?.fullAddress}</p>
+                            </div>
+                            <ChevronsUpDown className="h-4 w-4 opacity-50 flex-shrink-0" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                        {currentUser?.addresses?.map(addr => (
+                            <DropdownMenuItem key={addr.id} onSelect={() => setSelectedAddress(addr)}>
+                                {addr.name}
+                            </DropdownMenuItem>
+                        ))}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => setAddressDialogOpen(true)}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add new address
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                </>
+                )}
+
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
@@ -333,6 +360,17 @@ export default function CartPage() {
           </div>
         </div>
       </main>
+      <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Add New Address</DialogTitle>
+            </DialogHeader>
+            <AddressForm
+              onSave={handleAddressSave}
+              onCancel={() => setAddressDialogOpen(false)}
+            />
+        </DialogContent>
+    </Dialog>
     </>
   );
 }
