@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, {
@@ -66,6 +65,7 @@ interface AppContextType {
 
   // Admins
   admins: AdminUser[];
+  getAdmins: () => AdminUser[];
   addPendingAdmin: (admin: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => { success: boolean, error?: string };
   updateAdminPermissions: (email: string, permissions: string[]) => Promise<{ success: boolean; message: string; }>;
   approveAdmin: (email: string) => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
@@ -77,26 +77,29 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 // == LAZY INITIALIZER FUNCTION ==
 function getInitialState<T>(key: string, initialData: T): T {
-  if (typeof window === 'undefined') {
-    return initialData;
-  }
-  try {
+  if (typeof window !== 'undefined') {
     const item = window.localStorage.getItem(key);
     if (item) {
-      return JSON.parse(item);
-    } else {
-      // If no item, set it in localStorage and return initial data
-      window.localStorage.setItem(key, JSON.stringify(initialData));
-      return initialData;
+      try {
+        return JSON.parse(item);
+      } catch (error) {
+        console.error(`Error parsing JSON from localStorage for key "${key}":`, error);
+        return initialData;
+      }
     }
-  } catch (error) {
-    console.error(`Error reading from localStorage for key "${key}":`, error);
-    return initialData;
   }
+  return initialData;
 }
+
 
 // == PROVIDER COMPONENT ==
 export function AppProvider({ children }: { children: ReactNode }) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // === STATE MANAGEMENT ===
   const [orders, setOrders] = useState<Order[]>(() => getInitialState('orders', initialOrders));
   const [allBuyers, setAllBuyers] = useState<Buyer[]>(() => getInitialState('buyers', initialBuyers));
@@ -106,28 +109,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [admins, setAdmins] = useState<AdminUser[]>(() => getInitialState('admins', initialAdmins));
   
   useEffect(() => {
-    localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders]);
+    if (isClient) localStorage.setItem('orders', JSON.stringify(orders));
+  }, [orders, isClient]);
 
   useEffect(() => {
-    localStorage.setItem('buyers', JSON.stringify(allBuyers));
-  }, [allBuyers]);
+     if (isClient) localStorage.setItem('buyers', JSON.stringify(allBuyers));
+  }, [allBuyers, isClient]);
   
   useEffect(() => {
-    localStorage.setItem('medicines', JSON.stringify(medicines));
-  }, [medicines]);
+    if (isClient) localStorage.setItem('medicines', JSON.stringify(medicines));
+  }, [medicines, isClient]);
 
   useEffect(() => {
-    localStorage.setItem('appSettings', JSON.stringify(settings));
-  }, [settings]);
+    if (isClient) localStorage.setItem('appSettings', JSON.stringify(settings));
+  }, [settings, isClient]);
 
   useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (isClient) localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems, isClient]);
 
   useEffect(() => {
-    localStorage.setItem('admins', JSON.stringify(admins));
-  }, [admins]);
+    if (isClient) localStorage.setItem('admins', JSON.stringify(admins));
+  }, [admins, isClient]);
 
 
   // === ORDERS LOGIC ===
@@ -253,6 +256,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   
   // === ADMINS LOGIC ===
+  const getAdmins = useCallback(() => {
+      return admins;
+  }, [admins]);
+
   const addPendingAdmin = useCallback((adminData: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => {
     const existingUser = admins.find(u => u.email === adminData.email);
     if (existingUser) {
@@ -344,11 +351,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     cartCount,
     clearCart,
     admins,
+    getAdmins,
     addPendingAdmin,
     updateAdminPermissions,
     approveAdmin,
     toggleAdminStatus,
   };
+
+  if (!isClient) {
+    // Render nothing or a loading spinner on the server
+    return null;
+  }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
@@ -361,3 +374,4 @@ export function useAppContext() {
   }
   return context;
 }
+ 
