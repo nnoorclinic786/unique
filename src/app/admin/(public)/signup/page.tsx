@@ -16,7 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
 import { Eye, EyeOff } from "lucide-react";
 import { useAppContext } from "@/context/app-context";
-import { AppProvider } from "@/context/app-context";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -28,7 +27,7 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
-function AdminSignupPageContent() {
+export default function AdminSignupPage() {
   const { toast } = useToast();
   const router = useRouter();
   const { addPendingAdmin } = useAppContext();
@@ -155,12 +154,4 @@ function AdminSignupPageContent() {
       </Card>
     </div>
   );
-}
-
-export default function AdminSignupPage() {
-    return (
-        <AppProvider>
-            <AdminSignupPageContent />
-        </AppProvider>
-    )
 }

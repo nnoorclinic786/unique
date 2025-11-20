@@ -12,9 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { login } from "./actions";
 import { Eye, EyeOff } from "lucide-react";
 import { useAppContext } from "@/context/app-context";
-import { AppProvider } from "@/context/app-context";
 
-function LoginPageContent() {
+export default function AdminLoginPage() {
   const { toast } = useToast();
   const { admins } = useAppContext();
   const [error, setError] = useState<string | null>(null);
@@ -111,12 +110,4 @@ function LoginPageContent() {
       </Card>
     </div>
   );
-}
-
-export default function AdminLoginPage() {
-    return (
-        <AppProvider>
-            <LoginPageContent />
-        </AppProvider>
-    )
 }
