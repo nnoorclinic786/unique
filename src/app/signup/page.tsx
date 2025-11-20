@@ -6,6 +6,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
+import { addDoc, collection } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileUp } from "lucide-react";
 import type { Buyer } from "@/lib/types";
 import ClientLayout from "../client-layout";
+import { useFirestore, useUser } from "@/firebase";
 
 const formSchema = z.object({
   personName: z.string().min(2, "Person name is required."),
@@ -41,7 +43,8 @@ const formSchema = z.object({
 
 function SignupPageContent() {
   const { toast } = useToast();
-  const { addPendingBuyer } = useAppContext();
+  const firestore = useFirestore();
+  const { user } = useUser();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,9 +68,18 @@ function SignupPageContent() {
     name: 'type'
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "You must be signed in to create a buyer request.",
+        });
+        return;
+    }
+
     const addressId = `addr-${Date.now()}`;
-    const newBuyer: Omit<Buyer, 'id' | 'registeredOn' | 'status'> = {
+    const newBuyerRequest: Omit<Buyer, 'id'> = {
       name: values.businessName,
       personName: values.personName,
       businessName: values.businessName,
@@ -76,27 +88,33 @@ function SignupPageContent() {
       email: values.email,
       password: values.password,
       permanentAddress: values.permanentAddress,
-      // For convenience, the first shipping address is the same as the permanent one.
       addresses: [{ id: addressId, name: 'Primary', fullAddress: values.permanentAddress }],
       defaultAddressId: addressId,
       businessLocation: values.businessLocation,
       type: values.type,
       doctorRegNumber: values.doctorRegNumber,
       gstNumber: values.gstNumber,
+      registeredOn: format(new Date(), 'yyyy-MM-dd'),
+      status: 'Pending' as const,
     };
     
-    addPendingBuyer({
-        ...newBuyer,
-        id: `BUYER-${Date.now()}`,
-        registeredOn: format(new Date(), 'yyyy-MM-dd'),
-        status: 'Pending' as const,
-    });
-    
-    toast({
-      title: "Registration Submitted!",
-      description: "Your registration is under review. We will notify you upon approval.",
-    });
-    form.reset();
+    try {
+        const buyerRequestsCollection = collection(firestore, 'buyer_requests');
+        await addDoc(buyerRequestsCollection, { ...newBuyerRequest, id: user.uid });
+        
+        toast({
+          title: "Registration Submitted!",
+          description: "Your registration is under review. We will notify you upon approval.",
+        });
+        form.reset();
+    } catch (error) {
+        console.error("Error submitting buyer request:", error);
+        toast({
+            variant: "destructive",
+            title: "Submission Failed",
+            description: "Could not submit your registration. Please try again.",
+        });
+    }
   }
 
   const renderBusinessVerificationFields = () => {

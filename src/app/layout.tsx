@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from '@/context/app-context';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'Unique Medicare',
@@ -23,9 +24,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
-        <AppProvider>
-          {children}
-        </AppProvider>
+        <FirebaseClientProvider>
+          <AppProvider>
+            {children}
+          </AppProvider>
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

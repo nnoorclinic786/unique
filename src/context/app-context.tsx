@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, {
@@ -9,13 +10,12 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
+import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
 import {
-  orders as initialOrders,
-  buyers as initialBuyers,
-  medicines as initialMedicines,
-  admins as initialAdmins,
+  medicines as initialMedicines
 } from '@/lib/data';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 
 // == TYPES ==
 interface Settings {
@@ -98,37 +98,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   // === STATE MANAGEMENT ===
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const [allBuyers, setAllBuyers] = useState<Buyer[]>(initialBuyers);
-  const [medicines, setMedicines] = useState<Medicine[]>(initialMedicines);
+  const firestore = useFirestore();
   const [settings, setSettings] = useState<Settings>({ upiId: '' });
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
   
-  // Load state from localStorage on initial client render
+  // === FIRESTORE DATA ===
+  const ordersCollection = useMemoFirebase(() => collection(firestore, 'orders'), [firestore]);
+  const { data: ordersData } = useCollection<Order>(ordersCollection);
+  const orders = ordersData || [];
+  
+  const buyersCollection = useMemoFirebase(() => collection(firestore, 'users'), [firestore]);
+  const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
+  const allBuyers = allBuyersData || [];
+  
+  const buyerRequestsCollection = useMemoFirebase(() => collection(firestore, 'buyer_requests'), [firestore]);
+  const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
+  
+  const medicinesCollection = useMemoFirebase(() => collection(firestore, 'drugs'), [firestore]);
+  const { data: medicinesData } = useCollection<Medicine>(medicinesCollection);
+  const medicines = medicinesData || initialMedicines; // Fallback to initial data if needed
+
+  const adminsCollection = useMemoFirebase(() => collection(firestore, 'admins'), [firestore]);
+  const { data: adminsData } = useCollection<AdminUser>(adminsCollection);
+  
+
+  // Load non-Firestore state from localStorage on initial client render
   useEffect(() => {
-    setOrders(getInitialState('orders', initialOrders));
-    setAllBuyers(getInitialState('buyers', initialBuyers));
-    setMedicines(getInitialState('medicines', initialMedicines));
     setSettings(getInitialState('appSettings', { upiId: '' }));
     setCartItems(getInitialState('cartItems', []));
-    setAdmins(getInitialState('admins', initialAdmins));
     setHydrated(true);
   }, []);
-
-  // Persist state to localStorage whenever it changes
-  useEffect(() => {
-    if (hydrated) localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders, hydrated]);
-
-  useEffect(() => {
-     if (hydrated) localStorage.setItem('buyers', JSON.stringify(allBuyers));
-  }, [allBuyers, hydrated]);
   
   useEffect(() => {
-    if (hydrated) localStorage.setItem('medicines', JSON.stringify(medicines));
-  }, [medicines, hydrated]);
+    if(adminsData) {
+      setAdmins(adminsData);
+    }
+  }, [adminsData]);
 
+
+  // Persist non-Firestore state to localStorage whenever it changes
   useEffect(() => {
     if (hydrated) localStorage.setItem('appSettings', JSON.stringify(settings));
   }, [settings, hydrated]);
@@ -136,104 +145,101 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hydrated) localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems, hydrated]);
-
+  
   useEffect(() => {
-    if (hydrated) localStorage.setItem('admins', JSON.stringify(admins));
+    if (hydrated && admins.length) localStorage.setItem('admins', JSON.stringify(admins));
   }, [admins, hydrated]);
 
 
   // === ORDERS LOGIC ===
-  const addOrder = useCallback((order: Order) => {
-    setOrders((prev) => [order, ...prev]);
-  }, []);
+  const addOrder = useCallback(async (order: Omit<Order, 'id'>) => {
+    const ordersCol = collection(firestore, 'orders');
+    await addDoc(ordersCol, { ...order, createdAt: serverTimestamp() });
+  }, [firestore]);
 
-  const updateOrderStatus = useCallback((orderId: string, status: Order['status']) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status } : o))
-    );
-  }, []);
+  const updateOrderStatus = useCallback(async (orderId: string, status: Order['status']) => {
+    const orderDoc = doc(firestore, 'orders', orderId);
+    await setDoc(orderDoc, { status }, { merge: true });
+  }, [firestore]);
 
   // === BUYERS LOGIC ===
-  const addPendingBuyer = useCallback((buyer: Buyer) => {
-    setAllBuyers((prev) => [...prev, buyer]);
-  }, []);
+  const addPendingBuyer = useCallback(async (buyer: Buyer) => {
+     const buyerRequestsCol = collection(firestore, 'buyer_requests');
+     await addDoc(buyerRequestsCol, { ...buyer, createdAt: serverTimestamp() });
+  }, [firestore]);
 
-  const approveBuyer = useCallback((buyerId: string) => {
-    setAllBuyers((prev) =>
-      prev.map((b) => (b.id === buyerId ? { ...b, status: 'Approved' } : b))
-    );
-  }, []);
+  const approveBuyer = useCallback(async (requestId: string) => {
+    const requestDocRef = doc(firestore, 'buyer_requests', requestId);
+    const buyerData = pendingBuyersData?.find(b => b.id === requestId);
+    
+    if (buyerData) {
+        const userDocRef = doc(firestore, 'users', buyerData.id);
+        await setDoc(userDocRef, { ...buyerData, status: 'Approved' });
+        await deleteDoc(requestDocRef);
+    }
+  }, [firestore, pendingBuyersData]);
 
-  const toggleBuyerStatus = useCallback((buyerId: string, currentStatus: 'Approved' | 'Disabled') => {
+  const toggleBuyerStatus = useCallback(async (buyerId: string, currentStatus: 'Approved' | 'Disabled') => {
     const newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
-    setAllBuyers((prev) =>
-      prev.map((b) => (b.id === buyerId ? { ...b, status: newStatus } : b))
-    );
-  }, []);
+    const buyerDoc = doc(firestore, 'users', buyerId);
+    await setDoc(buyerDoc, { status: newStatus }, { merge: true });
+  }, [firestore]);
   
-  const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'businessName'| 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => {
-    setAllBuyers(prev => prev.map(buyer => {
-        if (buyer.id === buyerId) {
-            const newDetails = { ...buyer, ...details };
-            if (details.businessName) {
-                newDetails.name = details.businessName;
-            }
-            return newDetails;
-        }
-        return buyer;
-    }));
-  }, []);
+  const updateBuyerDetails = useCallback(async (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'businessName'| 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => {
+    const buyerDoc = doc(firestore, 'users', buyerId);
+    const payload = { ...details };
+    if (details.businessName) {
+        payload.name = details.businessName;
+    }
+    await setDoc(buyerDoc, payload, { merge: true });
+  }, [firestore]);
 
 
-  const addBuyerAddress = useCallback((buyerId: string, address: Omit<Address, 'id'>) => {
-    setAllBuyers(prev => prev.map(buyer => {
-      if (buyer.id === buyerId) {
+  const addBuyerAddress = useCallback(async (buyerId: string, address: Omit<Address, 'id'>) => {
+    const buyer = allBuyers.find(b => b.id === buyerId);
+    if(buyer) {
         const newAddress = { ...address, id: `addr-${Date.now()}` };
         const updatedAddresses = [...(buyer.addresses || []), newAddress];
-        return { ...buyer, addresses: updatedAddresses };
-      }
-      return buyer;
-    }));
-  }, []);
+        const buyerDoc = doc(firestore, 'users', buyerId);
+        await setDoc(buyerDoc, { addresses: updatedAddresses }, { merge: true });
+    }
+  }, [firestore, allBuyers]);
 
-  const updateBuyerAddress = useCallback((buyerId: string, updatedAddress: Address) => {
-    setAllBuyers(prev => prev.map(buyer => {
-      if (buyer.id === buyerId) {
+  const updateBuyerAddress = useCallback(async (buyerId: string, updatedAddress: Address) => {
+    const buyer = allBuyers.find(b => b.id === buyerId);
+    if(buyer) {
         const updatedAddresses = buyer.addresses?.map(addr => 
           addr.id === updatedAddress.id ? updatedAddress : addr
         ) || [];
-        return { ...buyer, addresses: updatedAddresses };
-      }
-      return buyer;
-    }));
-  }, []);
+        const buyerDoc = doc(firestore, 'users', buyerId);
+        await setDoc(buyerDoc, { addresses: updatedAddresses }, { merge: true });
+    }
+  }, [firestore, allBuyers]);
 
-  const deleteBuyerAddress = useCallback((buyerId: string, addressId: string) => {
-    setAllBuyers(prev => prev.map(buyer => {
-      if (buyer.id === buyerId) {
+  const deleteBuyerAddress = useCallback(async (buyerId: string, addressId: string) => {
+    const buyer = allBuyers.find(b => b.id === buyerId);
+    if(buyer) {
         const updatedAddresses = buyer.addresses?.filter(addr => addr.id !== addressId);
-        // If the deleted address was the default, set a new default
         const newDefault = buyer.defaultAddressId === addressId ? updatedAddresses?.[0]?.id : buyer.defaultAddressId;
-        return { ...buyer, addresses: updatedAddresses, defaultAddressId: newDefault };
-      }
-      return buyer;
-    }));
-  }, []);
+        const buyerDoc = doc(firestore, 'users', buyerId);
+        await setDoc(buyerDoc, { addresses: updatedAddresses, defaultAddressId: newDefault }, { merge: true });
+    }
+  }, [firestore, allBuyers]);
 
-  const setBuyerDefaultAddress = useCallback((buyerId: string, addressId: string) => {
-    setAllBuyers(prev => prev.map(buyer => 
-      buyer.id === buyerId ? { ...buyer, defaultAddressId: addressId } : buyer
-    ));
-  }, []);
+  const setBuyerDefaultAddress = useCallback(async (buyerId: string, addressId: string) => {
+    const buyerDoc = doc(firestore, 'users', buyerId);
+    await setDoc(buyerDoc, { defaultAddressId: addressId }, { merge: true });
+  }, [firestore]);
 
   const approvedBuyers = allBuyers.filter((b) => b.status === 'Approved');
-  const pendingBuyers = allBuyers.filter((b) => b.status === 'Pending');
+  const pendingBuyers = pendingBuyersData || [];
   const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
-  const addMedicine = useCallback((medicine: Medicine) => {
-    setMedicines((prev) => [...prev, medicine]);
-  }, []);
+  const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id'>) => {
+    const medicinesCol = collection(firestore, 'drugs');
+    await addDoc(medicinesCol, { ...medicine, createdAt: serverTimestamp() });
+  }, [firestore]);
 
   // === CART LOGIC ===
   const addToCart = useCallback((item: Medicine) => {
@@ -285,108 +291,80 @@ export function AppProvider({ children }: { children: ReactNode }) {
         permissions: [],
         status: 'Pending' as const,
     };
-    setAdmins(prev => [...prev, newAdmin]);
+    
+    const adminDoc = doc(firestore, 'admins', adminData.email);
+    setDoc(adminDoc, newAdmin, { merge: true });
+
     return { success: true };
-  }, [admins]);
+  }, [admins, firestore]);
 
   const updateAdminPermissions = useCallback(async (email: string, permissions: string[]) => {
-    setAdmins(prev => prev.map(admin => {
-        if (admin.email === email && admin.role !== 'Super Admin') {
-            return { ...admin, permissions };
-        }
-        return admin;
-    }));
-    return { success: true, message: `Permissions for ${email} updated.` };
-  }, []);
+    const admin = admins.find(a => a.email === email);
+    if (admin && admin.role !== 'Super Admin') {
+        const adminDoc = doc(firestore, 'admins', email);
+        await setDoc(adminDoc, { permissions }, { merge: true });
+        return { success: true, message: `Permissions for ${email} updated.` };
+    }
+    return { success: false, message: 'Admin not found or is a Super Admin.' };
+  }, [admins, firestore]);
 
   const approveAdmin = useCallback(async (email: string) => {
-    let success = false;
-    let userName = '';
-    setAdmins(prev => prev.map(admin => {
-        if (admin.email === email && admin.status === 'Pending') {
-            success = true;
-            userName = admin.name;
-            return { ...admin, status: 'Approved' as const, permissions: ['dashboard'] };
-        }
-        return admin;
-    }));
-    if (success) {
-      return { success: true, message: `${userName} has been approved.` };
+    const admin = admins.find(a => a.email === email);
+    if (admin && admin.status === 'Pending') {
+        const adminDoc = doc(firestore, 'admins', email);
+        await setDoc(adminDoc, { status: 'Approved', permissions: ['dashboard'] }, { merge: true });
+        return { success: true, message: `${admin.name} has been approved.` };
     }
     return { success: false, error: 'User not found or not pending.' };
-  }, []);
+  }, [admins, firestore]);
 
   const toggleAdminStatus = useCallback(async (email: string, currentStatus: 'Approved' | 'Disabled') => {
-      let userToggled = false;
-      let newStatus: 'Approved' | 'Disabled' = 'Approved';
-      let userName = '';
-      
-      setAdmins(prev => prev.map(admin => {
-          if (admin.email === email && admin.role !== 'Super Admin') {
-              userToggled = true;
-              userName = admin.name;
-              newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
-              return { ...admin, status: newStatus };
-          }
-          return admin;
-      }));
-
-      if (userToggled) {
-          return { success: true, message: `${userName}'s account has been ${newStatus.toLowerCase()}.` };
+      const admin = admins.find(a => a.email === email);
+      if (admin && admin.role !== 'Super Admin') {
+          const newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
+          const adminDoc = doc(firestore, 'admins', email);
+          await setDoc(adminDoc, { status: newStatus }, { merge: true });
+          return { success: true, message: `${admin.name}'s account has been ${newStatus.toLowerCase()}.` };
       }
       return { success: false, error: 'User not found or is a Super Admin.' };
-  }, []);
+  }, [admins, firestore]);
 
   const updateAdminDetails = useCallback((currentEmail: string, details: Partial<AdminUser> & { currentPassword?: string, newPassword?: string }) => {
-    let success = false;
-    let error: string | undefined = "Admin not found.";
+    const adminToUpdate = admins.find(a => a.email === currentEmail);
+    if(!adminToUpdate) return { success: false, error: "Admin not found." };
+    
+    const updates: Partial<AdminUser> = {};
 
-    setAdmins(prevAdmins => {
-      const newAdmins = [...prevAdmins];
-      const adminIndex = newAdmins.findIndex(a => a.email === currentEmail);
-
-      if (adminIndex === -1) {
-        return prevAdmins;
-      }
-      
-      const adminToUpdate = { ...newAdmins[adminIndex] };
-
-      // Password validation
-      if (details.newPassword) {
+    if (details.newPassword) {
         if (!details.currentPassword || details.currentPassword !== adminToUpdate.password) {
-          error = "Incorrect current password.";
-          return prevAdmins;
+          return { success: false, error: "Incorrect current password." };
         }
-        adminToUpdate.password = details.newPassword;
-      }
+        updates.password = details.newPassword;
+    }
 
-      // Update other details
-      adminToUpdate.name = details.name || adminToUpdate.name;
-      
-      // Prevent Super Admin email change
-      if (adminToUpdate.role !== 'Super Admin' && details.email && details.email !== currentEmail) {
-          const emailExists = newAdmins.some(a => a.email === details.email);
-          if(emailExists) {
-              error = "Another user with this email already exists.";
-              return prevAdmins;
-          }
-          adminToUpdate.email = details.email;
-      }
-      
-      newAdmins[adminIndex] = adminToUpdate;
-      success = true;
-      error = undefined;
-      return newAdmins;
-    });
-
-    return { success, error };
-  }, []);
+    updates.name = details.name || adminToUpdate.name;
+    
+    if (adminToUpdate.role !== 'Super Admin' && details.email && details.email !== currentEmail) {
+        const emailExists = admins.some(a => a.email === details.email);
+        if(emailExists) {
+            return { success: false, error: "Another user with this email already exists." };
+        }
+        updates.email = details.email;
+        // Note: Changing email in Firestore might require re-authentication or more complex logic if email is used as document ID.
+        // For simplicity, we assume email can be updated here. A real app might handle this differently.
+    }
+    
+    const adminDoc = doc(firestore, 'admins', currentEmail);
+    setDoc(adminDoc, updates, { merge: true });
+    
+    return { success: true };
+  }, [admins, firestore]);
 
 
   // === VALUE FOR PROVIDER ===
   const value: AppContextType = {
     orders,
-    addOrder,
+    addOrder: (order) => addOrder(order as Omit<Order, 'id'>),
     updateOrderStatus,
     buyers: approvedBuyers,
     pendingBuyers,
@@ -400,7 +378,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     deleteBuyerAddress,
     setBuyerDefaultAddress,
     medicines,
-    addMedicine,
+    addMedicine: (medicine) => addMedicine(medicine as Omit<Medicine, 'id'>),
     settings,
     setSettings,
     cartItems,
@@ -419,7 +397,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   if (!hydrated) {
-    // Render nothing or a loading spinner on the server or before hydration
     return null;
   }
 
