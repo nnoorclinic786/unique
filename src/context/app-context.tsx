@@ -11,9 +11,6 @@ import React, {
 } from 'react';
 import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment } from "firebase/firestore";
 import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
-import {
-  admins as initialAdmins
-} from '@/lib/data';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import Cookies from 'js-cookie';
 
@@ -36,7 +33,6 @@ interface AppContextType {
   buyers: Buyer[];
   pendingBuyers: Buyer[];
   disabledBuyers: Buyer[];
-  addPendingBuyer: (buyer: Omit<Buyer, 'id'>) => void;
   approveBuyer: (buyerId: string) => void;
   toggleBuyerStatus: (buyerId: string, status: 'Approved' | 'Disabled') => void;
   updateBuyerDetails: (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'businessName' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => void;
@@ -66,11 +62,11 @@ interface AppContextType {
   // Admins
   admins: AdminUser[];
   getAdmins: () => AdminUser[];
-  addPendingAdmin: (admin: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => { success: boolean, error?: string };
+  addPendingAdmin: (admin: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => Promise<{ success: boolean; error?: string; }>;
   updateAdminPermissions: (email: string, permissions: string[]) => Promise<{ success: boolean; message: string; }>;
   approveAdmin: (email: string) => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
   toggleAdminStatus: (email: string, currentStatus: 'Approved' | 'Disabled') => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
-  updateAdminDetails: (email: string, details: Partial<AdminUser>) => { success: boolean, error?: string };
+  updateAdminDetails: (email: string, details: Partial<AdminUser>) => Promise<{ success: boolean, error?: string }>;
 }
 
 // == CONTEXT CREATION ==
@@ -137,8 +133,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const adminsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'admins') : null, [firestore, isAdminLoggedIn]);
   const { data: adminsData } = useCollection<AdminUser>(adminsCollection);
-  // Admin data is sensitive, load it statically for server actions and only from firestore when admin is logged in.
-  const admins = isAdminLoggedIn && adminsData ? adminsData : initialAdmins;
+  const admins = adminsData || [];
 
   // Load non-Firestore state from localStorage on initial client render
   useEffect(() => {
@@ -175,7 +170,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const orderData = {
       buyerId: user.uid,
       buyerName: buyer.name,
-      items: currentCart-items.map(({id, name, quantity, price}) => ({id, name, quantity, price})),
+      items: currentCartItems.map(({id, name, quantity, price}) => ({id, name, quantity, price})),
       itemCount: currentCartItems.reduce((acc, item) => acc + item.quantity, 0),
       total: total,
       status: 'draft' as const,
@@ -212,12 +207,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [firestore]);
 
   // === BUYERS LOGIC ===
-  const addPendingBuyer = useCallback(async (buyer: Omit<Buyer, 'id'>) => {
-     if (!firestore) return;
-     const buyerRequestsCol = collection(firestore, 'buyer_requests');
-     await addDoc(buyerRequestsCol, { ...buyer, createdAt: serverTimestamp() });
-  }, [firestore]);
-
   const approveBuyer = useCallback(async (requestId: string) => {
     if (!firestore) return;
     const requestDocRef = doc(firestore, 'buyer_requests', requestId);
@@ -380,10 +369,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return admins;
   }, [admins]);
 
-  const addPendingAdmin = useCallback((adminData: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => {
+  const addPendingAdmin = useCallback(async (adminData: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => {
     if (!firestore) return { success: false, error: "Database not connected." };
-    const existingUser = admins.find(u => u.email === adminData.email);
-    if (existingUser) {
+    
+    // Check against Firestore data if available
+    if (admins.some(u => u.email === adminData.email)) {
         return { success: false, error: "An admin with this email already exists." };
     }
 
@@ -395,7 +385,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     
     const adminDoc = doc(firestore, 'admins', adminData.email);
-    setDoc(adminDoc, newAdmin, { merge: true });
+    await setDoc(adminDoc, newAdmin, { merge: true });
 
     return { success: true };
   }, [admins, firestore]);
@@ -434,34 +424,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { success: false, error: 'User not found or is a Super Admin.' };
   }, [admins, firestore]);
 
-  const updateAdminDetails = useCallback((currentEmail: string, details: Partial<AdminUser> & { currentPassword?: string, newPassword?: string }) => {
+  const updateAdminDetails = useCallback(async (currentEmail: string, details: Partial<AdminUser> & { currentPassword?: string, newPassword?: string }) => {
     if (!firestore) return { success: false, error: "Database not connected." };
     const adminToUpdate = admins.find(a => a.email === currentEmail);
     if(!adminToUpdate) return { success: false, error: "Admin not found." };
     
-    const updates: Partial<AdminUser> = {};
-
-    if (details.newPassword) {
-        if (!details.currentPassword || details.currentPassword !== adminToUpdate.password) {
-          return { success: false, error: "Incorrect current password." };
-        }
-        updates.password = details.newPassword;
+    // In a real app, password verification would happen on a server
+    if (details.newPassword && details.currentPassword !== adminToUpdate.password) {
+        return { success: false, error: "Incorrect current password." };
     }
-
-    updates.name = details.name || adminToUpdate.name;
     
-    if (adminToUpdate.role !== 'Super Admin' && details.email && details.email !== currentEmail) {
-        const emailExists = admins.some(a => a.email === details.email);
-        if(emailExists) {
-            return { success: false, error: "Another user with this email already exists." };
-        }
-        updates.email = details.email;
-        // Note: Changing email in Firestore might require re-authentication or more complex logic if email is used as document ID.
-        // For simplicity, we assume email can be updated here. A real app might handle this differently.
+    const updates: Partial<AdminUser> = {
+        name: details.name || adminToUpdate.name
+    };
+
+    if(details.newPassword) {
+        updates.password = details.newPassword;
     }
     
     const adminDoc = doc(firestore, 'admins', currentEmail);
-    setDoc(adminDoc, updates, { merge: true });
+    await setDoc(adminDoc, updates, { merge: true });
     
     return { success: true };
   }, [admins, firestore]);
@@ -475,7 +457,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     buyers: approvedBuyers,
     pendingBuyers,
     disabledBuyers,
-    addPendingBuyer,
     approveBuyer,
     toggleBuyerStatus,
     updateBuyerDetails,
