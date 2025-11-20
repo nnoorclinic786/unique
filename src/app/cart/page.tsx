@@ -19,12 +19,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { AddressForm } from '@/components/address-form';
-import type { Buyer, Address } from '@/lib/types';
+import type { Buyer, Address, Order } from '@/lib/types';
+import { useUser } from '@/firebase';
 
 function CartPageContent() {
   const { cartItems, updateQuantity, removeFromCart, cartCount, clearCart, addOrder, settings, buyers, addBuyerAddress } = useAppContext();
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isClient, setIsClient] = useState(false);
@@ -35,9 +37,8 @@ function CartPageContent() {
 
   useEffect(() => {
     setIsClient(true);
-    const storedUserName = localStorage.getItem('userName');
-    if (storedUserName) {
-        const foundBuyer = buyers.find(b => b.name === storedUserName);
+    if(user) {
+        const foundBuyer = buyers.find(b => b.id === user.uid);
         if (foundBuyer) {
             setCurrentUser(foundBuyer);
             const defaultAddress = foundBuyer.addresses?.find(a => a.id === foundBuyer.defaultAddressId);
@@ -52,26 +53,25 @@ function CartPageContent() {
         
         window.history.replaceState(null, '', window.location.pathname);
     }
-  }, [buyers]);
+  }, [buyers, user]);
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
   const handlePlaceOrder = () => {
-    const newOrder = {
-        id: `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        buyerName: localStorage.getItem('userName') || currentUser?.name || 'Guest',
-        date: new Date().toISOString().split('T')[0],
+    if (!currentUser) return;
+    const newOrder: Omit<Order, 'id' | 'date' | 'itemCount'> = {
+        buyerName: currentUser.name,
+        buyerId: currentUser.id,
         total: total,
         status: 'Pending' as const,
-        itemCount: cartCount,
     };
     
     addOrder(newOrder);
     toast({
         title: "Order Placed!",
-        description: `Your order ${newOrder.id} has been successfully placed.`,
+        description: `Your order has been successfully placed.`,
     });
     clearCart();
     router.push('/account');

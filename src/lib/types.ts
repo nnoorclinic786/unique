@@ -14,6 +14,7 @@ export type Medicine = {
   stock: number;
   category: string;
   imageUrl: string;
+  adminId?: string;
   hsnCode?: string;
   priceUnit?: 'strip' | 'piece' | 'bottle' | 'box';
   stockUnit?: 'strip' | 'piece' | 'bottle' | 'box';
@@ -28,6 +29,7 @@ export type Medicine = {
 export type Order = {
   id: string;
   buyerName: string;
+  buyerId: string;
   date: string;
   total: number;
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';

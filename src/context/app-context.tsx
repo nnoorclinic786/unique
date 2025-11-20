@@ -32,7 +32,7 @@ interface AppContextType {
   // Orders
   orders: Order[];
   updateOrderStatus: (orderId: string, status: Order['status']) => void;
-  addOrder: (order: Order) => void;
+  addOrder: (order: Omit<Order, 'id' | 'date' | 'itemCount'>) => void;
 
   // Buyers
   buyers: Buyer[];
@@ -104,11 +104,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
   const [settings, setSettings] = useState<Settings>({ upiId: '' });
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   
   // === FIRESTORE DATA ===
-  const ordersCollection = useMemoFirebase(() => firestore ? collection(firestore, 'orders') : null, [firestore]);
+  const ordersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'orders') : null, [firestore, isAdminLoggedIn]);
   const { data: ordersData } = useCollection<Order>(ordersCollection);
   const orders = ordersData || [];
   
@@ -125,6 +124,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const adminsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'admins') : null, [firestore, isAdminLoggedIn]);
   const { data: adminsData } = useCollection<AdminUser>(adminsCollection);
+  // Admin data is sensitive, load it statically for server actions and only from firestore when admin is logged in.
+  const admins = isAdminLoggedIn && adminsData ? adminsData : initialAdmins;
 
   useEffect(() => {
     const adminCookie = Cookies.get('admin_session');
@@ -137,6 +138,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch(e) {
         setIsAdminLoggedIn(false);
       }
+    } else {
+        setIsAdminLoggedIn(false);
     }
   }, [user]);
   
@@ -147,14 +150,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setCartItems(getInitialState('cartItems', []));
     setHydrated(true);
   }, []);
-  
-  useEffect(() => {
-    if(adminsData) {
-      setAdmins(adminsData);
-    } else {
-      setAdmins(initialAdmins);
-    }
-  }, [adminsData]);
 
 
   // Persist non-Firestore state to localStorage whenever it changes
@@ -166,17 +161,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (hydrated) localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems, hydrated]);
   
-  useEffect(() => {
-    if (hydrated && admins.length) localStorage.setItem('admins', JSON.stringify(admins));
-  }, [admins, hydrated]);
-
 
   // === ORDERS LOGIC ===
-  const addOrder = useCallback(async (order: Omit<Order, 'id'>) => {
-    if (!firestore) return;
+  const addOrder = useCallback(async (order: Omit<Order, 'id' | 'date' | 'itemCount'>) => {
+    if (!firestore || !user) return;
     const ordersCol = collection(firestore, 'orders');
-    await addDoc(ordersCol, { ...order, createdAt: serverTimestamp() });
-  }, [firestore]);
+    const newOrder: Omit<Order, 'id'> = {
+        ...order,
+        buyerId: user.uid,
+        date: new Date().toISOString().split('T')[0],
+        itemCount: cartItems.reduce((acc, item) => acc + item.quantity, 0),
+    };
+    await addDoc(ordersCol, { ...newOrder, createdAt: serverTimestamp() });
+  }, [firestore, user, cartItems]);
 
   const updateOrderStatus = useCallback(async (orderId: string, status: Order['status']) => {
     if (!firestore) return;
@@ -267,10 +264,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // === MEDICINES LOGIC ===
   const addMedicine = useCallback(async (medicine: Medicine) => {
-    if (!firestore) return;
+    if (!firestore || !user) return;
     const medicinesCol = collection(firestore, 'drugs');
-    await addDoc(medicinesCol, { ...medicine, createdAt: serverTimestamp() });
-  }, [firestore]);
+    await addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
+  }, [firestore, user]);
 
   // === CART LOGIC ===
   const addToCart = useCallback((item: Medicine) => {

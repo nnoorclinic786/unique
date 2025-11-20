@@ -16,10 +16,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AddressForm } from '@/components/address-form';
-import type { Address, Buyer } from '@/lib/types';
+import type { Address, Buyer, Order } from '@/lib/types';
 import { Home, Trash2, Edit, PlusCircle, Star, Building } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { BuyerProfileForm } from '@/components/buyer-profile-form';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
 
 
 const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
@@ -32,12 +34,14 @@ const statusColors: { [key: string]: 'default' | 'secondary' | 'destructive' | '
 
 function AccountPageContent() {
   const { 
-    orders, updateOrderStatus, buyers, 
+    updateOrderStatus, buyers, 
     addBuyerAddress, updateBuyerAddress, deleteBuyerAddress, setBuyerDefaultAddress,
     updateBuyerDetails
   } = useAppContext();
   const { toast } = useToast();
-  const [userName, setUserName] = useState<string | null>(null);
+  const { user } = useUser();
+  const firestore = useFirestore();
+  
   const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
   const [isProfileDialogOpen, setProfileDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | undefined>(undefined);
@@ -45,12 +49,20 @@ function AccountPageContent() {
   const [buyer, setBuyer] = useState<Buyer | null>(null);
 
   useEffect(() => {
-    const storedUserName = localStorage.getItem('userName');
-    setUserName(storedUserName);
-    if (storedUserName) {
-      setBuyer(buyers.find(b => b.name === storedUserName) || null);
+    if (user) {
+      setBuyer(buyers.find(b => b.id === user.uid) || null);
+    } else {
+      setBuyer(null);
     }
-  }, [buyers, userName]);
+  }, [buyers, user]);
+
+  const userOrdersQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'orders'), where('buyerId', '==', user.uid));
+  }, [firestore, user]);
+
+  const { data: userOrders, isLoading: ordersLoading } = useCollection<Order>(userOrdersQuery);
+
 
   const handleCancelOrder = (orderId: string) => {
     updateOrderStatus(orderId, 'Cancelled');
@@ -59,8 +71,6 @@ function AccountPageContent() {
         description: `Order ${orderId} has been cancelled.`,
     });
   };
-  
-  const userOrders = userName ? orders.filter(order => order.buyerName === userName) : [];
 
   const handleAddressSave = (addressData: Omit<Address, 'id'>) => {
     if (buyer) {
@@ -87,10 +97,6 @@ function AccountPageContent() {
   const handleProfileSave = (profileData: any) => {
     if (buyer) {
         updateBuyerDetails(buyer.id, profileData);
-        if (buyer.name !== profileData.name) {
-            localStorage.setItem('userName', profileData.name);
-            setUserName(profileData.name);
-        }
         toast({ title: "Profile Updated", description: "Your account details have been updated."});
         setProfileDialogOpen(false);
     }
@@ -120,6 +126,9 @@ function AccountPageContent() {
     }
   }
 
+  if (!user && !buyer) {
+    return <div className="text-center p-8 text-muted-foreground">Please log in to view your account.</div>;
+  }
 
   return (
     <main className="flex-1 container mx-auto px-4 md:px-6 py-8">
@@ -217,7 +226,8 @@ function AccountPageContent() {
           <h2 className="text-2xl font-headline font-bold mb-4">Order History</h2>
           <Card>
             <CardContent className="p-0">
-              {userOrders.length > 0 ? (
+              {ordersLoading && <div className="text-center p-8 text-muted-foreground">Loading orders...</div>}
+              {!ordersLoading && userOrders && userOrders.length > 0 ? (
                   <Accordion type="single" collapsible className="w-full">
                   {userOrders.map(order => (
                       <AccordionItem value={order.id} key={order.id}>
@@ -249,9 +259,7 @@ function AccountPageContent() {
                   ))}
                   </Accordion>
               ) : (
-                  <div className="text-center p-8 text-muted-foreground">
-                      You have not placed any orders yet.
-                  </div>
+                  !ordersLoading && <div className="text-center p-8 text-muted-foreground">You have not placed any orders yet.</div>
               )}
             </CardContent>
           </Card>
@@ -300,5 +308,3 @@ export default function AccountPage() {
     </ClientLayout>
   );
 }
-
-    

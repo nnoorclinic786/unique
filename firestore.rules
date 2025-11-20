@@ -11,11 +11,11 @@
  * - `/users/{userId}`: Stores approved buyer profiles. Each buyer has full control over their own document.
  * - `/buyer_requests/{requestId}`: A dedicated collection that acts as a queue for new buyer signups awaiting admin approval. This structural segregation simplifies rules and directly addresses the app's approval workflow.
  * - `/drugs/{drugId}`: The master drug catalog, readable by all authenticated users but writable only by administrators.
- * - `/users/{userId}/orders/...`: Subcollections for orders and their items, nested under the user's document to enforce strict path-based ownership.
+ * - `/orders/{orderId}`: A top-level collection for all orders. This supports admin queries. Buyer access is restricted at the document level.
  *
  * ## Key Security Decisions
  * - **Admin Role Management**: Admin access is determined by checking for a document in `/roles_admin/{uid}`. This is a performant and secure method that avoids reliance on custom claims.
- * - **Strict User Scoping**: All buyer-specific data (profiles, orders) is nested under `/users/{userId}`, ensuring rules can easily enforce that a user can only access their own data tree.
+ * - **Strict User Scoping**: Buyer-specific data in `/users/{userId}` ensures rules can easily enforce that a user can only access their own document.
  * - **No User Listing**: Listing all documents in the `/users` collection is explicitly disallowed to protect user privacy.
  * - **Approval Queue**: New buyer registrations are created in a separate `/buyer_requests` collection. This is a deliberate choice for security and performance, allowing admins to list and process requests without granting them broad write access to the main `/users` collection.
  * - **Destructive Operations**: Deleting user profiles is disallowed from the client side to prevent accidental data loss. Deleting orders and buyer requests is permitted for authorized roles.
@@ -94,7 +94,7 @@ service cloud.firestore {
      * @principle Allows admins to manage other admin accounts.
      */
     match /admins/{adminEmail} {
-      allow read, write: if isAdmin();
+      allow read, list, write: if isAdmin();
     }
 
 
@@ -108,7 +108,7 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
-      allow list: if false;
+      allow list: if isAdmin(); // Allow admins to list users.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if false;
@@ -147,43 +147,15 @@ service cloud.firestore {
     }
 
     /**
-     * @description A buyer's orders. Only the buyer who owns the orders or an admin can access them.
-     * @path /users/{userId}/orders/{orderId}
-     * @allow (create) A buyer with uid=`userId` placing a new order.
-     * @deny (get) A buyer trying to view the order history of another buyer.
-     * @principle Restricts access to a user's own data tree using path-based security.
-     */
-    match /users/{userId}/orders/{orderId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.buyerId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.buyerId == resource.data.buyerId;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description The specific items within a buyer's order. Permissions are inherited from the parent order.
-     * @path /users/{userId}/orders/{orderId}/order_items/{orderItemId}
-     * @allow (create) A buyer with uid=`userId` adding items to their own new order.
-     * @deny (update) A buyer trying to modify items in another user's order.
-     * @principle Enforces hierarchical ownership; access to a subcollection document is governed by the rules on its parent path.
-     */
-    match /users/{userId}/orders/{orderId}/order_items/{orderItemId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
-      allow update: if isExistingOwner(userId) && request.resource.data.orderId == resource.data.orderId;
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-    * @description The collection of orders.
+    * @description The collection of all orders. Admins can list all orders. Buyers can only read their own orders via queries.
     * @path /orders/{orderId}
-    * @allow (read) Admins can read all orders. Users can read their own orders.
+    * @allow (read) Admins can read any order. Users can read their own orders.
+    * @allow (list) Admins can list all orders. Buyers can list their own orders.
     * @allow (write) Users can create their own orders. Admins can update orders.
     */
     match /orders/{orderId} {
-        allow read: if isAdmin() || (isSignedIn() && resource.data.buyerId == request.auth.uid);
+        allow get: if isAdmin() || (isSignedIn() && resource.data.buyerId == request.auth.uid);
+        allow list: if isAdmin() || (isSignedIn() && request.query.where.size() > 0 && request.query.where[0][0] == 'buyerId' && request.query.where[0][2] == request.auth.uid);
         allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
         allow update: if isAdmin();
         allow delete: if isAdmin();
