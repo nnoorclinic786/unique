@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, {
@@ -103,8 +102,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
   const [settings, setSettings] = useState<Settings>({ upiId: '' });
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   
+  useEffect(() => {
+    const adminCookie = Cookies.get('admin_session');
+    if (adminCookie) {
+      try {
+        const session = JSON.parse(adminCookie);
+        if (session.isLoggedIn) {
+          setIsAdminLoggedIn(true);
+        }
+      } catch(e) {
+        setIsAdminLoggedIn(false);
+      }
+    }
+  }, []);
+
   // === FIRESTORE DATA ===
   const ordersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'orders') : null, [firestore, isAdminLoggedIn]);
   const { data: ordersData } = useCollection<Order>(ordersCollection);
@@ -126,27 +140,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Admin data is sensitive, load it statically for server actions and only from firestore when admin is logged in.
   const admins = isAdminLoggedIn && adminsData ? adminsData : initialAdmins;
 
-  useEffect(() => {
-    const adminCookie = Cookies.get('admin_session');
-    if (adminCookie) {
-      try {
-        const session = JSON.parse(adminCookie);
-        if (session.isLoggedIn) {
-          setIsAdminLoggedIn(true);
-        }
-      } catch(e) {
-        setIsAdminLoggedIn(false);
-      }
-    } else {
-        setIsAdminLoggedIn(false);
-    }
-  }, [user]);
-  
-
   // Load non-Firestore state from localStorage on initial client render
   useEffect(() => {
     setSettings(getInitialState('appSettings', { upiId: '' }));
     setCartItems(getInitialState('cartItems', []));
+    setActiveOrderId(getInitialState('activeOrderId', null));
     setHydrated(true);
   }, []);
 
@@ -159,20 +157,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hydrated) localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems, hydrated]);
+
+  useEffect(() => {
+    if (hydrated) localStorage.setItem('activeOrderId', JSON.stringify(activeOrderId));
+  }, [activeOrderId, hydrated]);
   
+
+  const createOrUpdateOrder = useCallback(async (currentCartItems: CartItem[]) => {
+    if (!firestore || !user || !currentCartItems.length) return;
+
+    const buyer = allBuyers.find(b => b.id === user.uid);
+    if (!buyer) return;
+
+    const subtotal = currentCartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const total = subtotal + (subtotal * 0.05); // Assuming 5% tax
+
+    const orderData = {
+      buyerId: user.uid,
+      buyerName: buyer.name,
+      items: currentCart-items.map(({id, name, quantity, price}) => ({id, name, quantity, price})),
+      itemCount: currentCartItems.reduce((acc, item) => acc + item.quantity, 0),
+      total: total,
+      status: 'draft' as const,
+      date: new Date().toISOString().split('T')[0],
+      updatedAt: serverTimestamp(),
+    };
+
+    if (activeOrderId) {
+      const orderRef = doc(firestore, 'orders', activeOrderId);
+      await setDoc(orderRef, orderData, { merge: true });
+    } else {
+      const ordersCol = collection(firestore, 'orders');
+      const newOrderRef = await addDoc(ordersCol, { ...orderData, createdAt: serverTimestamp() });
+      setActiveOrderId(newOrderRef.id);
+    }
+  }, [firestore, user, allBuyers, activeOrderId]);
 
   // === ORDERS LOGIC ===
   const addOrder = useCallback(async (order: Omit<Order, 'id' | 'date' | 'itemCount'>) => {
-    if (!firestore || !user) return;
-    const ordersCol = collection(firestore, 'orders');
-    const newOrder: Omit<Order, 'id'> = {
-        ...order,
-        buyerId: user.uid,
-        date: new Date().toISOString().split('T')[0],
-        itemCount: cartItems.reduce((acc, item) => acc + item.quantity, 0),
-    };
-    await addDoc(ordersCol, { ...newOrder, createdAt: serverTimestamp() });
-  }, [firestore, user, cartItems]);
+     if (!firestore || !user || !activeOrderId) return;
+    const orderRef = doc(firestore, 'orders', activeOrderId);
+    await setDoc(orderRef, {
+        status: 'Pending',
+        date: new Date().toISOString().split('T')[0], // Finalize order date
+    }, { merge: true });
+    // Reset cart and active order ID after placing
+    clearCart();
+  }, [firestore, user, activeOrderId]);
 
   const updateOrderStatus = useCallback(async (orderId: string, status: Order['status']) => {
     if (!firestore) return;
@@ -271,30 +302,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // === CART LOGIC ===
   const addToCart = useCallback((item: Medicine) => {
     if (!firestore) return;
+
+    let updatedCart: CartItem[];
+    const existing = cartItems.find((i) => i.id === item.id);
+    if (existing) {
+      updatedCart = cartItems.map((i) =>
+        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+      );
+    } else {
+      updatedCart = [...cartItems, { ...item, quantity: 1 }];
+    }
+    setCartItems(updatedCart);
+    createOrUpdateOrder(updatedCart);
+  
     const medicineDoc = doc(firestore, 'drugs', item.id);
     setDoc(medicineDoc, { stock: increment(-1) }, { merge: true });
-
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-  }, [firestore]);
+  }, [cartItems, firestore, createOrUpdateOrder]);
 
   const removeFromCart = useCallback((itemId: string) => {
-    setCartItems((prev) => {
-        const itemToRemove = prev.find(item => item.id === itemId);
-        if (itemToRemove && firestore) {
-            const medicineDoc = doc(firestore, 'drugs', itemId);
-            setDoc(medicineDoc, { stock: increment(itemToRemove.quantity) }, { merge: true });
-        }
-        return prev.filter((item) => item.id !== itemId)
-    });
-  }, [firestore]);
+    if (!firestore) return;
+
+    const itemToRemove = cartItems.find(item => item.id === itemId);
+    if (itemToRemove) {
+      const medicineDoc = doc(firestore, 'drugs', itemId);
+      setDoc(medicineDoc, { stock: increment(itemToRemove.quantity) }, { merge: true });
+    }
+
+    const updatedCart = cartItems.filter((item) => item.id !== itemId);
+    setCartItems(updatedCart);
+    createOrUpdateOrder(updatedCart);
+  }, [cartItems, firestore, createOrUpdateOrder]);
 
   const updateQuantity = useCallback((itemId: string, quantity: number) => {
     if (!firestore) return;
@@ -306,31 +343,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
       quantityChange = quantity - existingItem.quantity;
     }
 
+    let updatedCart;
     if (quantity <= 0) {
-      removeFromCart(itemId);
+      updatedCart = cartItems.filter((item) => item.id !== itemId);
     } else {
-      setCartItems((prev) =>
-        prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
-      );
+      updatedCart = cartItems.map((item) => (item.id === itemId ? { ...item, quantity } : item));
     }
-
+    setCartItems(updatedCart);
+    createOrUpdateOrder(updatedCart);
+    
     if (quantityChange !== 0) {
         const medicineDoc = doc(firestore, 'drugs', itemId);
-        // We decrement by the change. If new quantity is higher, change is positive, so we decrement stock.
-        // If new quantity is lower, change is negative, so we decrement by a negative, which adds back to stock.
         setDoc(medicineDoc, { stock: increment(-quantityChange) }, { merge: true });
     }
-  }, [firestore, cartItems, removeFromCart]);
+  }, [firestore, cartItems, createOrUpdateOrder]);
   
-  const clearCart = useCallback(() => {
-    if (firestore) {
-        cartItems.forEach(item => {
+  const clearCart = useCallback(async () => {
+    if (firestore && cartItems.length > 0) {
+        for (const item of cartItems) {
             const medicineDoc = doc(firestore, 'drugs', item.id);
-            setDoc(medicineDoc, { stock: increment(item.quantity) }, { merge: true });
-        });
+            await setDoc(medicineDoc, { stock: increment(item.quantity) }, { merge: true });
+        }
+    }
+    if (firestore && activeOrderId) {
+        const orderRef = doc(firestore, 'orders', activeOrderId);
+        await deleteDoc(orderRef);
     }
     setCartItems([]);
-  }, [firestore, cartItems]);
+    setActiveOrderId(null);
+  }, [firestore, cartItems, activeOrderId]);
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   

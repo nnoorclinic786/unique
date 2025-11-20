@@ -1,5 +1,4 @@
 
-
 export type Address = {
   id: string;
   name: string; // e.g. "Main Clinic", "Warehouse"
@@ -26,14 +25,22 @@ export type Medicine = {
   manufacturingDate?: string;
 };
 
+export type OrderItem = {
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+}
+
 export type Order = {
   id: string;
   buyerName: string;
   buyerId: string;
   date: string;
   total: number;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'draft';
   itemCount: number;
+  items?: OrderItem[];
 };
 
 export type Buyer = {
@@ -65,4 +72,3 @@ export type AdminUser = {
   status: 'Approved' | 'Pending' | 'Disabled';
   password?: string; // Password should be optional as we won't always have it
 };
-    
