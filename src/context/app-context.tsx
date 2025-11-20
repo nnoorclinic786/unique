@@ -70,6 +70,7 @@ interface AppContextType {
   updateAdminPermissions: (email: string, permissions: string[]) => Promise<{ success: boolean; message: string; }>;
   approveAdmin: (email: string) => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
   toggleAdminStatus: (email: string, currentStatus: 'Approved' | 'Disabled') => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
+  updateAdminDetails: (email: string, details: Partial<AdminUser>) => { success: boolean, error?: string };
 }
 
 // == CONTEXT CREATION ==
@@ -336,6 +337,52 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { success: false, error: 'User not found or is a Super Admin.' };
   }, []);
 
+  const updateAdminDetails = useCallback((currentEmail: string, details: Partial<AdminUser> & { currentPassword?: string, newPassword?: string }) => {
+    let success = false;
+    let error: string | undefined = "Admin not found.";
+
+    setAdmins(prevAdmins => {
+      const newAdmins = [...prevAdmins];
+      const adminIndex = newAdmins.findIndex(a => a.email === currentEmail);
+
+      if (adminIndex === -1) {
+        return prevAdmins;
+      }
+      
+      const adminToUpdate = { ...newAdmins[adminIndex] };
+
+      // Password validation
+      if (details.newPassword) {
+        if (!details.currentPassword || details.currentPassword !== adminToUpdate.password) {
+          error = "Incorrect current password.";
+          return prevAdmins;
+        }
+        adminToUpdate.password = details.newPassword;
+      }
+
+      // Update other details
+      adminToUpdate.name = details.name || adminToUpdate.name;
+      
+      // Prevent Super Admin email change
+      if (adminToUpdate.role !== 'Super Admin' && details.email && details.email !== currentEmail) {
+          const emailExists = newAdmins.some(a => a.email === details.email);
+          if(emailExists) {
+              error = "Another user with this email already exists.";
+              return prevAdmins;
+          }
+          adminToUpdate.email = details.email;
+      }
+      
+      newAdmins[adminIndex] = adminToUpdate;
+      success = true;
+      error = undefined;
+      return newAdmins;
+    });
+
+    return { success, error };
+  }, []);
+
+
   // === VALUE FOR PROVIDER ===
   const value: AppContextType = {
     orders,
@@ -368,6 +415,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     updateAdminPermissions,
     approveAdmin,
     toggleAdminStatus,
+    updateAdminDetails,
   };
 
   if (!hydrated) {

@@ -17,7 +17,7 @@ import { logout } from '@/app/admin/(public)/login/actions';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 interface AdminSession {
@@ -61,8 +61,10 @@ export function UserNav() {
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userName');
 
+    // This will clear the cookie and redirect to the login page for admins.
     await logout();
     
+    // For regular users, we manually redirect and refresh.
     if(!isAdmin){
         router.push('/');
         router.refresh();
@@ -102,10 +104,8 @@ export function UserNav() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                {session.permissions.includes('dashboard') && <DropdownMenuItem asChild><Link href="/admin/dashboard">Dashboard</Link></DropdownMenuItem>}
-                {session.permissions.includes('drugs') && <DropdownMenuItem asChild><Link href="/admin/drugs">Medicines</Link></DropdownMenuItem>}
-                {session.permissions.includes('buyers') && <DropdownMenuItem asChild><Link href="/admin/buyers">Buyers</Link></DropdownMenuItem>}
-                {session.permissions.includes('manage_admins') && <DropdownMenuItem asChild><Link href="/admin/manage-admins">Manage Admins</Link></DropdownMenuItem>}
+                <DropdownMenuItem asChild><Link href="/admin/profile"><User className="mr-2 h-4 w-4" /><span>My Profile</span></Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/admin/dashboard">Dashboard</Link></DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

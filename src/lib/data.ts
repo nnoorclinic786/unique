@@ -49,7 +49,7 @@ export const buyers: Buyer[] = [
 
 export const admins: AdminUser[] = [
     { email: "superadmin@medicare.com", password: "superadminpassword", role: "Super Admin", name: "Super Admin", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'], status: 'Approved' },
-    { email: "newsuperadmin@medicare.com", password: "newsuperadminpassword", role: "Super Admin", name: "New Super Admin", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'], status: 'Approved' },
+    { email: "superadmin2@medicare.com", password: "superadminpassword", role: "Super Admin", name: "Super Admin 2", permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'], status: 'Approved' },
     { email: "admin@medicare.com", password: "adminpassword", role: "Admin", name: "Admin User", permissions: ['dashboard', 'orders'], status: 'Approved' },
     { email: "testadmin@medicare.com", password: "testpassword", role: "Admin", name: "Test Admin", permissions: ['dashboard', 'drugs'], status: 'Approved' },
     { email: "pending@medicare.com", password: "pendingpassword", role: "Admin", name: "Pending User", permissions: [], status: 'Pending' }
