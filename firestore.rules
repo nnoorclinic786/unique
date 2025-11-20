@@ -7,6 +7,7 @@
  * ## Data Structure
  * The data is organized into several top-level collections to segregate permissions effectively:
  * - `/roles_admin/{adminId}`: Manages admin roles using a Database-Based Access Control (DBAC) pattern. The existence of a document grants admin privileges. This collection is not client-writable.
+ * - `/admins/{adminEmail}`: Stores detailed admin user profiles, including permissions. Writable only by other admins.
  * - `/users/{userId}`: Stores approved buyer profiles. Each buyer has full control over their own document.
  * - `/buyer_requests/{requestId}`: A dedicated collection that acts as a queue for new buyer signups awaiting admin approval. This structural segregation simplifies rules and directly addresses the app's approval workflow.
  * - `/drugs/{drugId}`: The master drug catalog, readable by all authenticated users but writable only by administrators.
@@ -87,6 +88,17 @@ service cloud.firestore {
     }
 
     /**
+     * @description Stores admin user profiles. Readable and writable only by other admins.
+     * @path /admins/{adminEmail}
+     * @allow (read, write) if the requesting user is an admin.
+     * @principle Allows admins to manage other admin accounts.
+     */
+    match /admins/{adminEmail} {
+      allow read, write: if isAdmin();
+    }
+
+
+    /**
      * @description Stores approved buyer profiles. Buyers can create and update their own profile. Admins have read-only access.
      * @path /users/{userId}
      * @allow (create) An authenticated user creating their own document: auth.uid == userId.
@@ -113,7 +125,7 @@ service cloud.firestore {
     match /buyer_requests/{requestId} {
       allow get: if isAdmin();
       allow list: if isAdmin();
-      allow create: if isSignedIn() && request.resource.data.id == request.auth.uid;
+      allow create: if isSignedIn();
       allow update: if false;
       allow delete: if isExistingAdmin();
     }
@@ -162,6 +174,19 @@ service cloud.firestore {
       allow create: if isOwner(userId) && request.resource.data.orderId == orderId;
       allow update: if isExistingOwner(userId) && request.resource.data.orderId == resource.data.orderId;
       allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+    * @description The collection of orders.
+    * @path /orders/{orderId}
+    * @allow (read) Admins can read all orders. Users can read their own orders.
+    * @allow (write) Users can create their own orders. Admins can update orders.
+    */
+    match /orders/{orderId} {
+        allow read: if isAdmin() || (isSignedIn() && resource.data.buyerId == request.auth.uid);
+        allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
     }
   }
 }
