@@ -111,7 +111,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { data: ordersData } = useCollection<Order>(ordersCollection);
   const orders = ordersData || [];
   
-  const buyersCollection = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
   const allBuyers = allBuyersData || [];
   
