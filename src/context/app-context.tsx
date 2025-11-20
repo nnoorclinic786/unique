@@ -10,7 +10,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment } from "firebase/firestore";
 import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
 import {
   admins as initialAdmins
@@ -270,6 +270,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // === CART LOGIC ===
   const addToCart = useCallback((item: Medicine) => {
+    if (!firestore) return;
+    const medicineDoc = doc(firestore, 'drugs', item.id);
+    setDoc(medicineDoc, { stock: increment(-1) }, { merge: true });
+
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
@@ -279,13 +283,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { ...item, quantity: 1 }];
     });
-  }, []);
+  }, [firestore]);
 
   const removeFromCart = useCallback((itemId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-  }, []);
+    setCartItems((prev) => {
+        const itemToRemove = prev.find(item => item.id === itemId);
+        if (itemToRemove && firestore) {
+            const medicineDoc = doc(firestore, 'drugs', itemId);
+            setDoc(medicineDoc, { stock: increment(itemToRemove.quantity) }, { merge: true });
+        }
+        return prev.filter((item) => item.id !== itemId)
+    });
+  }, [firestore]);
 
   const updateQuantity = useCallback((itemId: string, quantity: number) => {
+    if (!firestore) return;
+    
+    let quantityChange = 0;
+    const existingItem = cartItems.find((item) => item.id === itemId);
+    
+    if (existingItem) {
+      quantityChange = quantity - existingItem.quantity;
+    }
+
     if (quantity <= 0) {
       removeFromCart(itemId);
     } else {
@@ -293,11 +313,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
         prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
       );
     }
-  }, [removeFromCart]);
+
+    if (quantityChange !== 0) {
+        const medicineDoc = doc(firestore, 'drugs', itemId);
+        // We decrement by the change. If new quantity is higher, change is positive, so we decrement stock.
+        // If new quantity is lower, change is negative, so we decrement by a negative, which adds back to stock.
+        setDoc(medicineDoc, { stock: increment(-quantityChange) }, { merge: true });
+    }
+  }, [firestore, cartItems, removeFromCart]);
   
   const clearCart = useCallback(() => {
+    if (firestore) {
+        cartItems.forEach(item => {
+            const medicineDoc = doc(firestore, 'drugs', item.id);
+            setDoc(medicineDoc, { stock: increment(item.quantity) }, { merge: true });
+        });
+    }
     setCartItems([]);
-  }, []);
+  }, [firestore, cartItems]);
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   
