@@ -39,7 +39,7 @@ interface AppContextType {
   addPendingBuyer: (buyer: Buyer) => void;
   approveBuyer: (buyerId: string) => void;
   toggleBuyerStatus: (buyerId: string, status: 'Approved' | 'Disabled') => void;
-  updateBuyerDetails: (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => void;
+  updateBuyerDetails: (buyerId: string, details: Partial<Pick<Buyer, 'name' | 'businessName' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => void;
   
   // Buyer Addresses
   addBuyerAddress: (buyerId: string, address: Omit<Address, 'id'>) => void;
@@ -170,10 +170,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   }, []);
   
-  const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => {
+  const updateBuyerDetails = useCallback((buyerId: string, details: Partial<Pick<Buyer, 'name' | 'businessName'| 'personName' | 'email' | 'mobileNumber1' | 'gstNumber' | 'permanentAddress'>>) => {
     setAllBuyers(prev => prev.map(buyer => {
         if (buyer.id === buyerId) {
-            return { ...buyer, ...details };
+            const newDetails = { ...buyer, ...details };
+            if (details.businessName) {
+                newDetails.name = details.businessName;
+            }
+            return newDetails;
         }
         return buyer;
     }));

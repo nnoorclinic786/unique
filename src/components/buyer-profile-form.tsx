@@ -21,6 +21,7 @@ interface BuyerProfileFormProps {
 
 const formSchema = z.object({
   name: z.string().min(2, "Business name is required."),
+  businessName: z.string().min(2, "Business name is required."),
   personName: z.string().min(2, "Contact person name is required."),
   email: z.string().email("Invalid email address."),
   mobileNumber1: z.string().min(10, "A valid mobile number is required."),
@@ -33,6 +34,7 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: buyer?.name || "",
+      businessName: buyer?.businessName || "",
       personName: buyer?.personName || "",
       email: buyer?.email || "",
       mobileNumber1: buyer?.mobileNumber1 || "",
@@ -45,6 +47,7 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
     if (buyer) {
         form.reset({
             name: buyer.name,
+            businessName: buyer.businessName,
             personName: buyer.personName,
             email: buyer.email,
             mobileNumber1: buyer.mobileNumber1,
@@ -60,7 +63,7 @@ export function BuyerProfileForm({ buyer, onSave, onCancel }: BuyerProfileFormPr
           <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
             <ScrollArea className="h-[60vh] pr-6">
               <div className="space-y-4">
-                <FormField control={form.control} name="name" render={({ field }) => (
+                <FormField control={form.control} name="businessName" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Business Name</FormLabel>
                         <FormControl><Input placeholder="e.g., City Pharmacy" {...field} /></FormControl>

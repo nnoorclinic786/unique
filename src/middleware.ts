@@ -12,6 +12,17 @@ interface AdminSession {
   role: string;
 }
 
+// Map pathnames to required permissions
+const permissionMap: Record<string, AdminPermission> = {
+  '/admin/dashboard': 'dashboard',
+  '/admin/orders': 'orders',
+  '/admin/drugs': 'drugs',
+  '/admin/drugs/new': 'drugs',
+  '/admin/buyers': 'buyers',
+  '/admin/manage-admins': 'manage_admins',
+  '/admin/settings': 'settings',
+};
+
 // Function to check permission for a given path
 const hasPermissionForPath = (pathname: string, session: AdminSession): boolean => {
     // Super Admins have access to everything.
@@ -21,17 +32,6 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
 
     const userPermissions = session.permissions || [];
     
-    // Map pathnames to required permissions
-    const permissionMap: Record<string, AdminPermission> = {
-      '/admin/dashboard': 'dashboard',
-      '/admin/orders': 'orders',
-      '/admin/drugs': 'drugs',
-      '/admin/drugs/new': 'drugs',
-      '/admin/buyers': 'buyers',
-      '/admin/manage-admins': 'manage_admins',
-      '/admin/settings': 'settings',
-    };
-
     // Allow access to dynamic detail pages if they have the base permission
     if (/^\/admin\/buyers\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('buyers');
