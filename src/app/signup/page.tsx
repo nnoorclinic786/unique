@@ -6,7 +6,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,14 +14,15 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/icons";
-import { useAppContext } from "@/context/app-context";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from 'date-fns';
 import { Textarea } from "@/components/ui/textarea";
 import { FileUp } from "lucide-react";
 import type { Buyer } from "@/lib/types";
 import ClientLayout from "../client-layout";
-import { useFirestore, useUser } from "@/firebase";
+import { useAuth, useFirestore, useUser } from "@/firebase";
+import { useEffect } from "react";
+import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
 
 const formSchema = z.object({
   personName: z.string().min(2, "Person name is required."),
@@ -44,7 +45,16 @@ const formSchema = z.object({
 function SignupPageContent() {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { user } = useUser();
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+
+  useEffect(() => {
+    // When the component mounts and we are not loading, if there's no user,
+    // we initiate an anonymous sign-in.
+    if (!isUserLoading && !user) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [user, isUserLoading, auth]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,7 +83,7 @@ function SignupPageContent() {
         toast({
             variant: "destructive",
             title: "Authentication Error",
-            description: "You must be signed in to create a buyer request.",
+            description: "Could not create a temporary user session. Please refresh and try again.",
         });
         return;
     }
@@ -99,8 +109,9 @@ function SignupPageContent() {
     };
     
     try {
-        const buyerRequestsCollection = collection(firestore, 'buyer_requests');
-        await addDoc(buyerRequestsCollection, { ...newBuyerRequest, id: user.uid });
+        // Use the anonymous user's UID as the document ID for the request
+        const requestDocRef = doc(firestore, 'buyer_requests', user.uid);
+        await setDoc(requestDocRef, { ...newBuyerRequest, id: user.uid });
         
         toast({
           title: "Registration Submitted!",
@@ -311,7 +322,9 @@ function SignupPageContent() {
               </div>
 
 
-              <Button type="submit" className="w-full">Create Account</Button>
+              <Button type="submit" className="w-full" disabled={isUserLoading}>
+                {isUserLoading ? 'Initializing...' : 'Create Account'}
+              </Button>
             </form>
           </Form>
           <div className="mt-6 text-center text-sm">
