@@ -13,7 +13,6 @@ import React, {
 import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
 import {
-  medicines as initialMedicines,
   admins as initialAdmins
 } from '@/lib/data';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
@@ -120,7 +119,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const medicinesCollection = useMemoFirebase(() => firestore ? collection(firestore, 'drugs') : null, [firestore]);
   const { data: medicinesData } = useCollection<Medicine>(medicinesCollection);
-  const medicines = medicinesData || initialMedicines; // Fallback to initial data if needed
+  const medicines = medicinesData || [];
 
   const adminsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'admins') : null, [firestore, isAdminLoggedIn]);
   const { data: adminsData } = useCollection<AdminUser>(adminsCollection);

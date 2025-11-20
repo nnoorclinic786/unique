@@ -139,8 +139,8 @@ service cloud.firestore {
      * @principle Provides public read access for a catalog while centralizing write control to a privileged role.
      */
     match /drugs/{drugId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
+      allow get: if true;
+      allow list: if true;
       allow create: if isAdmin() && request.resource.data.adminId == request.auth.uid;
       allow update: if isExistingAdmin();
       allow delete: if isExistingAdmin();
