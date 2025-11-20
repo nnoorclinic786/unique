@@ -39,7 +39,7 @@ const hasPermissionForPath = (pathname: string, session: AdminSession): boolean 
     if (/^\/admin\/orders\/[^/]+$/.test(pathname)) {
         return userPermissions.includes('orders');
     }
-     if (/^\/admin\/drugs\/[^/]+$/.test(pathname)) {
+     if (/^\/admin\/drugs\/[^/]+$/.test(pathname) && !pathname.endsWith('/new')) {
         return userPermissions.includes('drugs');
     }
 
