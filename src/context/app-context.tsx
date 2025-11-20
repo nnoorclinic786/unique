@@ -75,7 +75,7 @@ interface AppContextType {
 // == CONTEXT CREATION ==
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// == LAZY INITIALIZER FUNCTION ==
+// == HELPER FUNCTION FOR LOCALSTORAGE ==
 function getInitialState<T>(key: string, initialData: T): T {
   if (typeof window !== 'undefined') {
     const item = window.localStorage.getItem(key);
@@ -94,43 +94,51 @@ function getInitialState<T>(key: string, initialData: T): T {
 
 // == PROVIDER COMPONENT ==
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const [hydrated, setHydrated] = useState(false);
 
   // === STATE MANAGEMENT ===
-  const [orders, setOrders] = useState<Order[]>(() => getInitialState('orders', initialOrders));
-  const [allBuyers, setAllBuyers] = useState<Buyer[]>(() => getInitialState('buyers', initialBuyers));
-  const [medicines, setMedicines] = useState<Medicine[]>(() => getInitialState('medicines', initialMedicines));
-  const [settings, setSettings] = useState<Settings>(() => getInitialState('appSettings', { upiId: '' }));
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => getInitialState('cartItems', []));
-  const [admins, setAdmins] = useState<AdminUser[]>(() => getInitialState('admins', initialAdmins));
+  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [allBuyers, setAllBuyers] = useState<Buyer[]>(initialBuyers);
+  const [medicines, setMedicines] = useState<Medicine[]>(initialMedicines);
+  const [settings, setSettings] = useState<Settings>({ upiId: '' });
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
+  
+  // Load state from localStorage on initial client render
+  useEffect(() => {
+    setOrders(getInitialState('orders', initialOrders));
+    setAllBuyers(getInitialState('buyers', initialBuyers));
+    setMedicines(getInitialState('medicines', initialMedicines));
+    setSettings(getInitialState('appSettings', { upiId: '' }));
+    setCartItems(getInitialState('cartItems', []));
+    setAdmins(getInitialState('admins', initialAdmins));
+    setHydrated(true);
+  }, []);
+
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    if (hydrated) localStorage.setItem('orders', JSON.stringify(orders));
+  }, [orders, hydrated]);
+
+  useEffect(() => {
+     if (hydrated) localStorage.setItem('buyers', JSON.stringify(allBuyers));
+  }, [allBuyers, hydrated]);
   
   useEffect(() => {
-    if (isClient) localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders, isClient]);
+    if (hydrated) localStorage.setItem('medicines', JSON.stringify(medicines));
+  }, [medicines, hydrated]);
 
   useEffect(() => {
-     if (isClient) localStorage.setItem('buyers', JSON.stringify(allBuyers));
-  }, [allBuyers, isClient]);
-  
-  useEffect(() => {
-    if (isClient) localStorage.setItem('medicines', JSON.stringify(medicines));
-  }, [medicines, isClient]);
+    if (hydrated) localStorage.setItem('appSettings', JSON.stringify(settings));
+  }, [settings, hydrated]);
 
   useEffect(() => {
-    if (isClient) localStorage.setItem('appSettings', JSON.stringify(settings));
-  }, [settings, isClient]);
+    if (hydrated) localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems, hydrated]);
 
   useEffect(() => {
-    if (isClient) localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems, isClient]);
-
-  useEffect(() => {
-    if (isClient) localStorage.setItem('admins', JSON.stringify(admins));
-  }, [admins, isClient]);
+    if (hydrated) localStorage.setItem('admins', JSON.stringify(admins));
+  }, [admins, hydrated]);
 
 
   // === ORDERS LOGIC ===
@@ -358,8 +366,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toggleAdminStatus,
   };
 
-  if (!isClient) {
-    // Render nothing or a loading spinner on the server
+  if (!hydrated) {
+    // Render nothing or a loading spinner on the server or before hydration
     return null;
   }
 
@@ -374,4 +382,3 @@ export function useAppContext() {
   }
   return context;
 }
- 
