@@ -3,10 +3,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword }from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,9 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileUp } from "lucide-react";
 import type { Buyer } from "@/lib/types";
 import ClientLayout from "../client-layout";
-import { useAuth, useFirestore, useUser } from "@/firebase";
-import { useEffect } from "react";
-import { initiateAnonymousSignIn } from "@/firebase/non-blocking-login";
+import { useAuth, useFirestore } from "@/firebase";
 
 const formSchema = z.object({
   personName: z.string().min(2, "Person name is required."),
@@ -44,17 +44,9 @@ const formSchema = z.object({
 
 function SignupPageContent() {
   const { toast } = useToast();
+  const router = useRouter();
   const firestore = useFirestore();
   const auth = useAuth();
-  const { user, isUserLoading } = useUser();
-
-  useEffect(() => {
-    // When the component mounts and we are not loading, if there's no user,
-    // we initiate an anonymous sign-in.
-    if (!isUserLoading && !user) {
-      initiateAnonymousSignIn(auth);
-    }
-  }, [user, isUserLoading, auth]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,37 +71,36 @@ function SignupPageContent() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) {
-        toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "Could not create a temporary user session. Please refresh and try again.",
-        });
-        return;
-    }
-
-    const addressId = `addr-${Date.now()}`;
-    const newBuyerRequest: Omit<Buyer, 'id'> = {
-      name: values.businessName,
-      personName: values.personName,
-      businessName: values.businessName,
-      mobileNumber1: values.mobileNumber1,
-      mobileNumber2: values.mobileNumber2,
-      email: values.email,
-      password: values.password,
-      permanentAddress: values.permanentAddress,
-      addresses: [{ id: addressId, name: 'Primary', fullAddress: values.permanentAddress }],
-      defaultAddressId: addressId,
-      businessLocation: values.businessLocation,
-      type: values.type,
-      doctorRegNumber: values.doctorRegNumber,
-      gstNumber: values.gstNumber,
-      registeredOn: format(new Date(), 'yyyy-MM-dd'),
-      status: 'Pending' as const,
-    };
-    
     try {
-        // Use the anonymous user's UID as the document ID for the request
+        // Step 1: Create the user account in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+
+        if (!user) {
+            throw new Error("User creation failed.");
+        }
+
+        // Step 2: Create the buyer request document in Firestore with the new user's UID
+        const addressId = `addr-${Date.now()}`;
+        const newBuyerRequest: Omit<Buyer, 'id'> = {
+          name: values.businessName,
+          personName: values.personName,
+          businessName: values.businessName,
+          mobileNumber1: values.mobileNumber1,
+          mobileNumber2: values.mobileNumber2,
+          email: values.email,
+          password: values.password, // Storing password is not recommended in production
+          permanentAddress: values.permanentAddress,
+          addresses: [{ id: addressId, name: 'Primary', fullAddress: values.permanentAddress }],
+          defaultAddressId: addressId,
+          businessLocation: values.businessLocation,
+          type: values.type,
+          doctorRegNumber: values.doctorRegNumber,
+          gstNumber: values.gstNumber,
+          registeredOn: format(new Date(), 'yyyy-MM-dd'),
+          status: 'Pending' as const,
+        };
+
         const requestDocRef = doc(firestore, 'buyer_requests', user.uid);
         await setDoc(requestDocRef, { ...newBuyerRequest, id: user.uid });
         
@@ -118,12 +109,18 @@ function SignupPageContent() {
           description: "Your registration is under review. We will notify you upon approval.",
         });
         form.reset();
-    } catch (error) {
-        console.error("Error submitting buyer request:", error);
+        router.push('/login');
+
+    } catch (error: any) {
+        console.error("Error during signup:", error);
+        let errorMessage = "Could not submit your registration. Please try again.";
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = "This email address is already in use. Please use a different email or log in.";
+        }
         toast({
             variant: "destructive",
             title: "Submission Failed",
-            description: "Could not submit your registration. Please try again.",
+            description: errorMessage,
         });
     }
   }
@@ -322,8 +319,8 @@ function SignupPageContent() {
               </div>
 
 
-              <Button type="submit" className="w-full" disabled={isUserLoading}>
-                {isUserLoading ? 'Initializing...' : 'Create Account'}
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Submitting...' : 'Create Account'}
               </Button>
             </form>
           </Form>

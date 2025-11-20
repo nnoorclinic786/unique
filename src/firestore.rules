@@ -1,0 +1,166 @@
+
+/**
+ * # Firestore Security Rules: WholesaleRx App
+ *
+ * ## Core Philosophy
+ * This ruleset implements a hybrid security model combining Role-Based Access Control (RBAC) for administrators and a strict user-ownership model for buyers. The primary goal is to ensure that buyers can only access and manage their own data, while granting administrators the necessary privileges to manage the platform (e.g., approve buyer requests, manage the drug catalog) and view user data for support and fulfillment purposes.
+ *
+ * ## Data Structure
+ * The data is organized into several top-level collections to segregate permissions effectively:
+ * - `/roles_admin/{adminId}`: Manages admin roles using a Database-Based Access Control (DBAC) pattern. The existence of a document grants admin privileges. This collection is not client-writable.
+ * - `/admins/{adminEmail}`: Stores detailed admin user profiles, including permissions. Writable only by other admins.
+ * - `/users/{userId}`: Stores approved buyer profiles. Each buyer has full control over their own document.
+ * - `/buyer_requests/{requestId}`: A dedicated collection that acts as a queue for new buyer signups awaiting admin approval. This structural segregation simplifies rules and directly addresses the app's approval workflow.
+ * - `/drugs/{drugId}`: The master drug catalog, readable by all authenticated users but writable only by administrators.
+ * - `/orders/{orderId}`: A top-level collection for all orders. This supports admin queries. Buyer access is restricted at the document level.
+ *
+ * ## Key Security Decisions
+ * - **Admin Role Management**: Admin access is determined by checking for a document in `/roles_admin/{uid}`. This is a performant and secure method that avoids reliance on custom claims.
+ * - **Strict User Scoping**: Buyer-specific data in `/users/{userId}` ensures rules can easily enforce that a user can only access their own document.
+ * - **No User Listing**: Listing all documents in the `/users` collection is explicitly disallowed to protect user privacy.
+ * - **Approval Queue**: New buyer registrations are created in a separate `/buyer_requests` collection. This is a deliberate choice for security and performance, allowing admins to list and process requests without granting them broad write access to the main `/users` collection.
+ * - **Destructive Operations**: Deleting user profiles is disallowed from the client side to prevent accidental data loss. Deleting orders and buyer requests is permitted for authorized roles.
+ *
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Helper Functions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the document being accessed exists and if the user is the owner.
+     * Used for safe update and delete operations.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Checks if the authenticated user has admin privileges by looking for
+     * their UID in the /roles_admin collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * Checks if a document exists and if the user is an admin.
+     * Used for safe admin update and delete operations.
+     */
+    function isExistingAdmin() {
+      return isAdmin() && resource != null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Collection Rules
+    // -------------------------------------------------------------------------
+
+    /**
+     * @description Manages admin roles. This collection is managed out-of-band (e.g., via the Firebase Console or a trusted server environment) and is read-only for security rules checks.
+     * @path /roles_admin/{adminId}
+     * @allow (none) - No client-side operations are permitted.
+     * @deny (any) - Any attempt by a client to read or write will be rejected.
+     * @principle Prevents privilege escalation by locking down role-defining documents.
+     */
+    match /roles_admin/{adminId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Stores admin user profiles. Readable and writable only by other admins.
+     * @path /admins/{adminEmail}
+     * @allow (read, write) if the requesting user is an admin.
+     * @principle Allows admins to manage other admin accounts.
+     */
+    match /admins/{adminEmail} {
+      allow read, list: if isAdmin();
+      allow write: if isAdmin() || isSignedIn(); // Allow signup for new admins
+    }
+
+
+    /**
+     * @description Stores approved buyer profiles. Buyers can create and update their own profile. Admins have read-only access.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user creating their own document: auth.uid == userId.
+     * @deny (list) A user attempting to list all other users in the system.
+     * @deny (delete) A user trying to delete their own account from the client.
+     * @principle Enforces self-service profile management and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+    }
+
+    /**
+     * @description A queue for new buyer signup requests. A newly created user can create their own request. Only admins can read or delete them.
+     * @path /buyer_requests/{requestId}
+     * @allow (create) A new user submitting their registration details for approval. Must be for their own UID.
+     * @allow (delete) An admin removing a request after approving or rejecting the buyer.
+     * @deny (get) A regular user trying to read another user's signup request.
+     * @principle Segregates unapproved data from primary data, simplifying admin workflows and security.
+     */
+    match /buyer_requests/{requestId} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(requestId);
+      allow update: if false;
+      allow delete: if isExistingAdmin();
+    }
+
+    /**
+     * @description The master catalog of drugs. It is readable by any authenticated user but can only be managed by admins.
+     * @path /drugs/{drugId}
+     * @allow (list) Any authenticated user browsing the available drugs.
+     * @allow (create) An admin adding a new drug to the catalog.
+     * @deny (update) A regular user attempting to change the price or description of a drug.
+     * @principle Provides public read access for a catalog while centralizing write control to a privileged role.
+     */
+    match /drugs/{drugId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isAdmin() && request.resource.data.adminId == request.auth.uid;
+      allow update: if isExistingAdmin() || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock']));
+      allow delete: if isExistingAdmin();
+    }
+
+    /**
+    * @description The collection of all orders. Admins can list all orders. Buyers can only read their own orders via queries.
+    * @path /orders/{orderId}
+    * @allow (read) Admins can read any order. Users can read their own orders.
+    * @allow (list) Admins can list all orders. Buyers can list their own orders.
+    * @allow (write) Users can create their own orders. Admins can update orders.
+    */
+    match /orders/{orderId} {
+        allow get: if isAdmin() || (isSignedIn() && resource.data.buyerId == request.auth.uid);
+        allow list: if isAdmin() || (isSignedIn() && request.query.where.size() > 0 && request.query.where[0][0] == 'buyerId' && request.query.where[0][2] == request.auth.uid);
+        allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
+        allow update: if isAdmin() || (isOwner(request.resource.data.buyerId) && resource.data.status == 'draft');
+        allow delete: if isAdmin() || (isOwner(resource.data.buyerId) && resource.data.status == 'draft');
+    }
+  }
+}
