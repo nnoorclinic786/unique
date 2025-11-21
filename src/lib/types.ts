@@ -5,24 +5,32 @@ export type Address = {
   fullAddress: string;
 }
 
-export type Medicine = {
-  id: string;
-  name: string;
-  description: string;
+export type MedicineBatch = {
+  id: string; // Will be batch number or a unique ID
+  batchNumber: string;
   price: number;
   stock: number;
+  expiryDate: string;
+  manufacturingDate?: string;
+  priceUnit: 'strip' | 'piece' | 'bottle' | 'box';
+  stockUnit: 'strip' | 'piece' | 'bottle' | 'box';
+}
+
+export type Medicine = {
+  id: string; // Represents the core product
+  name: string;
+  description: string;
   category: string;
   imageUrl: string;
   adminId: string;
   hsnCode?: string;
-  priceUnit?: 'strip' | 'piece' | 'bottle' | 'box';
-  stockUnit?: 'strip' | 'piece' | 'bottle' | 'box';
   manufacturingCompany?: string;
   marketingCompany?: string;
   imageSource?: string;
-  batchNumber?: string;
-  expiryDate?: string;
-  manufacturingDate?: string;
+  // Aggregated/default values - Batches will have specific overrides
+  totalStock: number;
+  defaultPrice: number;
+  batches: MedicineBatch[];
 };
 
 export type OrderItem = {
@@ -30,6 +38,7 @@ export type OrderItem = {
     name: string;
     quantity: number;
     price: number;
+    batchNumber: string; // Track which batch was ordered
 }
 
 export type Order = {
@@ -74,3 +83,4 @@ export type AdminUser = {
   status: 'Approved' | 'Pending' | 'Disabled';
   password?: string; // Password should be optional as we won't always have it
 };
+

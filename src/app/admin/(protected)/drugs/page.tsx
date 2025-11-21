@@ -75,12 +75,9 @@ export default function AdminDrugsPage() {
               </TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Manufacturing Co.</TableHead>
-              <TableHead>Marketing Co.</TableHead>
-              <TableHead className="hidden md:table-cell">Stock</TableHead>
-              <TableHead className="hidden md:table-cell">Price</TableHead>
-              <TableHead className="hidden md:table-cell">Batch No.</TableHead>
-              <TableHead className="hidden md:table-cell">Mfg. Date</TableHead>
-              <TableHead className="hidden md:table-cell">Expiry</TableHead>
+              <TableHead className="hidden md:table-cell">Total Stock</TableHead>
+              <TableHead className="hidden md:table-cell">Batches</TableHead>
+              <TableHead className="hidden md:table-cell">Default Price</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -102,13 +99,10 @@ export default function AdminDrugsPage() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">{medicine.name}</TableCell>
-                  <TableCell className="hidden md:table-cell">{medicine.manufacturingCompany || 'N/A'}</TableCell>
-                  <TableCell className="hidden md:table-cell">{medicine.marketingCompany || 'N/A'}</TableCell>
-                  <TableCell className="hidden md:table-cell">{medicine.stock}</TableCell>
-                  <TableCell className="hidden md:table-cell">₹{medicine.price.toFixed(2)}</TableCell>
-                   <TableCell className="hidden md:table-cell">{medicine.batchNumber || 'N/A'}</TableCell>
-                  <TableCell className="hidden md:table-cell">{medicine.manufacturingDate || 'N/A'}</TableCell>
-                  <TableCell className="hidden md:table-cell">{medicine.expiryDate || 'N/A'}</TableCell>
+                  <TableCell>{medicine.manufacturingCompany || 'N/A'}</TableCell>
+                  <TableCell className="hidden md:table-cell">{medicine.totalStock}</TableCell>
+                  <TableCell className="hidden md:table-cell">{medicine.batches.length}</TableCell>
+                  <TableCell className="hidden md:table-cell">₹{medicine.defaultPrice.toFixed(2)}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
