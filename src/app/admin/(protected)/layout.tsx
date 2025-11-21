@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import AdminClientLayout from './client-layout';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 
-export default function ProtectedAdminLayout({
+export default async function ProtectedAdminLayout({
   children,
 }: {
   children: React.ReactNode;
