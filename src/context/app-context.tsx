@@ -122,7 +122,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
-  const allBuyers = allBuyersData || [];
   
   const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
   const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
@@ -137,7 +136,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const initialAdmins: AdminUser[] = [
     {
-      email: 'uniquemedicare@gmail.com',
+      email: 'uniquemedicare786@gmail.com',
       name: 'Unique Medicare',
       role: 'Super Admin',
       permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'],
@@ -146,6 +145,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
   ];
 
+  const allBuyers = allBuyersData || [];
   const admins = adminsData || initialAdmins;
 
 
