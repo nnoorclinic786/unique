@@ -36,19 +36,21 @@ export default function AdminForgotPasswordPage() {
     
     try {
         await sendPasswordResetEmail(auth, email);
+        // Always show a generic success message to prevent email enumeration.
         toast({
             title: "Reset Link Sent",
             description: `If an account with the email ${email} exists, a password reset link has been sent. Please check your inbox (and spam folder).`,
             duration: 5000,
         });
     } catch (error: any) {
-        // For security, we show a generic success message even on error (e.g., user not found)
-        // to prevent email enumeration attacks.
+        // For security, we show the same generic success message even on error (e.g., user not found).
+        // This prevents attackers from figuring out which emails are registered.
         toast({
             title: "Reset Link Sent",
             description: `If an account with the email ${email} exists, a password reset link has been sent. Please check your inbox (and spam folder).`,
             duration: 5000,
         });
+        // We log the actual error to the console for debugging purposes during development.
         console.error("Forgot password error:", error);
     } finally {
         setIsLoading(false);
