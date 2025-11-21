@@ -10,28 +10,40 @@ import { Logo } from "@/components/icons";
 import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
+import { useAuth } from "@/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export default function AdminForgotPasswordPage() {
   const { toast } = useToast();
+  const auth = useAuth();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
+    const email = formData.get("email") as string;
 
-    // In a real app, you would call your backend to send a reset email.
-    // For now, we'll just show a confirmation toast.
-    if (email) {
-      toast({
-        title: "Reset Link Sent",
-        description: `If an admin account with the email ${email} exists, a password reset link has been sent.`,
-      });
-    } else {
+    if (!email) {
         toast({
             variant: "destructive",
             title: "Error",
             description: "Please enter your email address.",
         });
+        return;
+    }
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        toast({
+          title: "Reset Link Sent",
+          description: `If an admin account with the email ${email} exists, a password reset link has been sent.`,
+        });
+    } catch (error: any) {
+        // For security, we show the same message even on error (e.g., user not found)
+        toast({
+          title: "Reset Link Sent",
+          description: `If an admin account with the email ${email} exists, a password reset link has been sent.`,
+        });
+        console.error("Admin forgot password error:", error);
     }
   };
 
