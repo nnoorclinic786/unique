@@ -5,7 +5,7 @@ import AdminClientLayout from './client-layout';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 import { redirect } from 'next/navigation';
 
-// This is now an async Server Component
+// This is now a correctly implemented async Server Component
 export default async function ProtectedAdminLayout({
   children,
 }: {
