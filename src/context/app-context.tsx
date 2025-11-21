@@ -45,7 +45,7 @@ interface AppContextType {
 
   // Medicines
   medicines: Medicine[];
-  addMedicine: (medicine: Omit<Medicine, 'id'>) => Promise<any>;
+  addMedicine: (medicine: Omit<Medicine, 'id' | 'adminId'>) => Promise<any>;
   updateMedicine: (medicine: Medicine) => void;
   deleteMedicine: (medicineId: string) => void;
 
@@ -302,9 +302,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
-  const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id'>) => {
+  const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id' | 'adminId'>) => {
     if (!firestore || !user) return Promise.reject("Firestore or user not available");
     const medicinesCol = collection(firestore, 'drugs');
+    // Ensure adminId is added to satisfy security rules
     return addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
   }, [firestore, user]);
 

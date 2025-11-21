@@ -13,7 +13,7 @@ export type Medicine = {
   stock: number;
   category: string;
   imageUrl: string;
-  adminId?: string;
+  adminId: string;
   hsnCode?: string;
   priceUnit?: 'strip' | 'piece' | 'bottle' | 'box';
   stockUnit?: 'strip' | 'piece' | 'bottle' | 'box';
