@@ -131,7 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
   const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
   
-  const medicinesCollection = useMemoFirebase(() => firestore ? collection(firestore, 'drugs') : null, [firestore]);
+  const medicinesCollection = useMemoFirebase(() => (firestore && (user || isAdminLoggedIn)) ? collection(firestore, 'drugs') : null, [firestore, user, isAdminLoggedIn]);
   const { data: medicinesData } = useCollection<Medicine>(medicinesCollection);
   
   const adminsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'admins') : null, [firestore, isAdminLoggedIn]);
