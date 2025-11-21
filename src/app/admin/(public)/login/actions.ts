@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { initializeApp, getApps, App } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import type { AdminUser } from "@/lib/types";
 
 // Initialize Firebase Admin SDK if it hasn't been already.
 function getFirebaseAdminApp(): App {
@@ -28,36 +29,38 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
     return { error: "Authentication details are missing." };
   }
 
-  let user = {
-      name: '',
-      email: email,
-      status: ''
-  };
+  let user: { name: string; email: string; status: string; role: string; } | null = null;
   
   // Check if the user is the Super Admin
   if (email === SUPER_ADMIN_EMAIL) {
-      user.name = 'Unique Medicare';
-      user.status = 'Approved';
+      user = {
+          name: 'Unique Medicare',
+          email: email,
+          status: 'Approved',
+          role: 'Super Admin',
+      };
   } else {
       // Fetch regular admin user data from Firestore using the UID
       const adminDocRef = adminDb.collection('admins').doc(uid);
       const adminDoc = await adminDocRef.get();
 
       if (!adminDoc.exists) {
-        return { error: "Admin record not found in database." };
+        // This case should be rare if signup is the only entry point, but good to handle.
+        return { error: "Admin record not found in the database. Please contact support." };
       }
       
-      const adminData = adminDoc.data();
-      if (!adminData) {
-        return { error: "Failed to retrieve admin data."};
-      }
-      user.name = adminData.name;
-      user.status = adminData.status;
+      const adminData = adminDoc.data() as AdminUser;
+      user = {
+          name: adminData.name,
+          email: adminData.email,
+          status: adminData.status,
+          role: adminData.role || 'Admin',
+      };
   }
   
   // Check user status
   if (user.status !== 'Approved') {
-      return { error: `Your account is currently ${user.status}. Please contact the Super Admin.` };
+      return { error: `Your account is currently ${user.status}. Please contact the Super Admin for approval.` };
   }
 
   // Create session data
@@ -66,6 +69,7 @@ export async function login(formData: FormData): Promise<{ error?: string }> {
       email: user.email,
       name: user.name,
       uid: uid,
+      role: user.role, // Add role to session for middleware
   };
 
   // Set the cookie
