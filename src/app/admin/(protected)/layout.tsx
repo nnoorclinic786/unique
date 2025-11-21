@@ -13,6 +13,7 @@ function getFirebaseAdminApp(): App {
     if (getApps().length) {
         return getApps()[0];
     }
+    // This should be configured with service account credentials in a real environment
     return initializeApp();
 }
 
@@ -22,16 +23,19 @@ const db = getFirestore(app);
 const SUPER_ADMIN_EMAIL = 'uniquemedicare786@gmail.com';
 const ALL_PERMISSIONS = ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'];
 
-async function getAdminPermissions(uid: string, email: string): Promise<string[]> {
+async function getAdminPermissions(email: string): Promise<string[]> {
     if (email === SUPER_ADMIN_EMAIL) {
         return ALL_PERMISSIONS;
     }
 
     try {
-        const adminDocRef = db.collection('admins').doc(uid);
-        const adminDoc = await adminDocRef.get();
+        // Use a query to find the admin by their email address
+        const adminsRef = db.collection('admins');
+        const q = adminsRef.where('email', '==', email).limit(1);
+        const querySnapshot = await q.get();
 
-        if (adminDoc.exists) {
+        if (!querySnapshot.empty) {
+            const adminDoc = querySnapshot.docs[0];
             const adminData = adminDoc.data() as AdminUser;
             // Ensure the user is approved and return their permissions
             if (adminData.status === 'Approved') {
@@ -65,12 +69,12 @@ export default async function ProtectedAdminLayout({
   const session = JSON.parse(sessionCookie.value);
 
   // If for any reason the session is invalid, redirect.
-  if (!session?.isLoggedIn || !session.uid) {
+  if (!session?.isLoggedIn || !session.uid || !session.email) {
      redirect('/admin/login');
   }
   
-  // Fetch the user's permissions on the server
-  const permissions = await getAdminPermissions(session.uid, session.email);
+  // Fetch the user's permissions on the server using their email
+  const permissions = await getAdminPermissions(session.email);
 
   // If the user has no permissions, they shouldn't access any protected route.
   // We can redirect them to a specific page or just the login page.
