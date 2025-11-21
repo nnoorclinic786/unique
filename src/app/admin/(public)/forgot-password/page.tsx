@@ -4,48 +4,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/icons";
-import { ChevronLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import React from "react";
-import { useAuth } from "@/firebase";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { ChevronLeft, Mail } from "lucide-react";
+import { useAppContext } from "@/context/app-context";
 
 export default function AdminForgotPasswordPage() {
-  const { toast } = useToast();
-  const auth = useAuth();
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const email = formData.get("email") as string;
-
-    if (!email) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Please enter your email address.",
-        });
-        return;
-    }
-
-    try {
-        await sendPasswordResetEmail(auth, email);
-        toast({
-          title: "Reset Link Sent",
-          description: `If an admin account with the email ${email} exists, a password reset link has been sent.`,
-        });
-    } catch (error: any) {
-        // For security, we show the same message even on error (e.g., user not found)
-        toast({
-          title: "Reset Link Sent",
-          description: `If an admin account with the email ${email} exists, a password reset link has been sent.`,
-        });
-        console.error("Admin forgot password error:", error);
-    }
-  };
+  const { admins } = useAppContext();
+  const superAdmin = admins.find(a => a.role === 'Super Admin');
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -58,33 +23,29 @@ export default function AdminForgotPasswordPage() {
           </div>
           <CardTitle className="font-headline text-2xl">Forgot Admin Password?</CardTitle>
           <CardDescription>
-            Enter your admin email and we'll send you a reset link.
+            To reset your password, please contact the Super Admin.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form className="grid gap-4" onSubmit={handleSubmit}>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="admin@example.com"
-                required
-              />
+        <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">
+                For security reasons, password resets must be handled manually by the Super Admin.
+            </p>
+            {superAdmin && (
+                <div className="flex items-center justify-center gap-2 rounded-md border bg-muted/50 p-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <a href={`mailto:${superAdmin.email}`} className="font-medium text-primary hover:underline">
+                        {superAdmin.email}
+                    </a>
+                </div>
+            )}
+            <div className="mt-4 text-center">
+                <Button variant="link" asChild>
+                    <Link href="/admin/login">
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        Back to Admin Login
+                    </Link>
+                </Button>
             </div>
-            <Button type="submit" className="w-full">
-              Send Reset Link
-            </Button>
-          </form>
-          <div className="mt-4 text-center">
-            <Button variant="link" asChild>
-                <Link href="/admin/login">
-                    <ChevronLeft className="mr-2 h-4 w-4" />
-                    Back to Admin Login
-                </Link>
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>
