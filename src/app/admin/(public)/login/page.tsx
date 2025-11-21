@@ -11,23 +11,56 @@ import { Logo } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import { login } from "./actions";
 import { Eye, EyeOff } from "lucide-react";
-import { useAppContext } from "@/context/app-context";
+import { useAuth } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
-  const { admins } = useAppContext();
+  const auth = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setIsLoading(true);
+
     const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    // Special case for static Super Admin
+    if (email === 'uniquemedicare786@gmail.com' && password === 'uniquemedicare@123#') {
+        const serverFormData = new FormData();
+        serverFormData.append('email', email);
+        serverFormData.append('uid', 'super-admin-uid-placeholder');
+        try {
+            await login(serverFormData);
+            // Redirect will be handled by the server action
+        } catch (e: any) {
+            if (e.message !== 'NEXT_REDIRECT') {
+                setError(e.message || "An unexpected error occurred.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+        return;
+    }
     
     try {
-      // The login action will automatically redirect on success by throwing an error.
-      // If it returns a value, it means there was an error.
-      const result = await login(formData, admins);
+      // Step 1: Sign in with Firebase Auth on the client
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Step 2: If sign-in is successful, create a new FormData and call the server action
+      // to set the secure cookie.
+      const serverFormData = new FormData();
+      serverFormData.append('email', user.email || "");
+      serverFormData.append('uid', user.uid);
+      
+      const result = await login(serverFormData);
+
       if (result?.error) {
         setError(result.error);
         toast({
@@ -36,17 +69,36 @@ export default function AdminLoginPage() {
           description: result.error,
         });
       }
+      // On success, the server action will handle the redirect.
+
     } catch (e: any) {
-      // This will catch the NEXT_REDIRECT error and allow the redirect to happen.
-      // We can also handle other unexpected errors here.
+      // This catches errors from both Firebase Auth signIn and the server action
+      let errorMessage = "An unexpected error occurred.";
+      if (e.code) { // Firebase error
+        switch(e.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+          case 'auth/invalid-credential':
+            errorMessage = "Invalid email or password.";
+            break;
+          default:
+            errorMessage = e.message;
+            break;
+        }
+      } else if (e.message !== 'NEXT_REDIRECT') {
+        errorMessage = e.message;
+      }
+      
       if (e.message !== 'NEXT_REDIRECT') {
-        setError("An unexpected error occurred.");
-         toast({
+        setError(errorMessage);
+        toast({
           variant: "destructive",
           title: "Login Failed",
-          description: "An unexpected error occurred.",
+          description: errorMessage,
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -101,8 +153,8 @@ export default function AdminLoginPage() {
               </div>
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
            <div className="mt-4 text-center text-sm">
