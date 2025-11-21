@@ -124,7 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const ordersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'orders') : null, [firestore, isAdminLoggedIn]);
   const { data: ordersData } = useCollection<Order>(ordersCollection);
   
-  const buyersCollection = useMemoFirebase(() => (firestore) ? collection(firestore, 'users') : null, [firestore]);
+  const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
   
   const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
@@ -151,7 +151,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const allBuyers = allBuyersData || [];
   const pendingBuyers = pendingBuyersData || [];
   const medicines = medicinesData || [];
-  const admins = adminsData || initialAdmins;
+  const admins = adminsData ? [...adminsData, ...initialAdmins.filter(ia => !adminsData.find(ad => ad.email === ia.email))] : initialAdmins;
   
 
   // Load non-Firestore state from localStorage on initial client render
