@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { MedicineCard } from '@/components/medicine-card';
-import { useAppContext } from '@/context/app-context';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Medicine } from '@/lib/types';
@@ -17,14 +16,14 @@ function MedicinesPageContent() {
   const firestore = useFirestore();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // IMPORTANT: Only create the query when the user is authenticated.
+  // This query is now memoized and will only be created when the user is logged in.
+  // If the user is not logged in, it will be null, and useCollection will not run.
   const medicinesQuery = useMemoFirebase(() => {
-    // If the user isn't logged in, or we're still checking, don't create the query.
     if (!firestore || !user) return null;
     return collection(firestore, 'drugs');
   }, [firestore, user]);
 
-  // The useCollection hook will now wait until medicinesQuery is not null.
+  // useCollection will wait until medicinesQuery is not null.
   const { data: medicines, isLoading: medicinesLoading } = useCollection<Medicine>(medicinesQuery);
 
   const filteredMedicines = medicines?.filter(medicine =>
@@ -55,7 +54,7 @@ function MedicinesPageContent() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="flex flex-col space-y-3">
-                        <Skeleton className="h-[125px] w-full rounded-xl" />
+                        <Skeleton className="h-[200px] w-full rounded-xl" />
                         <div className="space-y-2">
                             <Skeleton className="h-4 w-[200px]" />
                             <Skeleton className="h-4 w-[150px]" />
@@ -64,16 +63,25 @@ function MedicinesPageContent() {
                 ))}
             </div>
         ) : !user ? (
-            <div className="text-center py-16">
-                <h2 className="text-xl font-semibold">Please log in</h2>
-                <p className="text-muted-foreground">You need to be logged in to view our medicine catalog.</p>
+            <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                <h2 className="text-xl font-semibold text-foreground">Please Log In</h2>
+                <p>You need to be logged in to view our medicine catalog.</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredMedicines.map((medicine) => (
-                <MedicineCard key={medicine.id} medicine={medicine} />
-            ))}
-            </div>
+            <>
+              {filteredMedicines.length > 0 ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {filteredMedicines.map((medicine) => (
+                      <MedicineCard key={medicine.id} medicine={medicine} />
+                  ))}
+                  </div>
+              ) : (
+                 <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                    <h2 className="text-xl font-semibold text-foreground">No Medicines Found</h2>
+                    <p>Your search for "{searchQuery}" did not match any medicines.</p>
+                </div>
+              )}
+            </>
         )}
 
       </div>
