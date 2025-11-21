@@ -1,310 +1,120 @@
 {
   "entities": {
-    "Admin": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Admin",
+    "SuperAdmin": {
+      "title": "Super Admin",
+      "description": "Represents a Super Admin with complete control over the platform.",
       "type": "object",
-      "description": "Represents an administrator within the WholesaleRx application.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Admin entity."
+        "id": { "type": "string", "description": "Unique identifier for the Super Admin." },
+        "email": { "type": "string", "format": "email", "description": "Email address of the Super Admin." },
+        "name": { "type": "string", "description": "Name of the Super Admin." }
+      },
+      "required": ["id", "email", "name"]
+    },
+    "Worker": {
+      "title": "Worker",
+      "description": "Represents a worker with specific roles like Pharmacist, Stock Manager, or Delivery Person.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the Worker." },
+        "email": { "type": "string", "format": "email", "description": "Email address of the Worker." },
+        "name": { "type": "string", "description": "Name of the Worker." },
+        "role": { 
+          "type": "string", 
+          "description": "The role of the worker.",
+          "enum": ["Pharmacist", "Stock Manager", "Delivery Person"]
         },
-        "mobileNumber": {
-          "type": "string",
-          "description": "Admin's mobile phone number."
-        },
-        "email": {
-          "type": "string",
-          "description": "Admin's email address.",
-          "format": "email"
-        },
-        "gstNumber": {
-          "type": "string",
-          "description": "Admin's GST (Goods and Services Tax) number."
-        },
-        "address": {
-          "type": "string",
-          "description": "Admin's business address."
+        "permissions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "A list of permissions assigned to this worker role."
         }
       },
-      "required": [
-        "id",
-        "mobileNumber",
-        "email",
-        "gstNumber",
-        "address"
-      ]
+      "required": ["id", "email", "name", "role", "permissions"]
     },
     "Buyer": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Buyer",
+      "description": "Represents a customer who purchases medicine.",
       "type": "object",
-      "description": "Represents a buyer (retail chemist, doctor, hospital, or clinic) in the WholesaleRx application.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Buyer entity."
-        },
-        "mobileNumber": {
-          "type": "string",
-          "description": "Buyer's mobile phone number."
-        },
-        "email": {
-          "type": "string",
-          "description": "Buyer's email address.",
-          "format": "email"
-        },
-        "drugsRegistration": {
-          "type": "string",
-          "description": "Buyer's drug registration details/number."
-        },
-        "registeredPractitionerRegistration": {
-          "type": "string",
-          "description": "Buyer's registered practitioner registration details/number, if applicable."
-        },
-        "gstNumber": {
-          "type": "string",
-          "description": "Buyer's GST (Goods and Services Tax) number."
-        },
-        "address": {
-          "type": "string",
-          "description": "Buyer's delivery address."
-        }
+        "id": { "type": "string", "description": "Unique identifier for the Buyer." },
+        "email": { "type": "string", "format": "email", "description": "Email address of the Buyer." },
+        "name": { "type": "string", "description": "Name of the Buyer." }
       },
-      "required": [
-        "id",
-        "mobileNumber",
-        "email",
-        "drugsRegistration",
-        "gstNumber",
-        "address"
-      ]
+      "required": ["id", "email", "name"]
     },
-    "Drug": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Drug",
+    "Medicine": {
+      "title": "Medicine",
+      "description": "Represents a medicine in the catalog.",
       "type": "object",
-      "description": "Represents a drug available for wholesale in the WholesaleRx application.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Drug entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the drug."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the drug."
-        },
-        "adminId": {
-          "type": "string",
-          "description": "Reference to Admin. (Relationship: Admin 1:N Drug)"
-        }
+        "name": { "type": "string", "description": "Name of the medicine." },
+        "description": { "type": "string", "description": "Detailed description of the medicine." },
+        "dosage": { "type": "string", "description": "Dosage information (e.g., 500mg)." },
+        "price": { "type": "number", "description": "Price of the medicine." },
+        "stockLevel": { "type": "number", "description": "Current stock level." },
+        "manufacturer": { "type": "string", "description": "Manufacturer of the medicine." },
+        "prescriptionRequired": { "type": "boolean", "description": "Indicates if a prescription is required." },
+        "category": { "type": "string", "description": "Medicine category (e.g., Antibiotic, Analgesic)." },
+        "activeIngredient": { "type": "string", "description": "The primary active ingredient." }
       },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "adminId"
-      ]
+      "required": ["name", "price", "stockLevel", "manufacturer", "prescriptionRequired"]
     },
     "Order": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Order",
-      "type": "object",
-      "description": "Represents an order placed by a buyer in the WholesaleRx application.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Order entity."
+        "title": "Order",
+        "description": "Represents an order placed by a Buyer.",
+        "type": "object",
+        "properties": {
+            "buyerId": { "type": "string", "description": "The ID of the buyer who placed the order." },
+            "status": {
+                "type": "string",
+                "enum": ["Pending Verification", "Verified", "Awaiting Payment", "Paid", "Processing", "In Transit", "Delivered", "Cancelled"],
+                "description": "The current status of the order."
+            },
+            "orderDate": { "type": "string", "format": "date-time", "description": "The date and time the order was placed." },
+            "totalAmount": { "type": "number", "description": "The total amount of the order." },
+            "prescriptionImageUrl": { "type": "string", "description": "URL of the uploaded prescription image." },
+            "prescriptionPatientName": { "type": "string", "description": "Patient's name on the prescription." },
+            "prescriptionDoctorName": { "type": "string", "description": "Doctor's name on the prescription." },
+            "prescriptionDate": { "type": "string", "format": "date", "description": "Date the prescription was issued." }
         },
-        "buyerId": {
-          "type": "string",
-          "description": "Reference to Buyer. (Relationship: Buyer 1:N Order)"
-        },
-        "orderDate": {
-          "type": "string",
-          "description": "Date the order was placed.",
-          "format": "date-time"
-        },
-        "totalAmount": {
-          "type": "number",
-          "description": "Total amount for the order."
-        },
-        "paymentMode": {
-          "type": "string",
-          "description": "Payment mode used for the order (e.g., Cash on Delivery)."
-        },
-        "orderStatus": {
-          "type": "string",
-          "description": "Status of the order (e.g., pending, processing, shipped, delivered)."
-        }
-      },
-      "required": [
-        "id",
-        "buyerId",
-        "orderDate",
-        "totalAmount",
-        "paymentMode",
-        "orderStatus"
-      ]
-    },
-    "OrderItem": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "OrderItem",
-      "type": "object",
-      "description": "Represents an item within an order in the WholesaleRx application.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the OrderItem entity."
-        },
-        "orderId": {
-          "type": "string",
-          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
-        },
-        "drugId": {
-          "type": "string",
-          "description": "Reference to Drug. (Relationship: Drug 1:N OrderItem)"
-        },
-        "quantity": {
-          "type": "number",
-          "description": "Quantity of the drug in the order item."
-        },
-        "price": {
-          "type": "number",
-          "description": "Price of the drug in the order item."
-        }
-      },
-      "required": [
-        "id",
-        "orderId",
-        "drugId",
-        "quantity",
-        "price"
-      ]
+        "required": ["buyerId", "status", "orderDate", "totalAmount"]
     }
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "password"
     ]
   },
   "firestore": {
     "structure": [
-      {
-        "path": "/roles_admin/{adminId}",
-        "definition": {
-          "entityName": "Admin",
-          "schema": {
-            "$ref": "#/backend/entities/Admin"
-          },
-          "description": "Collection to store admin user IDs. Existence of a document indicates admin privileges.",
-          "params": [
-            {
-              "name": "adminId",
-              "description": "The unique identifier of the admin user."
+        {
+            "path": "/users/{userId}",
+            "definition": {
+                "description": "Stores all user profiles, whether they are Buyers, Workers, or Super Admins. The 'role' field differentiates them.",
+                "schema": {
+                    "oneOf": [
+                        { "$ref": "#/backend/entities/Buyer" },
+                        { "$ref": "#/backend/entities/Worker" },
+                        { "$ref": "#/backend/entities/SuperAdmin" }
+                    ]
+                }
             }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "Buyer",
-          "schema": {
-            "$ref": "#/backend/entities/Buyer"
-          },
-          "description": "Collection to store buyer user data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the buyer user."
+        },
+        {
+            "path": "/medicines/{medicineId}",
+            "definition": {
+                "description": "The master catalog of all available medicines.",
+                "schema": { "$ref": "#/backend/entities/Medicine" }
             }
-          ]
-        }
-      },
-      {
-        "path": "/buyer_requests/{requestId}",
-        "definition": {
-          "entityName": "Buyer",
-          "schema": {
-            "$ref": "#/backend/entities/Buyer"
-          },
-          "description": "Collection to store new buyer signup requests for admin approval. Accessible only by admins.",
-          "params": [
-            {
-              "name": "requestId",
-              "description": "The unique identifier of the buyer request."
+        },
+        {
+            "path": "/orders/{orderId}",
+            "definition": {
+                "description": "Collection for all orders placed on the platform. Security rules will control access based on user role (Buyer, Worker, Super Admin).",
+                "schema": { "$ref": "#/backend/entities/Order" }
             }
-          ]
         }
-      },
-      {
-        "path": "/drugs/{drugId}",
-        "definition": {
-          "entityName": "Drug",
-          "schema": {
-            "$ref": "#/backend/entities/Drug"
-          },
-          "description": "Collection to store drug information. Includes denormalized 'adminId' for filtering.",
-          "params": [
-            {
-              "name": "drugId",
-              "description": "The unique identifier of the drug."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}",
-        "definition": {
-          "entityName": "Order",
-          "schema": {
-            "$ref": "#/backend/entities/Order"
-          },
-          "description": "Subcollection to store orders placed by a specific buyer.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the buyer user."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier of the order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}/order_items/{orderItemId}",
-        "definition": {
-          "entityName": "OrderItem",
-          "schema": {
-            "$ref": "#/backend/entities/OrderItem"
-          },
-          "description": "Subcollection to store order items for a specific order.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the buyer user."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier of the order."
-            },
-            {
-              "name": "orderItemId",
-              "description": "The unique identifier of the order item."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore data structure is designed to address the user's bug report regarding buyer signup requests not appearing in the admin panel, while adhering to the core design principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), QAPs (Rules are not Filters), and Invariants.  The structure emphasizes denormalization to ensure authorization independence and facilitates efficient querying for admin approval workflows.  Specifically, the `/buyer_requests` collection is segregated to ensure that only admin users can access the data, this ensures data separation. The structure uses path-based ownership for user-owned data (e.g., `/users/{userId}/orders/{orderId}`).\n\n*   **Authorization Independence:** The design avoids `get()` calls in security rules by denormalizing necessary authorization data.  For example, the `buyer_requests` collection, requires admin access, therefore it is stored outside of the user document.  The `adminId` is denormalized in the `drugs` collection to facilitate listing drugs by admins without needing to read the admin document.\n*   **Clarity of Intent:** The structure clearly separates different types of data into distinct collections based on their security requirements and access patterns.  This segregation makes the intent of security rules more explicit and easier to understand.\n*   **DBAC (No Custom Claims):** The structure utilizes database-based access control.  Admin roles are managed using the `/roles_admin/{uid}` collection.\n*   **QAPs (Rules are not Filters):** The structure enables secure `list` operations by using structural segregation.  For example, listing buyer requests is restricted to admins via the `/buyer_requests` collection. Listing drugs is restricted by the `adminId` in the `/drugs` collection\n\nSpecifically to address the bug report, the creation of a buyer request now writes to a separate collection `/buyer_requests`. This ensures that admin users have access to these requests immediately. Security rules can be written to specifically validate and authorize write operations to the `/buyer_requests` collection based on the admin's role."
+    ]
   }
 }

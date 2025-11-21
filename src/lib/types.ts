@@ -2,36 +2,21 @@
 
 export type Address = {
   id: string;
-  name: string; // e.g. "Main Clinic", "Warehouse"
+  name: string; 
   fullAddress: string;
 }
 
-export type MedicineBatch = {
-  id: string; // Will be batch number or a unique ID
-  batchNumber: string;
-  price: number;
-  stock: number;
-  expiryDate: string;
-  manufacturingDate?: string;
-  priceUnit: 'strip' | 'piece' | 'bottle' | 'box';
-  stockUnit: 'strip' | 'piece' | 'bottle' | 'box';
-}
-
 export type Medicine = {
-  id: string; // Represents the core product
+  id: string; 
   name: string;
   description: string;
+  dosage: string;
+  price: number;
+  stockLevel: number;
+  manufacturer: string;
+  prescriptionRequired: boolean;
   category: string;
-  imageUrl: string;
-  adminId: string;
-  hsnCode?: string;
-  manufacturingCompany?: string;
-  marketingCompany?: string;
-  imageSource?: string;
-  // Aggregated/default values - Batches will have specific overrides
-  totalStock: number;
-  defaultPrice: number;
-  batches: MedicineBatch[];
+  activeIngredient: string;
 };
 
 export type OrderItem = {
@@ -39,48 +24,48 @@ export type OrderItem = {
     name: string;
     quantity: number;
     price: number;
-    batchNumber: string; // Track which batch was ordered
 }
 
 export type Order = {
   id: string;
-  buyerName: string;
   buyerId: string;
   date: string;
   total: number;
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'draft';
+  status: 'Pending Verification' | 'Verified' | 'Awaiting Payment' | 'Paid' | 'Processing' | 'In Transit' | 'Delivered' | 'Cancelled';
   itemCount: number;
   paymentMode: string;
+  prescriptionImageUrl?: string;
+  prescriptionPatientName?: string;
+  prescriptionDoctorName?: string;
+  prescriptionDate?: string;
   items?: OrderItem[];
 };
 
 export type Buyer = {
     id: string;
-    name: string; // This can be business name
-    businessName?: string;
     email: string;
-    registeredOn: string;
-    gstNumber?: string;
-    type: 'Medical Store' | 'Doctor' | 'Hospital';
-    status: 'Pending' | 'Approved' | 'Disabled';
-    personName?: string;
-    mobileNumber1?: string;
-    mobileNumber2?: string;
-    permanentAddress?: string;
+    name: string;
     addresses?: Address[];
     defaultAddressId?: string;
-    doctorRegNumber?: string;
-    password?: string;
+    password?: string; // Should not be stored plaintext
 };
 
 export type AdminUser = {
-  id?: string; // Add optional id for firestore documents
+  id?: string;
   email: string;
   name: string;
-  role: string;
+  role: 'Super Admin' | 'Worker';
   permissions: string[];
   status: 'Approved' | 'Pending' | 'Disabled';
-  password?: string; // Password should be optional as we won't always have it
+  password?: string;
+};
+
+export type Worker = {
+    id: string;
+    email: string;
+    name: string;
+    role: 'Pharmacist' | 'Stock Manager' | 'Delivery Person';
+    permissions: string[];
 };
 
     
