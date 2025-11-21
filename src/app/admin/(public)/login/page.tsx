@@ -30,24 +30,6 @@ export default function AdminLoginPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    // Special case for static Super Admin
-    if (email === 'uniquemedicare786@gmail.com' && password === 'uniquemedicare@123#') {
-        const serverFormData = new FormData();
-        serverFormData.append('email', email);
-        serverFormData.append('uid', 'super-admin-uid-placeholder');
-        try {
-            await login(serverFormData);
-            // Redirect will be handled by the server action
-        } catch (e: any) {
-            if (e.message !== 'NEXT_REDIRECT') {
-                setError(e.message || "An unexpected error occurred.");
-            }
-        } finally {
-            setIsLoading(false);
-        }
-        return;
-    }
-    
     try {
       // Step 1: Sign in with Firebase Auth on the client
       const userCredential = await signInWithEmailAndPassword(auth, email, password);

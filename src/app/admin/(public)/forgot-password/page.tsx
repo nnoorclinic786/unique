@@ -34,17 +34,6 @@ export default function AdminForgotPasswordPage() {
         return;
     }
     
-    // Special handling for the static super admin, as they don't have a Firebase Auth account.
-    if (email.toLowerCase() === 'uniquemedicare786@gmail.com') {
-        toast({
-            title: "Super Admin Account",
-            description: "Password reset for the Super Admin account must be handled manually. Please contact support.",
-            duration: 5000,
-        });
-        setIsLoading(false);
-        return;
-    }
-
     try {
         await sendPasswordResetEmail(auth, email);
         toast({
