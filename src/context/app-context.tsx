@@ -301,7 +301,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // === MEDICINES LOGIC ===
   const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id'>) => {
-    if (!firestore || !user) return;
+    if (!firestore || !user) return Promise.reject("Firestore or user not available");
     const medicinesCol = collection(firestore, 'drugs');
     return addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
   }, [firestore, user]);
