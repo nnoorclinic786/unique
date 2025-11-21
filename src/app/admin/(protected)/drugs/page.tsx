@@ -33,7 +33,7 @@ import { useAdminSearch } from "@/context/admin-search-context";
 import React from 'react';
 
 export default function AdminDrugsPage() {
-  const { medicines } = useAppContext();
+  const { medicines, deleteMedicine } = useAppContext();
   const { query } = useAdminSearch();
 
   const filteredMedicines = medicines.filter(medicine => {
@@ -119,8 +119,10 @@ export default function AdminDrugsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/drugs/${medicine.id}`}>Edit</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => deleteMedicine(medicine.id)}>Delete</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

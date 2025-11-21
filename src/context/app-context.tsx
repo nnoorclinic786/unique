@@ -9,7 +9,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment } from "firebase/firestore";
+import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment, getDoc, updateDoc } from "firebase/firestore";
 import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import Cookies from 'js-cookie';
@@ -45,7 +45,9 @@ interface AppContextType {
 
   // Medicines
   medicines: Medicine[];
-  addMedicine: (medicine: Medicine) => void;
+  addMedicine: (medicine: Omit<Medicine, 'id'>) => void;
+  updateMedicine: (medicine: Medicine) => void;
+  deleteMedicine: (medicineId: string) => void;
 
   // Settings
   settings: Settings;
@@ -62,7 +64,7 @@ interface AppContextType {
   // Admins
   admins: AdminUser[];
   getAdmins: () => AdminUser[];
-  addPendingAdmin: (admin: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => Promise<{ success: boolean; error?: string; }>;
+  addPendingAdmin: (admin: Omit<AdminUser, 'role' | 'permissions' | 'status'|'id'>) => Promise<{ success: boolean; error?: string; }>;
   updateAdminPermissions: (email: string, permissions: string[]) => Promise<{ success: boolean; message: string; }>;
   approveAdmin: (email: string) => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
   toggleAdminStatus: (email: string, currentStatus: 'Approved' | 'Disabled') => Promise<{ success: boolean; message: string; error?: undefined; } | { success: boolean; error: string; message?: undefined; }>;
@@ -295,11 +297,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
-  const addMedicine = useCallback(async (medicine: Medicine) => {
+  const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id'>) => {
     if (!firestore || !user) return;
     const medicinesCol = collection(firestore, 'drugs');
     await addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
   }, [firestore, user]);
+
+  const updateMedicine = useCallback(async (medicine: Medicine) => {
+    if (!firestore || !user) return;
+    const medicineDoc = doc(firestore, 'drugs', medicine.id);
+    await setDoc(medicineDoc, { ...medicine, adminId: user.uid, updatedAt: serverTimestamp() }, { merge: true });
+  }, [firestore, user]);
+
+  const deleteMedicine = useCallback(async (medicineId: string) => {
+    if (!firestore) return;
+    const medicineDoc = doc(firestore, 'drugs', medicineId);
+    await deleteDoc(medicineDoc);
+  }, [firestore]);
 
   // === CART LOGIC ===
   const addToCart = useCallback((item: Medicine) => {
@@ -382,11 +396,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return admins;
   }, [admins]);
 
-  const addPendingAdmin = useCallback(async (adminData: Omit<AdminUser, 'role' | 'permissions' | 'status'>) => {
+  const addPendingAdmin = useCallback(async (adminData: Omit<AdminUser, 'role' | 'permissions' | 'status' | 'id'>) => {
     if (!firestore) return { success: false, error: "Database not connected." };
     
-    // Check against Firestore data if available
-    if (admins.some(u => u.email === adminData.email)) {
+    const adminDocRef = doc(firestore, 'admins', adminData.email);
+    const docSnap = await getDoc(adminDocRef);
+
+    if (docSnap.exists()) {
         return { success: false, error: "An admin with this email already exists." };
     }
 
@@ -397,18 +413,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: 'Pending' as const,
     };
     
-    const adminDoc = doc(firestore, 'admins', adminData.email);
-    await setDoc(adminDoc, newAdmin, { merge: true });
+    await setDoc(adminDocRef, newAdmin, { merge: true });
 
     return { success: true };
-  }, [admins, firestore]);
+  }, [firestore]);
 
   const updateAdminPermissions = useCallback(async (email: string, permissions: string[]) => {
     if (!firestore) return { success: false, message: 'Database not connected.' };
     const admin = admins.find(a => a.email === email);
     if (admin && admin.role !== 'Super Admin') {
         const adminDoc = doc(firestore, 'admins', email);
-        await setDoc(adminDoc, { permissions }, { merge: true });
+        await updateDoc(adminDoc, { permissions });
         return { success: true, message: `Permissions for ${email} updated.` };
     }
     return { success: false, message: 'Admin not found or is a Super Admin.' };
@@ -419,7 +434,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const admin = admins.find(a => a.email === email);
     if (admin && admin.status === 'Pending') {
         const adminDoc = doc(firestore, 'admins', email);
-        await setDoc(adminDoc, { status: 'Approved', permissions: ['dashboard'] }, { merge: true });
+        await updateDoc(adminDoc, { status: 'Approved', permissions: ['dashboard'] });
         return { success: true, message: `${admin.name} has been approved.` };
     }
     return { success: false, error: 'User not found or not pending.' };
@@ -431,7 +446,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (admin && admin.role !== 'Super Admin') {
           const newStatus = currentStatus === 'Approved' ? 'Disabled' : 'Approved';
           const adminDoc = doc(firestore, 'admins', email);
-          await setDoc(adminDoc, { status: newStatus }, { merge: true });
+          await updateDoc(adminDoc, { status: newStatus });
           return { success: true, message: `${admin.name}'s account has been ${newStatus.toLowerCase()}.` };
       }
       return { success: false, error: 'User not found or is a Super Admin.' };
@@ -456,7 +471,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     
     const adminDoc = doc(firestore, 'admins', currentEmail);
-    await setDoc(adminDoc, updates, { merge: true });
+    await updateDoc(adminDoc, updates);
     
     return { success: true };
   }, [admins, firestore]);
@@ -479,6 +494,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setBuyerDefaultAddress,
     medicines,
     addMedicine,
+    updateMedicine,
+    deleteMedicine,
     settings,
     setSettings,
     cartItems,

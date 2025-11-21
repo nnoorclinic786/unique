@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -36,7 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft, UploadCloud, Link as LinkIcon, Eye, Trash2, Loader2, File as FileIcon } from "lucide-react";
 import type { Medicine } from "@/lib/types";
 import { useAppContext } from "@/context/app-context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 const formSchema = z.object({
@@ -57,10 +57,14 @@ const formSchema = z.object({
   marketingCompany: z.string().optional(),
 });
 
-export default function AddMedicinePage() {
+export default function EditMedicinePage() {
   const router = useRouter();
+  const params = useParams();
+  const { id } = params;
   const { toast } = useToast();
-  const { addMedicine } = useAppContext();
+  const { medicines, updateMedicine } = useAppContext();
+  
+  const [medicine, setMedicine] = useState<Medicine | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileType, setFileType] = useState<'image' | 'pdf' | null>(null);
@@ -83,6 +87,23 @@ export default function AddMedicinePage() {
       marketingCompany: "",
     },
   });
+
+  useEffect(() => {
+    const med = medicines.find(m => m.id === id);
+    if (med) {
+        setMedicine(med);
+        form.reset(med);
+        if (med.imageUrl) {
+            setPreview(med.imageUrl);
+            // A simple check to see if the URL is a data URI for a PDF
+            if (med.imageUrl.startsWith('data:application/pdf')) {
+                setFileType('pdf');
+            } else {
+                setFileType('image');
+            }
+        }
+    }
+  }, [id, medicines, form]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -120,51 +141,27 @@ export default function AddMedicinePage() {
       setPreview(null);
       setFileType(null);
   };
-  
-  const fetchFromUrl = async () => {
-    const url = form.getValues('imageUrl');
-    if (!url) {
-        toast({ variant: "destructive", title: "No URL", description: "Please paste a URL first." });
-        return;
-    }
-    
-    try {
-        const response = await fetch(url);
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'].some(type => contentType.includes(type))) {
-             toast({ variant: "destructive", title: "Invalid URL content", description: "The URL does not point to a valid image or PDF." });
-             return;
-        }
-
-        const blob = await response.blob();
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-            const dataUrl = reader.result as string;
-            setPreview(dataUrl);
-            setFileType(contentType.startsWith('image/') ? 'image' : 'pdf');
-            toast({ title: "URL Fetched", description: "The file from the URL is ready." });
-        };
-
-    } catch (error) {
-        toast({ variant: "destructive", title: "Fetch Failed", description: "Could not fetch the file from the provided URL." });
-    }
-  }
-
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newMedicine: Omit<Medicine, 'id'> = {
+    if (!medicine) return;
+
+    const updatedMedicine: Medicine = {
+      ...medicine,
       ...values,
       imageUrl: values.imageUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image', 
     };
     
-    addMedicine(newMedicine);
+    updateMedicine(updatedMedicine);
     
     toast({
-      title: "Medicine Added!",
-      description: `${values.name} has been added to the catalog.`,
+      title: "Medicine Updated!",
+      description: `${values.name} has been updated.`,
     });
     router.push("/admin/drugs");
+  }
+  
+  if (!medicine) {
+    return <div className="p-8 text-center">Loading medicine details...</div>
   }
 
   return (
@@ -178,8 +175,8 @@ export default function AddMedicinePage() {
                 </Link>
             </Button>
             <div>
-                <CardTitle className="font-headline text-2xl">Add New Medicine</CardTitle>
-                <CardDescription>Please enter the medicine details below.</CardDescription>
+                <CardTitle className="font-headline text-2xl">Edit Medicine</CardTitle>
+                <CardDescription>Update the medicine details below.</CardDescription>
             </div>
         </div>
       </CardHeader>
@@ -323,7 +320,7 @@ export default function AddMedicinePage() {
                             <span className="w-full border-t" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">Or paste URL</span>
+                            <span className="bg-background px-2 text-muted-foreground">Or use URL</span>
                         </div>
                     </div>
                      <FormField
@@ -333,17 +330,8 @@ export default function AddMedicinePage() {
                             <FormItem>
                             <FormLabel>Image / PDF URL</FormLabel>
                             <FormControl>
-                                <div className="flex gap-2">
-                                    <Input placeholder="https://example.com/image.jpg" {...field} />
-                                    <Button variant="outline" type="button" onClick={fetchFromUrl}>
-                                        <LinkIcon className="mr-2 h-4 w-4"/>
-                                        Fetch
-                                    </Button>
-                                </div>
+                                <Input placeholder="https://example.com/image.jpg" {...field} />
                             </FormControl>
-                            <FormDescription>
-                                If you paste a URL, click Fetch to preview. The URL itself will be saved.
-                            </FormDescription>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -467,7 +455,7 @@ export default function AddMedicinePage() {
             </div>
             <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>Save</Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>Save Changes</Button>
             </div>
           </form>
         </Form>

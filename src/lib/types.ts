@@ -65,6 +65,7 @@ export type Buyer = {
 };
 
 export type AdminUser = {
+  id?: string; // Add optional id for firestore documents
   email: string;
   name: string;
   role: string;
