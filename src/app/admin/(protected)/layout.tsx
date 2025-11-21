@@ -9,7 +9,8 @@ export default function ProtectedAdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const sessionCookie = cookies().get('admin_session');
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('admin_session');
   // We can safely assume the cookie exists and is valid
   // because the middleware is protecting this route group.
   const session = JSON.parse(sessionCookie!.value);
