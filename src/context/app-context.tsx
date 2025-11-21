@@ -133,7 +133,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const adminsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'admins') : null, [firestore, isAdminLoggedIn]);
   const { data: adminsData } = useCollection<AdminUser>(adminsCollection);
-  const admins = adminsData || [];
+  
+  const initialAdmins: AdminUser[] = [
+    {
+      email: 'uniquemedicare@gmail.com',
+      name: 'Unique Medicare',
+      role: 'Super Admin',
+      permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'],
+      status: 'Approved',
+      password: 'uniquemedicare@123#',
+    },
+  ];
+
+  const admins = adminsData || initialAdmins;
+
 
   // Load non-Firestore state from localStorage on initial client render
   useEffect(() => {
