@@ -45,7 +45,7 @@ interface AppContextType {
 
   // Medicines
   medicines: Medicine[];
-  addMedicine: (medicine: Omit<Medicine, 'id'>) => void;
+  addMedicine: (medicine: Omit<Medicine, 'id'>) => Promise<any>;
   updateMedicine: (medicine: Medicine) => void;
   deleteMedicine: (medicineId: string) => void;
 
@@ -127,7 +127,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
   
-  const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
+  const buyerRequestsCollection = useMemoFirebase(() => (firestore) ? collection(firestore, 'buyer_requests') : null, [firestore]);
   const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
   
   const medicinesCollection = useMemoFirebase(() => firestore ? collection(firestore, 'drugs') : null, [firestore]);
@@ -303,7 +303,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id'>) => {
     if (!firestore || !user) return;
     const medicinesCol = collection(firestore, 'drugs');
-    await addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
+    return addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
   }, [firestore, user]);
 
   const updateMedicine = useCallback(async (medicine: Medicine) => {

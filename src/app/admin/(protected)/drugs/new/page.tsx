@@ -152,19 +152,26 @@ export default function AddMedicinePage() {
   }
 
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const newMedicine: Omit<Medicine, 'id'> = {
       ...values,
       imageUrl: values.imageUrl || 'https://placehold.co/600x400/EEE/31343C?text=No+Image', 
     };
     
-    addMedicine(newMedicine);
-    
-    toast({
-      title: "Medicine Added!",
-      description: `${values.name} has been added to the catalog.`,
-    });
-    router.push("/admin/drugs");
+    try {
+      await addMedicine(newMedicine);
+      toast({
+        title: "Medicine Added!",
+        description: `${values.name} has been added to the catalog.`,
+      });
+      router.push("/admin/drugs");
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Failed to add medicine",
+        description: "An error occurred while saving the medicine. Please try again.",
+      });
+    }
   }
 
   return (
@@ -467,7 +474,9 @@ export default function AddMedicinePage() {
             </div>
             <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>Save</Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Save'}
+                </Button>
             </div>
           </form>
         </Form>
