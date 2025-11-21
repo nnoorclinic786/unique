@@ -10,7 +10,7 @@ import React, {
   useCallback,
 } from 'react';
 import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment, getDoc, updateDoc } from "firebase/firestore";
-import type { Order, Buyer, Medicine, Address, AdminUser } from '@/lib/types';
+import type { Order, Buyer, Medicine, Address, AdminUser, MedicineBatch } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import Cookies from 'js-cookie';
 
@@ -45,7 +45,7 @@ interface AppContextType {
 
   // Medicines
   medicines: Medicine[];
-  addMedicine: (medicine: Omit<Medicine, 'id' | 'adminId'>) => Promise<any>;
+  addMedicine: (medicineData: Omit<Medicine, 'id' | 'adminId' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => Promise<any>;
   updateMedicine: (medicine: Medicine) => void;
   deleteMedicine: (medicineId: string) => void;
 
@@ -138,6 +138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const initialAdmins: AdminUser[] = [
     {
+      id: 'super-admin-01',
       email: 'uniquemedicare786@gmail.com',
       name: 'Unique Medicare',
       role: 'Super Admin',
@@ -302,10 +303,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
-  const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id' | 'adminId'>) => {
+  const addMedicine = useCallback(async (medicineData: Omit<Medicine, 'id' | 'adminId' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => {
     if (!firestore || !user) return Promise.reject("Firestore or user not available");
     
-    // Get the admin session from cookies
     const adminCookie = Cookies.get('admin_session');
     if (!adminCookie) {
       return Promise.reject("Admin session not found. Please log in again.");
@@ -313,13 +313,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const session = JSON.parse(adminCookie);
 
     const medicinesCol = collection(firestore, 'drugs');
-    return addDoc(medicinesCol, { ...medicine, adminId: session.email, createdAt: serverTimestamp() });
+    return addDoc(medicinesCol, {
+      ...medicineData, 
+      adminId: session.email, 
+      totalStock: batchData.stock,
+      defaultPrice: batchData.price,
+      batches: [{ ...batchData, id: batchData.batchNumber }],
+      createdAt: serverTimestamp() 
+    });
   }, [firestore, user]);
 
   const updateMedicine = useCallback(async (medicine: Medicine) => {
     if (!firestore || !user) return;
+    const adminCookie = Cookies.get('admin_session');
+    if (!adminCookie) return;
+    const session = JSON.parse(adminCookie);
+    
     const medicineDoc = doc(firestore, 'drugs', medicine.id);
-    await setDoc(medicineDoc, { ...medicine, adminId: user.uid, updatedAt: serverTimestamp() }, { merge: true });
+    await setDoc(medicineDoc, { ...medicine, adminId: session.email, updatedAt: serverTimestamp() }, { merge: true });
   }, [firestore, user]);
 
   const deleteMedicine = useCallback(async (medicineId: string) => {
@@ -343,8 +354,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     setCartItems(updatedCart);
     
-    // We don't create an order draft here anymore.
-  
     const medicineDoc = doc(firestore, 'drugs', item.id);
     setDoc(medicineDoc, { stock: increment(-1) }, { merge: true });
   }, [cartItems, firestore, user]);
@@ -387,16 +396,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [firestore, cartItems, user]);
   
   const clearCart = useCallback(async () => {
-    if (firestore && cartItems.length > 0 && false) { // Logic disabled for now, stock logic on add/remove is sufficient
+    if (firestore && cartItems.length > 0 && false) {
         for (const item of cartItems) {
             const medicineDoc = doc(firestore, 'drugs', item.id);
             await setDoc(medicineDoc, { stock: increment(item.quantity) }, { merge: true });
         }
     }
     if (firestore && activeOrderId) {
-        // Maybe we don't delete draft orders, but just abandon them.
-        // const orderRef = doc(firestore, 'orders', activeOrderId);
-        // await deleteDoc(orderRef);
     }
     setCartItems([]);
     setActiveOrderId(null);
@@ -419,14 +425,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return { success: false, error: "An admin with this email already exists." };
     }
 
-    const newAdmin: AdminUser = {
+    const newAdmin: Omit<AdminUser, 'id'> = {
         ...adminData,
         role: "Admin",
         permissions: [],
         status: 'Pending' as const,
     };
     
-    await setDoc(adminDocRef, newAdmin, { merge: true });
+    await setDoc(adminDocRef, newAdmin);
 
     return { success: true };
   }, [firestore]);
@@ -470,7 +476,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const adminToUpdate = admins.find(a => a.email === currentEmail);
     if(!adminToUpdate) return { success: false, error: "Admin not found." };
     
-    // In a real app, password verification would happen on a server
     if (details.newPassword && details.currentPassword !== adminToUpdate.password) {
         return { success: false, error: "Incorrect current password." };
     }
@@ -522,7 +527,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addPendingAdmin,
     updateAdminPermissions,
     approveAdmin,
-toggleAdminStatus,
+    toggleAdminStatus,
     updateAdminDetails,
   };
 

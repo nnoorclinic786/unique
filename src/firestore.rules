@@ -89,14 +89,15 @@ service cloud.firestore {
     }
 
     /**
-     * @description Stores admin user profiles. Readable and writable only by other admins.
+     * @description Stores admin user profiles. Readable and writable only by other admins. New signups can create their own doc.
      * @path /admins/{adminEmail}
-     * @allow (read, write) if the requesting user is an admin.
-     * @principle Allows admins to manage other admin accounts.
+     * @allow (read, list, write) if the requesting user is an admin.
+     * @allow (create) if the user is signed in (for new admin signups).
+     * @principle Allows admins to manage other admin accounts and allows new admins to register.
      */
     match /admins/{adminEmail} {
-      allow read, list: if isAdmin();
-      allow write: if isAdmin() || isSignedIn(); // Allow signup for new admins
+      allow read, list, write: if isAdmin();
+      allow create: if isSignedIn();
     }
 
 
