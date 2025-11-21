@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import { ShoppingCart } from 'lucide-react';
 import { UserNav } from './user-nav';
-import Cookies from 'js-cookie';
 import { useAppContext } from '@/context/app-context';
 import { Badge } from './ui/badge';
 
+interface AdminSession {
+  isLoggedIn: boolean;
+}
 
 export function Header() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
@@ -20,23 +22,33 @@ export function Header() {
 
   useEffect(() => {
     setIsClient(true);
-    // Check for regular user login
-    if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
-      setIsUserLoggedIn(true);
-    }
-    
-    // Check for admin login
-    const adminCookie = Cookies.get('admin_session');
-    if (adminCookie) {
+    // This listener will react to login/logout events for regular users
+    const checkUserLoginStatus = () => {
+      if (typeof window !== 'undefined' && localStorage.getItem('userLoggedIn') === 'true') {
+        setIsUserLoggedIn(true);
+      } else {
+        setIsUserLoggedIn(false);
+      }
+    };
+    checkUserLoginStatus();
+    window.addEventListener('storage', checkUserLoginStatus);
+
+
+    // Fetch admin status from the session API
+    async function fetchAdminStatus() {
         try {
-            const session = JSON.parse(adminCookie);
-            if(session.isLoggedIn) {
-                setIsAdminLoggedIn(true);
-            }
-        } catch (e) {
+            const res = await fetch('/api/session');
+            const data: AdminSession = await res.json();
+            setIsAdminLoggedIn(data.isLoggedIn);
+        } catch (error) {
             setIsAdminLoggedIn(false);
         }
     }
+    fetchAdminStatus();
+
+    return () => {
+      window.removeEventListener('storage', checkUserLoginStatus);
+    };
 
   }, []);
 
@@ -98,7 +110,7 @@ export function Header() {
           )}
           {isAdminLoggedIn && (
             <Link href="/admin/dashboard" className="transition-colors hover:text-primary">
-              Admin
+              Admin Dashboard
             </Link>
           )}
         </nav>

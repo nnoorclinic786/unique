@@ -15,7 +15,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { logout } from '@/app/admin/(public)/login/actions';
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { LogOut, User } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
@@ -35,24 +34,30 @@ export function UserNav() {
   const router = useRouter();
 
   useEffect(() => {
-    const adminCookie = Cookies.get('admin_session');
-    if (adminCookie) {
+    async function fetchSession() {
+      // Fetch admin session from the new API route
       try {
-        const sessionData = JSON.parse(adminCookie);
-        if (sessionData.isLoggedIn) {
-          setSession(sessionData);
-          setIsLoading(false);
-          return;
+        const response = await fetch('/api/session');
+        if (response.ok) {
+          const sessionData = await response.json();
+          if (sessionData.isLoggedIn) {
+            setSession(sessionData);
+            setIsLoading(false);
+            return;
+          }
         }
-      } catch (e) {
-        setSession(null);
+      } catch (error) {
+        console.error("Failed to fetch session:", error);
       }
-    }
 
-    if (localStorage.getItem('userLoggedIn') === 'true') {
-        setUserName(localStorage.getItem('userName'));
+      // Fallback to check for regular user login from localStorage
+      if (localStorage.getItem('userLoggedIn') === 'true') {
+          setUserName(localStorage.getItem('userName'));
+      }
+      setIsLoading(false);
     }
-    setIsLoading(false);
+    
+    fetchSession();
   }, []);
 
   const handleLogout = async () => {
