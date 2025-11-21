@@ -38,7 +38,7 @@ export default function AdminForgotPasswordPage() {
         await sendPasswordResetEmail(auth, email);
         toast({
             title: "Reset Link Sent",
-            description: `If an account with the email ${email} exists, a password reset link has been sent. Please check your inbox.`,
+            description: `If an account with the email ${email} exists, a password reset link has been sent. Please check your inbox (and spam folder).`,
             duration: 5000,
         });
     } catch (error: any) {
@@ -46,7 +46,7 @@ export default function AdminForgotPasswordPage() {
         // to prevent email enumeration attacks.
         toast({
             title: "Reset Link Sent",
-            description: `If an account with the email ${email} exists, a password reset link has been sent. Please check your inbox.`,
+            description: `If an account with the email ${email} exists, a password reset link has been sent. Please check your inbox (and spam folder).`,
             duration: 5000,
         });
         console.error("Forgot password error:", error);
