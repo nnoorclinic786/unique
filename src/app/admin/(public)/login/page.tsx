@@ -75,7 +75,12 @@ export default function AdminLoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/admin/forgot-password" className="ml-auto inline-block text-sm underline">
+                  Forgot your password?
+                </Link>
+              </div>
               <div className="relative">
                 <Input 
                   id="password" 
