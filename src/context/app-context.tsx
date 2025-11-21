@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, {
@@ -9,7 +10,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment, getDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, addDoc, deleteDoc, setDoc, serverTimestamp, increment, getDoc, updateDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 import type { Order, Buyer, Medicine, Address, AdminUser, MedicineBatch } from '@/lib/types';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import Cookies from 'js-cookie';
@@ -305,22 +306,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // === MEDICINES LOGIC ===
   const addMedicine = useCallback(async (medicineData: Omit<Medicine, 'id' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => {
     if (!firestore || !user) return Promise.reject("Firestore or user not available");
-    
+
     const medicinesCol = collection(firestore, 'drugs');
-    return addDoc(medicinesCol, {
-      ...medicineData, 
-      totalStock: batchData.stock,
-      defaultPrice: batchData.price,
-      batches: [{ ...batchData, id: batchData.batchNumber }],
-      createdAt: serverTimestamp() 
-    });
+    // Check if a medicine with the same name already exists
+    const q = query(medicinesCol, where("name", "==", medicineData.name));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+        // Medicine exists, add a new batch to it
+        const existingDoc = querySnapshot.docs[0];
+        const existingMedicine = existingDoc.data() as Medicine;
+
+        // Check if batch number already exists
+        if (existingMedicine.batches.some(b => b.batchNumber === batchData.batchNumber)) {
+            return Promise.reject(`Batch ${batchData.batchNumber} already exists for ${medicineData.name}.`);
+        }
+        
+        const newBatch: MedicineBatch = { ...batchData, id: batchData.batchNumber };
+        const updatedBatches = [...existingMedicine.batches, newBatch];
+        const newTotalStock = updatedBatches.reduce((acc, b) => acc + b.stock, 0);
+
+        return updateDoc(existingDoc.ref, {
+            batches: updatedBatches,
+            totalStock: newTotalStock,
+            // Optionally update default price to the latest batch's price
+            defaultPrice: batchData.price,
+            updatedAt: serverTimestamp()
+        });
+
+    } else {
+        // Medicine does not exist, create a new document
+        const newBatch: MedicineBatch = { ...batchData, id: batchData.batchNumber };
+        const newMedicine: Omit<Medicine, 'id'> = {
+            ...medicineData,
+            adminId: user.uid,
+            totalStock: batchData.stock,
+            defaultPrice: batchData.price,
+            batches: [newBatch],
+        };
+        return addDoc(medicinesCol, {
+            ...newMedicine,
+            createdAt: serverTimestamp()
+        });
+    }
   }, [firestore, user]);
 
   const updateMedicine = useCallback(async (medicine: Medicine) => {
     if (!firestore || !user) return;
     const adminCookie = Cookies.get('admin_session');
     if (!adminCookie) return;
-    const session = JSON.parse(adminCookie);
     
     const medicineDoc = doc(firestore, 'drugs', medicine.id);
     await setDoc(medicineDoc, { ...medicine, adminId: user.uid, updatedAt: serverTimestamp() }, { merge: true });
