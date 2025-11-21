@@ -30,6 +30,8 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
+const SUPER_ADMIN_EMAIL = 'uniquemedicare786@gmail.com';
+
 export default function AdminSignupPage() {
   const { toast } = useToast();
   const router = useRouter();
@@ -53,25 +55,48 @@ export default function AdminSignupPage() {
     setIsSubmitting(true);
     try {
         // We create the user in Firebase Auth first.
-        // NOTE: This will fail if the email is already in use by ANY user (buyer or admin).
-        // This is a good thing for security.
         const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        const user = userCredential.user;
+
+        // Check if the signup is for the Super Admin
+        if (values.email === SUPER_ADMIN_EMAIL) {
+            // This is the Super Admin. Create their role document directly.
+            const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
+            await setDoc(adminRoleDocRef, { role: 'Super Admin', createdAt: new Date() });
+            
+            // Also create their profile in the 'admins' collection for consistency
+            const superAdminData: AdminUser = {
+                id: user.uid,
+                name: values.name,
+                email: values.email,
+                role: "Super Admin",
+                permissions: ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'],
+                status: 'Approved',
+            };
+            await setDoc(doc(firestore, "admins", user.uid), superAdminData);
+
+            toast({
+                title: "Super Admin Registered!",
+                description: "The Super Admin account has been successfully created in Firebase.",
+            });
+
+        } else {
+            // For any other admin, create a document in the `admins` collection with 'Pending' status.
+             const adminData: Omit<AdminUser, 'id' | 'password'> = {
+                name: values.name,
+                email: values.email,
+                role: "Admin",
+                permissions: [],
+                status: 'Pending',
+            };
+            await setDoc(doc(firestore, "admins", user.uid), adminData);
+
+            toast({
+                title: "Registration Submitted!",
+                description: "Your registration is under review. The Super Admin will approve your account shortly.",
+            });
+        }
         
-        // Then, we create a corresponding document in the `admins` collection in Firestore.
-        const adminData: Omit<AdminUser, 'id' | 'password'> = {
-            name: values.name,
-            email: values.email,
-            role: "Admin",
-            permissions: [], // Permissions will be granted by a Super Admin
-            status: 'Pending',
-        };
-
-        await setDoc(doc(firestore, "admins", userCredential.user.uid), adminData);
-
-        toast({
-            title: "Registration Submitted!",
-            description: "Your registration is under review. The Super Admin will approve your account shortly.",
-        });
         router.push("/admin/login");
 
     } catch (error: any) {
@@ -181,3 +206,5 @@ export default function AdminSignupPage() {
     </div>
   );
 }
+
+    

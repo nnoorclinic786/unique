@@ -4,17 +4,28 @@ import { cookies } from 'next/headers';
 import AdminClientLayout from './client-layout';
 import { AdminSearchProvider } from '@/context/admin-search-context';
 import { redirect } from 'next/navigation';
-import { initializeApp, getApps, App } from "firebase-admin/app";
+import { initializeApp, getApps, App, ServiceAccount } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import type { AdminUser } from '@/lib/types';
+import { credential } from 'firebase-admin';
+
+// This is a placeholder for the service account. In a real environment, this would be
+// managed securely (e.g., via environment variables).
+const serviceAccount: ServiceAccount | null = process.env.FIREBASE_SERVICE_ACCOUNT
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  : null;
 
 // Initialize Firebase Admin SDK if it hasn't been already.
 function getFirebaseAdminApp(): App {
     if (getApps().length) {
         return getApps()[0];
     }
-    // This should be configured with service account credentials in a real environment
-    return initializeApp();
+    
+    const adminCredential = serviceAccount ? credential.cert(serviceAccount) : undefined;
+    
+    // In a real deployed environment (like Firebase App Hosting), service account
+    // might be auto-discovered. The credential object is for local/CI environments.
+    return initializeApp(adminCredential ? { credential: adminCredential } : undefined);
 }
 
 const app = getFirebaseAdminApp();
@@ -23,25 +34,29 @@ const db = getFirestore(app);
 const SUPER_ADMIN_EMAIL = 'uniquemedicare786@gmail.com';
 const ALL_PERMISSIONS = ['dashboard', 'orders', 'drugs', 'buyers', 'manage_admins', 'settings'];
 
-async function getAdminPermissions(email: string): Promise<string[]> {
+async function getAdminPermissions(uid: string, email: string): Promise<string[]> {
     if (email === SUPER_ADMIN_EMAIL) {
         return ALL_PERMISSIONS;
     }
 
     try {
-        // Use a query to find the admin by their email address
-        const adminsRef = db.collection('admins');
-        const q = adminsRef.where('email', '==', email).limit(1);
-        const querySnapshot = await q.get();
+        // Check for role first
+        const roleDoc = await db.collection('roles_admin').doc(uid).get();
+        if (!roleDoc.exists) {
+            return []; // Not an admin
+        }
+        
+        // Now fetch detailed permissions from the 'admins' collection using the UID
+        const adminDoc = await db.collection('admins').doc(uid).get();
 
-        if (!querySnapshot.empty) {
-            const adminDoc = querySnapshot.docs[0];
+        if (adminDoc.exists) {
             const adminData = adminDoc.data() as AdminUser;
             // Ensure the user is approved and return their permissions
             if (adminData.status === 'Approved') {
                 return adminData.permissions || [];
             }
         }
+
     } catch (error) {
         console.error("Error fetching admin permissions:", error);
     }
@@ -73,15 +88,14 @@ export default async function ProtectedAdminLayout({
      redirect('/admin/login');
   }
   
-  // Fetch the user's permissions on the server using their email
-  const permissions = await getAdminPermissions(session.email);
+  // Fetch the user's permissions on the server using their UID and email
+  const permissions = await getAdminPermissions(session.uid, session.email);
 
   // If the user has no permissions, they shouldn't access any protected route.
-  // We can redirect them to a specific page or just the login page.
   if (permissions.length === 0) {
       console.warn(`Admin ${session.email} has no permissions. Logging out.`);
       // Optional: Clear the cookie before redirecting
-      // cookies().delete('admin_session');
+      cookies().delete('admin_session');
       redirect('/admin/login?error=access_denied');
   }
 
@@ -94,3 +108,5 @@ export default async function ProtectedAdminLayout({
     </AdminSearchProvider>
   );
 }
+
+    
