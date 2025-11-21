@@ -39,5 +39,5 @@ export async function login(formData: FormData, allAdmins: any[]): Promise<{ err
 
 export async function logout() {
   cookies().delete("admin_session");
-  redirect("/admin/login");
+  redirect("/");
 }
