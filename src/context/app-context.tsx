@@ -126,6 +126,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   
   const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
   const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
+  const pendingBuyers = pendingBuyersData || [];
   
   const medicinesCollection = useMemoFirebase(() => firestore ? collection(firestore, 'drugs') : null, [firestore]);
   const { data: medicinesData } = useCollection<Medicine>(medicinesCollection);
@@ -222,15 +223,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // === BUYERS LOGIC ===
   const approveBuyer = useCallback(async (requestId: string) => {
     if (!firestore) return;
-    const requestDocRef = doc(firestore, 'buyer_requests', requestId);
-    const buyerData = pendingBuyersData?.find(b => b.id === requestId);
+    const buyerData = pendingBuyers?.find(b => b.id === requestId);
     
     if (buyerData) {
         const userDocRef = doc(firestore, 'users', buyerData.id);
         await setDoc(userDocRef, { ...buyerData, status: 'Approved' });
+        const requestDocRef = doc(firestore, 'buyer_requests', requestId);
         await deleteDoc(requestDocRef);
     }
-  }, [firestore, pendingBuyersData]);
+  }, [firestore, pendingBuyers]);
 
   const toggleBuyerStatus = useCallback(async (buyerId: string, currentStatus: 'Approved' | 'Disabled') => {
     if (!firestore) return;
@@ -291,7 +292,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [firestore]);
 
   const approvedBuyers = allBuyers.filter((b) => b.status === 'Approved');
-  const pendingBuyers = pendingBuyersData || [];
   const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
