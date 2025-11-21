@@ -10,10 +10,11 @@ import { PaymentForm } from "@/components/payment-form";
 import { ChevronLeft, CreditCard, Landmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import Image from 'next/image';
 
 const paymentMethodDetails = {
     card: { icon: <CreditCard className="w-8 h-8" />, title: "Credit/Debit Card" },
-    upi: { icon: <img src="https://www.vectorlogo.zone/logos/upi/upi-icon.svg" alt="UPI" className="w-8 h-8"/>, title: "UPI Payment" },
+    upi: { icon: <Image src="/qr-code.jpg" alt="UPI QR" width={128} height={128} />, title: "UPI Payment" },
     netbanking: { icon: <Landmark className="w-8 h-8" />, title: "Net Banking" }
 }
 

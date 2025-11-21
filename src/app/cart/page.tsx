@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { AddressForm } from '@/components/address-form';
 import type { Buyer, Address, Order } from '@/lib/types';
@@ -31,6 +31,7 @@ function CartPageContent() {
   const [checkoutStep, setCheckoutStep] = useState(1);
   const [isClient, setIsClient] = useState(false);
   const [isAddressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [isUpiDialogOpen, setUpiDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<Buyer | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
@@ -74,6 +75,7 @@ function CartPageContent() {
         description: `Your order has been successfully placed.`,
     });
     clearCart();
+    setUpiDialogOpen(false);
     router.push('/account');
   }
   
@@ -88,6 +90,8 @@ function CartPageContent() {
     }
     if (paymentMethod === 'cod') {
         setCheckoutStep(2);
+    } else if (paymentMethod === 'upi') {
+        setUpiDialogOpen(true);
     } else {
         router.push(`/payment/${paymentMethod}`);
     }
@@ -359,6 +363,7 @@ function CartPageContent() {
             </Card>
           </div>
         </div>
+
       <Dialog open={isAddressDialogOpen} onOpenChange={setAddressDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -369,7 +374,25 @@ function CartPageContent() {
               onCancel={() => setAddressDialogOpen(false)}
             />
         </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      <Dialog open={isUpiDialogOpen} onOpenChange={setUpiDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle className="font-headline text-2xl text-center">Scan to Pay</DialogTitle>
+                <DialogDescription className="text-center">
+                    Use any UPI app to scan the QR code and pay the total amount of <strong>₹{total.toFixed(2)}</strong>.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center p-4">
+                <Image src="/qr-code.jpg" alt="UPI QR Code" width={300} height={400} />
+            </div>
+             <div className="flex flex-col gap-4">
+                 <p className="text-center text-sm text-muted-foreground">After completing the payment, click the button below to confirm your order.</p>
+                <Button size="lg" onClick={handlePlaceOrder}>I Have Paid</Button>
+             </div>
+        </DialogContent>
+      </Dialog>
       </main>
   );
 }
