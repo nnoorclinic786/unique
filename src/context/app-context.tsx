@@ -304,9 +304,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // === MEDICINES LOGIC ===
   const addMedicine = useCallback(async (medicine: Omit<Medicine, 'id' | 'adminId'>) => {
     if (!firestore || !user) return Promise.reject("Firestore or user not available");
+    
+    // Get the admin session from cookies
+    const adminCookie = Cookies.get('admin_session');
+    if (!adminCookie) {
+      return Promise.reject("Admin session not found. Please log in again.");
+    }
+    const session = JSON.parse(adminCookie);
+
     const medicinesCol = collection(firestore, 'drugs');
-    // Ensure adminId is added to satisfy security rules
-    return addDoc(medicinesCol, { ...medicine, adminId: user.uid, createdAt: serverTimestamp() });
+    return addDoc(medicinesCol, { ...medicine, adminId: session.email, createdAt: serverTimestamp() });
   }, [firestore, user]);
 
   const updateMedicine = useCallback(async (medicine: Medicine) => {
