@@ -64,6 +64,7 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: Order[] }) => {
             <TableRow>
               <TableHead>Customer</TableHead>
               <TableHead className="hidden sm:table-cell">Status</TableHead>
+              <TableHead className="hidden md:table-cell">Payment Mode</TableHead>
               <TableHead className="hidden sm:table-cell">Date</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>
@@ -84,6 +85,9 @@ const OrderTable = ({ ordersToShow }: { ordersToShow: Order[] }) => {
                   <Badge className="text-xs" variant={statusColors[order.status] || 'secondary'}>
                     {order.status}
                   </Badge>
+                </TableCell>
+                <TableCell className="hidden md:table-cell capitalize">
+                  {order.paymentMode}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">{order.date}</TableCell>
                 <TableCell className="text-right">₹{order.total.toFixed(2)}</TableCell>
@@ -165,14 +169,15 @@ export default function AdminOrdersPage() {
   const exportToCsv = (data: Order[], filename: string) => {
     const csvRows = [
         // Headers
-        ['Order ID', 'Customer', 'Date', 'Amount', 'Status'].join(','),
+        ['Order ID', 'Customer', 'Date', 'Amount', 'Status', 'Payment Mode'].join(','),
         // Data
         ...data.map(order => [
             order.id,
             `"${order.buyerName.replace(/"/g, '""')}"`, // Handle quotes in names
             order.date,
             order.total.toFixed(2),
-            order.status
+            order.status,
+            order.paymentMode
         ].join(','))
     ];
 
@@ -191,13 +196,14 @@ export default function AdminOrdersPage() {
   const exportToPdf = (data: Order[], filename: string) => {
       const doc = new jsPDF();
       (doc as any).autoTable({
-          head: [['Order ID', 'Customer', 'Date', 'Amount', 'Status']],
+          head: [['Order ID', 'Customer', 'Date', 'Amount', 'Status', 'Payment Mode']],
           body: data.map(order => [
               order.id,
               order.buyerName,
               order.date,
               `₹${order.total.toFixed(2)}`,
               order.status,
+              order.paymentMode
           ]),
       });
       doc.save(`${filename}.pdf`);

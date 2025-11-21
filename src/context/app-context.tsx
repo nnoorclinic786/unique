@@ -124,7 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const ordersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'orders') : null, [firestore, isAdminLoggedIn]);
   const { data: ordersData } = useCollection<Order>(ordersCollection);
   
-  const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
+  const buyersCollection = useMemoFirebase(() => (firestore) ? collection(firestore, 'users') : null, [firestore]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
   
   const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
@@ -177,7 +177,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [activeOrderId, hydrated]);
   
 
-  const createOrUpdateOrder = useCallback(async (currentCartItems: CartItem[]) => {
+  const createOrUpdateOrder = useCallback(async (currentCartItems: CartItem[], paymentMethod: string) => {
     if (!firestore || !user || !currentCartItems.length) return;
 
     const buyer = allBuyers.find(b => b.id === user.uid);
@@ -193,6 +193,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       itemCount: currentCartItems.reduce((acc, item) => acc + item.quantity, 0),
       total: total,
       status: 'draft' as const,
+      paymentMode: paymentMethod,
       date: new Date().toISOString().split('T')[0],
       updatedAt: serverTimestamp(),
     };
@@ -212,6 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
      if (!firestore || !user || !activeOrderId) return;
     const orderRef = doc(firestore, 'orders', activeOrderId);
     await setDoc(orderRef, {
+        ...order,
         status: 'Pending',
         date: new Date().toISOString().split('T')[0], // Finalize order date
     }, { merge: true });
@@ -333,11 +335,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     setCartItems(updatedCart);
     
-    if (user) createOrUpdateOrder(updatedCart);
+    // We don't create an order draft here anymore.
   
     const medicineDoc = doc(firestore, 'drugs', item.id);
     setDoc(medicineDoc, { stock: increment(-1) }, { merge: true });
-  }, [cartItems, firestore, createOrUpdateOrder, user]);
+  }, [cartItems, firestore, user]);
 
   const removeFromCart = useCallback((itemId: string) => {
     if (!firestore) return;
@@ -350,8 +352,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const updatedCart = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updatedCart);
-    if (user) createOrUpdateOrder(updatedCart);
-  }, [cartItems, firestore, createOrUpdateOrder, user]);
+  }, [cartItems, firestore, user]);
 
   const updateQuantity = useCallback((itemId: string, quantity: number) => {
     if (!firestore) return;
@@ -370,24 +371,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updatedCart = cartItems.map((item) => (item.id === itemId ? { ...item, quantity } : item));
     }
     setCartItems(updatedCart);
-    if(user) createOrUpdateOrder(updatedCart);
     
     if (quantityChange !== 0) {
         const medicineDoc = doc(firestore, 'drugs', itemId);
         setDoc(medicineDoc, { stock: increment(-quantityChange) }, { merge: true });
     }
-  }, [firestore, cartItems, createOrUpdateOrder, user]);
+  }, [firestore, cartItems, user]);
   
   const clearCart = useCallback(async () => {
-    if (firestore && cartItems.length > 0) {
+    if (firestore && cartItems.length > 0 && false) { // Logic disabled for now, stock logic on add/remove is sufficient
         for (const item of cartItems) {
             const medicineDoc = doc(firestore, 'drugs', item.id);
             await setDoc(medicineDoc, { stock: increment(item.quantity) }, { merge: true });
         }
     }
     if (firestore && activeOrderId) {
-        const orderRef = doc(firestore, 'orders', activeOrderId);
-        await deleteDoc(orderRef);
+        // Maybe we don't delete draft orders, but just abandon them.
+        // const orderRef = doc(firestore, 'orders', activeOrderId);
+        // await deleteDoc(orderRef);
     }
     setCartItems([]);
     setActiveOrderId(null);

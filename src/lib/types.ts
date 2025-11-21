@@ -40,6 +40,7 @@ export type Order = {
   total: number;
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'draft';
   itemCount: number;
+  paymentMode: string;
   items?: OrderItem[];
 };
 

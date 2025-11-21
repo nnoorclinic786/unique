@@ -67,6 +67,7 @@ function CartPageContent() {
         buyerId: currentUser.id,
         total: total,
         status: 'Pending' as const,
+        paymentMode: paymentMethod,
     };
     
     addOrder(newOrder);

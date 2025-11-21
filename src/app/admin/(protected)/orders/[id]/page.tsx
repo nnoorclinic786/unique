@@ -24,6 +24,7 @@ import {
   Package,
   Calendar,
   IndianRupee,
+  CreditCard,
 } from 'lucide-react';
 import {
   Table,
@@ -150,6 +151,21 @@ export default function OrderDetailsPage() {
                     <div className="flex justify-between font-semibold">
                         <span>Total</span>
                         <span>₹{total.toFixed(2)}</span>
+                    </div>
+                </CardContent>
+            </Card>
+            
+             <Card>
+                <CardHeader>
+                    <CardTitle>Payment</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Payment Method
+                        </span>
+                        <span className="font-semibold uppercase">{order.paymentMode}</span>
                     </div>
                 </CardContent>
             </Card>
