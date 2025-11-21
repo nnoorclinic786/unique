@@ -127,7 +127,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
   
-  const buyerRequestsCollection = useMemoFirebase(() => (firestore) ? collection(firestore, 'buyer_requests') : null, [firestore]);
+  const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
   const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
   
   const medicinesCollection = useMemoFirebase(() => firestore ? collection(firestore, 'drugs') : null, [firestore]);
@@ -513,7 +513,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addPendingAdmin,
     updateAdminPermissions,
     approveAdmin,
-    toggleAdminStatus,
+toggleAdminStatus,
     updateAdminDetails,
   };
 
