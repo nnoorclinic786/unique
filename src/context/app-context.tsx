@@ -101,6 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>({ upiId: '' });
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
+  
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   
   useEffect(() => {
@@ -114,28 +115,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch(e) {
         setIsAdminLoggedIn(false);
       }
+    } else {
+        setIsAdminLoggedIn(false);
     }
   }, []);
 
   // === FIRESTORE DATA ===
   const ordersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'orders') : null, [firestore, isAdminLoggedIn]);
   const { data: ordersData } = useCollection<Order>(ordersCollection);
-  const orders = ordersData || [];
   
   const buyersCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'users') : null, [firestore, isAdminLoggedIn]);
   const { data: allBuyersData } = useCollection<Buyer>(buyersCollection);
   
   const buyerRequestsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'buyer_requests') : null, [firestore, isAdminLoggedIn]);
   const { data: pendingBuyersData } = useCollection<Buyer>(buyerRequestsCollection);
-  const pendingBuyers = pendingBuyersData || [];
   
   const medicinesCollection = useMemoFirebase(() => firestore ? collection(firestore, 'drugs') : null, [firestore]);
   const { data: medicinesData } = useCollection<Medicine>(medicinesCollection);
-  const medicines = medicinesData || [];
-
+  
   const adminsCollection = useMemoFirebase(() => (firestore && isAdminLoggedIn) ? collection(firestore, 'admins') : null, [firestore, isAdminLoggedIn]);
   const { data: adminsData } = useCollection<AdminUser>(adminsCollection);
-  
+
   const initialAdmins: AdminUser[] = [
     {
       email: 'uniquemedicare786@gmail.com',
@@ -146,10 +146,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       password: 'uniquemedicare@123#',
     },
   ];
-
+  
+  const orders = ordersData || [];
   const allBuyers = allBuyersData || [];
+  const pendingBuyers = pendingBuyersData || [];
+  const medicines = medicinesData || [];
   const admins = adminsData || initialAdmins;
-
+  
 
   // Load non-Firestore state from localStorage on initial client render
   useEffect(() => {
@@ -329,11 +332,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updatedCart = [...cartItems, { ...item, quantity: 1 }];
     }
     setCartItems(updatedCart);
-    createOrUpdateOrder(updatedCart);
+    
+    if (user) createOrUpdateOrder(updatedCart);
   
     const medicineDoc = doc(firestore, 'drugs', item.id);
     setDoc(medicineDoc, { stock: increment(-1) }, { merge: true });
-  }, [cartItems, firestore, createOrUpdateOrder]);
+  }, [cartItems, firestore, createOrUpdateOrder, user]);
 
   const removeFromCart = useCallback((itemId: string) => {
     if (!firestore) return;
@@ -346,8 +350,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const updatedCart = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updatedCart);
-    createOrUpdateOrder(updatedCart);
-  }, [cartItems, firestore, createOrUpdateOrder]);
+    if (user) createOrUpdateOrder(updatedCart);
+  }, [cartItems, firestore, createOrUpdateOrder, user]);
 
   const updateQuantity = useCallback((itemId: string, quantity: number) => {
     if (!firestore) return;
@@ -366,13 +370,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updatedCart = cartItems.map((item) => (item.id === itemId ? { ...item, quantity } : item));
     }
     setCartItems(updatedCart);
-    createOrUpdateOrder(updatedCart);
+    if(user) createOrUpdateOrder(updatedCart);
     
     if (quantityChange !== 0) {
         const medicineDoc = doc(firestore, 'drugs', itemId);
         setDoc(medicineDoc, { stock: increment(-quantityChange) }, { merge: true });
     }
-  }, [firestore, cartItems, createOrUpdateOrder]);
+  }, [firestore, cartItems, createOrUpdateOrder, user]);
   
   const clearCart = useCallback(async () => {
     if (firestore && cartItems.length > 0) {
