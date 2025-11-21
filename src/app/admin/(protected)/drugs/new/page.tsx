@@ -38,6 +38,7 @@ import type { Medicine } from "@/lib/types";
 import { useAppContext } from "@/context/app-context";
 import { useState } from "react";
 import Image from "next/image";
+import Cookies from "js-cookie";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Medicine name must be at least 2 characters." }),
@@ -155,8 +156,21 @@ export default function AddMedicinePage() {
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const medicineData: Omit<Medicine, 'id' | 'totalStock' | 'defaultPrice' | 'batches' | 'adminId'> = {
+    const adminCookie = Cookies.get('admin_session');
+    if (!adminCookie) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Admin session not found. Please log in again.",
+      });
+      return;
+    }
+    const session = JSON.parse(adminCookie);
+    const adminId = session.email;
+
+    const medicineData: Omit<Medicine, 'id' | 'totalStock' | 'defaultPrice' | 'batches'> = {
       name: values.name,
+      adminId: adminId, // Include the adminId
       hsnCode: values.hsnCode,
       manufacturingCompany: values.manufacturingCompany,
       marketingCompany: values.marketingCompany,
@@ -287,3 +301,5 @@ export default function AddMedicinePage() {
     </Card>
   );
 }
+
+    
