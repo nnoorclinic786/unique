@@ -38,7 +38,7 @@ import type { Medicine } from "@/lib/types";
 import { useAppContext } from "@/context/app-context";
 import { useState } from "react";
 import Image from "next/image";
-import Cookies from "js-cookie";
+import { useUser } from "@/firebase";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Medicine name must be at least 2 characters." }),
@@ -64,6 +64,7 @@ export default function AddMedicinePage() {
   const router = useRouter();
   const { toast } = useToast();
   const { addMedicine } = useAppContext();
+  const { user } = useUser();
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileType, setFileType] = useState<'image' | 'pdf' | null>(null);
@@ -156,8 +157,7 @@ export default function AddMedicinePage() {
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const adminCookie = Cookies.get('admin_session');
-    if (!adminCookie) {
+    if (!user) {
       toast({
         variant: "destructive",
         title: "Authentication Error",
@@ -165,12 +165,10 @@ export default function AddMedicinePage() {
       });
       return;
     }
-    const session = JSON.parse(adminCookie);
-    const adminId = session.email;
 
     const medicineData: Omit<Medicine, 'id' | 'totalStock' | 'defaultPrice' | 'batches'> = {
       name: values.name,
-      adminId: adminId, // Include the adminId
+      adminId: user.uid, // Correctly use the Firebase Auth UID
       hsnCode: values.hsnCode,
       manufacturingCompany: values.manufacturingCompany,
       marketingCompany: values.marketingCompany,

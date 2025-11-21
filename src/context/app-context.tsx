@@ -45,7 +45,7 @@ interface AppContextType {
 
   // Medicines
   medicines: Medicine[];
-  addMedicine: (medicineData: Omit<Medicine, 'id' | 'adminId' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => Promise<any>;
+  addMedicine: (medicineData: Omit<Medicine, 'id' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => Promise<any>;
   updateMedicine: (medicine: Medicine) => void;
   deleteMedicine: (medicineId: string) => void;
 
@@ -303,19 +303,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const disabledBuyers = allBuyers.filter((b) => b.status === 'Disabled');
 
   // === MEDICINES LOGIC ===
-  const addMedicine = useCallback(async (medicineData: Omit<Medicine, 'id' | 'adminId' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => {
+  const addMedicine = useCallback(async (medicineData: Omit<Medicine, 'id' | 'totalStock' | 'defaultPrice' | 'batches'>, batchData: Omit<MedicineBatch, 'id'>) => {
     if (!firestore || !user) return Promise.reject("Firestore or user not available");
     
-    const adminCookie = Cookies.get('admin_session');
-    if (!adminCookie) {
-      return Promise.reject("Admin session not found. Please log in again.");
-    }
-    const session = JSON.parse(adminCookie);
-
     const medicinesCol = collection(firestore, 'drugs');
     return addDoc(medicinesCol, {
       ...medicineData, 
-      adminId: session.email, 
       totalStock: batchData.stock,
       defaultPrice: batchData.price,
       batches: [{ ...batchData, id: batchData.batchNumber }],
@@ -330,7 +323,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const session = JSON.parse(adminCookie);
     
     const medicineDoc = doc(firestore, 'drugs', medicine.id);
-    await setDoc(medicineDoc, { ...medicine, adminId: session.email, updatedAt: serverTimestamp() }, { merge: true });
+    await setDoc(medicineDoc, { ...medicine, adminId: user.uid, updatedAt: serverTimestamp() }, { merge: true });
   }, [firestore, user]);
 
   const deleteMedicine = useCallback(async (medicineId: string) => {
@@ -546,3 +539,5 @@ export function useAppContext() {
   }
   return context;
 }
+
+    
